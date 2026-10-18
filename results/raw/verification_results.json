@@ -34,7 +34,7 @@
     "num_edges": 136,
     "budget": 104.5598038070699,
     "status": "Optimal",
-    "optimal_cost": 54.36125764449656,
+    "optimal_cost": 54.36125764449657,
     "optimal_weight": 80.41019969653394,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 19,
@@ -79,9 +79,9 @@
     "optimal_cost": 146.92974274383604,
     "optimal_weight": 179.3707912266696,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 22,
+    "adhp_labels_generated": 37,
     "martins_labels_generated": 138,
-    "pruning_ratio_percent": 84.05797101449275
+    "pruning_ratio_percent": 73.18840579710145
   },
   {
     "instance_id": "random_n30_s2",
@@ -135,9 +135,9 @@
     "optimal_cost": 148.13415906633495,
     "optimal_weight": 290.76166980667745,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 31,
+    "adhp_labels_generated": 52,
     "martins_labels_generated": 265,
-    "pruning_ratio_percent": 88.30188679245283
+    "pruning_ratio_percent": 80.37735849056604
   },
   {
     "instance_id": "random_n35_s3",
@@ -163,9 +163,9 @@
     "optimal_cost": 191.26780944590217,
     "optimal_weight": 98.3597366082549,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 185,
+    "adhp_labels_generated": 313,
     "martins_labels_generated": 2055,
-    "pruning_ratio_percent": 90.99756690997567
+    "pruning_ratio_percent": 84.76885644768856
   },
   {
     "instance_id": "anticorr_n35_s4",
@@ -261,9 +261,9 @@
     "optimal_cost": 46.18567202325467,
     "optimal_weight": 74.41968624010613,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 25,
+    "adhp_labels_generated": 59,
     "martins_labels_generated": 241,
-    "pruning_ratio_percent": 89.62655601659752
+    "pruning_ratio_percent": 75.51867219917013
   },
   {
     "instance_id": "anticorr_dense_n28_s5",
@@ -303,9 +303,9 @@
     "optimal_cost": 126.86744152198133,
     "optimal_weight": 229.85774273755902,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 38,
+    "adhp_labels_generated": 47,
     "martins_labels_generated": 141,
-    "pruning_ratio_percent": 73.04964539007092
+    "pruning_ratio_percent": 66.66666666666666
   },
   {
     "instance_id": "random_n20_s6",
@@ -345,9 +345,9 @@
     "optimal_cost": 119.54678805142319,
     "optimal_weight": 79.10125132403553,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 12,
+    "adhp_labels_generated": 25,
     "martins_labels_generated": 129,
-    "pruning_ratio_percent": 90.69767441860465
+    "pruning_ratio_percent": 80.62015503875969
   },
   {
     "instance_id": "grid_6x6_s7",
@@ -359,9 +359,9 @@
     "optimal_cost": 148.0292424313113,
     "optimal_weight": 325.46753135286303,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 22,
+    "adhp_labels_generated": 25,
     "martins_labels_generated": 310,
-    "pruning_ratio_percent": 92.90322580645162
+    "pruning_ratio_percent": 91.93548387096774
   },
   {
     "instance_id": "random_n25_s7",
@@ -373,9 +373,9 @@
     "optimal_cost": 80.1906629078494,
     "optimal_weight": 100.44313796849467,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 22,
+    "adhp_labels_generated": 42,
     "martins_labels_generated": 169,
-    "pruning_ratio_percent": 86.98224852071006
+    "pruning_ratio_percent": 75.14792899408283
   },
   {
     "instance_id": "anticorr_dense_n44_s7",
@@ -427,7 +427,7 @@
     "budget": 71.47715121012655,
     "status": "Optimal",
     "optimal_cost": 155.10357934994215,
-    "optimal_weight": 49.10945026830901,
+    "optimal_weight": 49.10945026830902,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 35,
     "martins_labels_generated": 232,
@@ -510,7 +510,7 @@
     "num_edges": 62,
     "budget": 107.57402259406189,
     "status": "Optimal",
-    "optimal_cost": 290.8670342640286,
+    "optimal_cost": 290.86703426402863,
     "optimal_weight": 96.58372939089199,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 16,
@@ -580,7 +580,7 @@
     "num_edges": 85,
     "budget": 261.2055638302327,
     "status": "Optimal",
-    "optimal_cost": 174.65952246845566,
+    "optimal_cost": 174.6595224684557,
     "optimal_weight": 239.27002834791642,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 16,
@@ -611,9 +611,9 @@
     "optimal_cost": 88.70410773880809,
     "optimal_weight": 105.42625221621455,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 32,
+    "adhp_labels_generated": 134,
     "martins_labels_generated": 325,
-    "pruning_ratio_percent": 90.15384615384615
+    "pruning_ratio_percent": 58.769230769230774
   },
   {
     "instance_id": "anticorr_n25_s12",
@@ -625,9 +625,9 @@
     "optimal_cost": 104.76671943274377,
     "optimal_weight": 92.18801111387369,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 16,
+    "adhp_labels_generated": 24,
     "martins_labels_generated": 171,
-    "pruning_ratio_percent": 90.64327485380117
+    "pruning_ratio_percent": 85.96491228070175
   },
   {
     "instance_id": "grid_3x3_s12",
@@ -695,9 +695,9 @@
     "optimal_cost": 141.37224836228165,
     "optimal_weight": 92.56370418658958,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 13,
+    "adhp_labels_generated": 16,
     "martins_labels_generated": 61,
-    "pruning_ratio_percent": 78.68852459016394
+    "pruning_ratio_percent": 73.77049180327869
   },
   {
     "instance_id": "random_n25_s13",
@@ -723,9 +723,9 @@
     "optimal_cost": 305.5471606036359,
     "optimal_weight": 92.28217637926824,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 93,
+    "adhp_labels_generated": 109,
     "martins_labels_generated": 719,
-    "pruning_ratio_percent": 87.0653685674548
+    "pruning_ratio_percent": 84.84005563282336
   },
   {
     "instance_id": "anticorr_n35_s14",
@@ -735,7 +735,7 @@
     "budget": 244.79889786317938,
     "status": "Optimal",
     "optimal_cost": 78.08094721667088,
-    "optimal_weight": 220.77981260329983,
+    "optimal_weight": 220.7798126032998,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 45,
     "martins_labels_generated": 342,
@@ -749,11 +749,11 @@
     "budget": 196.71246111044573,
     "status": "Optimal",
     "optimal_cost": 149.08546769410154,
-    "optimal_weight": 163.37255596259277,
+    "optimal_weight": 163.3725559625928,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 19,
+    "adhp_labels_generated": 34,
     "martins_labels_generated": 121,
-    "pruning_ratio_percent": 84.29752066115702
+    "pruning_ratio_percent": 71.900826446281
   },
   {
     "instance_id": "random_n30_s14",
@@ -807,9 +807,9 @@
     "optimal_cost": 148.2615926000479,
     "optimal_weight": 284.94579293290013,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 17,
+    "adhp_labels_generated": 38,
     "martins_labels_generated": 274,
-    "pruning_ratio_percent": 93.7956204379562
+    "pruning_ratio_percent": 86.13138686131386
   },
   {
     "instance_id": "random_n35_s15",
@@ -933,9 +933,9 @@
     "optimal_cost": 49.76708239846406,
     "optimal_weight": 71.59748891017882,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 67,
+    "adhp_labels_generated": 79,
     "martins_labels_generated": 441,
-    "pruning_ratio_percent": 84.80725623582767
+    "pruning_ratio_percent": 82.08616780045351
   },
   {
     "instance_id": "anticorr_dense_n28_s17",
@@ -961,9 +961,9 @@
     "optimal_cost": 109.51142398043044,
     "optimal_weight": 87.24923578408934,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 11,
+    "adhp_labels_generated": 25,
     "martins_labels_generated": 150,
-    "pruning_ratio_percent": 92.66666666666666
+    "pruning_ratio_percent": 83.33333333333334
   },
   {
     "instance_id": "grid_5x5_s18",
@@ -1017,9 +1017,9 @@
     "optimal_cost": 41.577640615701895,
     "optimal_weight": 154.13686043476886,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 26,
+    "adhp_labels_generated": 32,
     "martins_labels_generated": 76,
-    "pruning_ratio_percent": 65.78947368421053
+    "pruning_ratio_percent": 57.89473684210527
   },
   {
     "instance_id": "grid_6x6_s19",
@@ -1031,9 +1031,9 @@
     "optimal_cost": 155.7468499194065,
     "optimal_weight": 277.08888429610784,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 56,
+    "adhp_labels_generated": 83,
     "martins_labels_generated": 289,
-    "pruning_ratio_percent": 80.62283737024222
+    "pruning_ratio_percent": 71.280276816609
   },
   {
     "instance_id": "random_n25_s19",
@@ -1059,9 +1059,9 @@
     "optimal_cost": 73.91709732490264,
     "optimal_weight": 117.57847948453839,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 33,
+    "adhp_labels_generated": 132,
     "martins_labels_generated": 760,
-    "pruning_ratio_percent": 95.65789473684211
+    "pruning_ratio_percent": 82.63157894736842
   },
   {
     "instance_id": "anticorr_n15_s20",
@@ -1126,7 +1126,7 @@
     "num_edges": 107,
     "budget": 115.87074894543056,
     "status": "Optimal",
-    "optimal_cost": 303.61869410873794,
+    "optimal_cost": 303.618694108738,
     "optimal_weight": 87.80078415892909,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 24,
@@ -1157,9 +1157,9 @@
     "optimal_cost": 91.69429558655834,
     "optimal_weight": 78.36603231797085,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 49,
+    "adhp_labels_generated": 71,
     "martins_labels_generated": 321,
-    "pruning_ratio_percent": 84.73520249221184
+    "pruning_ratio_percent": 77.88161993769471
   },
   {
     "instance_id": "anticorr_dense_n28_s21",
@@ -1171,9 +1171,9 @@
     "optimal_cost": 120.9012955974948,
     "optimal_weight": 76.7352535013311,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 52,
+    "adhp_labels_generated": 68,
     "martins_labels_generated": 247,
-    "pruning_ratio_percent": 78.94736842105263
+    "pruning_ratio_percent": 72.46963562753037
   },
   {
     "instance_id": "anticorr_n25_s22",
@@ -1199,9 +1199,9 @@
     "optimal_cost": 144.0176712912841,
     "optimal_weight": 216.69561245272962,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 16,
+    "adhp_labels_generated": 22,
     "martins_labels_generated": 156,
-    "pruning_ratio_percent": 89.74358974358975
+    "pruning_ratio_percent": 85.8974358974359
   },
   {
     "instance_id": "random_n40_s22",
@@ -1253,11 +1253,11 @@
     "budget": 324.9572144084723,
     "status": "Optimal",
     "optimal_cost": 123.0441619456065,
-    "optimal_weight": 321.8359255306712,
+    "optimal_weight": 321.83592553067126,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 19,
+    "adhp_labels_generated": 64,
     "martins_labels_generated": 244,
-    "pruning_ratio_percent": 92.21311475409836
+    "pruning_ratio_percent": 73.77049180327869
   },
   {
     "instance_id": "random_n45_s23",
@@ -1269,9 +1269,9 @@
     "optimal_cost": 69.846383929866,
     "optimal_weight": 67.7418917315558,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 24,
+    "adhp_labels_generated": 38,
     "martins_labels_generated": 691,
-    "pruning_ratio_percent": 96.52677279305355
+    "pruning_ratio_percent": 94.50072358900144
   },
   {
     "instance_id": "anticorr_dense_n44_s23",

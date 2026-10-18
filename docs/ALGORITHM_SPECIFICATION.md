@@ -1,5 +1,5 @@
 # ALGORITHM SPECIFICATION: ADAPTIVE DUAL HULL PRUNING (ADHP)
-## Exact Solver for the Weight-Constrained Shortest Path Problem
+## Exact & High-Performance Solvers for the Weight-Constrained Shortest Path Problem
 
 **Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
@@ -9,233 +9,202 @@
 
 ### 1. Architectural Overview
 
-The **ADHP** algorithm solves the Weight-Constrained Shortest Path Problem (CSPP) through four integrated phases:
+The **ADHP** solver architecture provides two execution engines:
+1. **Floating-Point Engine (`AdhpSolver`)**: Operates on standard real-valued IEEE 754 `f64` graphs under an explicit, certified $(\epsilon_{\text{feas}}, \epsilon_{\text{prune}})$-admissibility contract.
+2. **Exact Integer Engine (`IntAdhpSolver`)**: Operates on `u64` integer graphs using checked integer arithmetic, rational dual multipliers $\lambda = p / q$, ceiling lower-bound evaluation, zero-tolerance feasibility, and strict Pareto dominance, achieving 100% mathematically exact zero-tolerance optimality.
+
+Both engines execute through four tightly integrated, non-redundant phases:
 
 ```
-[Phase 1: Adaptive Dual Discovery]
+[Phase 1: Backward-Centric Weight Preprocessing]
        │
        ▼
-   Select K optimal multipliers Λ = {λ₁, ..., λ_K} via bisection on (s, t)
+   Run Dijkstra on G^R from destination t with pure weight (w-only).
+   Outputs:
+     - dist_weight[u] for all u ∈ V (Filter 1 resource bounding)
+     - d_w(s, t): If > W, certified INFEASIBLE immediately in 1 Dijkstra pass!
+     - Suffix tree: Reconstructs path P_w(s, t) initializing C_UB = c(P_w)
        │
        ▼
-[Phase 2: Reverse Multi-Tree Preprocessing]
+[Phase 2: Backward-Centric Unconstrained Cost & Adaptive Facet Discovery]
        │
        ▼
-   Compute K backward Dijkstra trees from t on reversed graph G^R
-   Store table: dist_dual[k][u] = d_{λ_k}(u, t) for all k ∈ [1, K], u ∈ V
+   Run Dijkstra on G^R from t with λ₁ = 0 (c-only).
+   Outputs:
+     - dist_dual[0][u] = d_c(u, t) for all u ∈ V
+     - Reconstructs P_c(s, t): If w(P_c) ≤ W, return globally OPTIMAL in 2 passes!
+   If constrained, perform adaptive bisection:
+     - For λ_mid = (c_r - c_l) / (w_l - w_r), run Dijkstra on G^R from t.
+     - Single backward run computes BOTH path P_mid(s, t) (updating C_UB)
+       AND full reverse distance array dist_dual[k].
+     - Adaptive cutoff: Only adopt facet if root lower bound gain > 2%.
        │
        ▼
-[Phase 3: Root Feasibility & Upper Bound Initialization]
+[Phase 3: Priority Search with Strict Pareto Dominance]
        │
        ▼
-   Check d_w(s, t) ≤ W (feasibility check)
-   Extract candidate feasible paths from backward trees to initialize C_UB
-       │
-       ▼
-[Phase 4: Dual-Envelope Filtered Label Setting Search]
-       │
-       ▼
-   Priority search from s to t maintaining Pareto frontier at each vertex
-   For each candidate label (u, c, w):
-       1. Resource check: w + d_w(u, t) > W ⟹ DROP
-       2. Dual Envelope check: c + L_u^Λ(W - w) ≥ C_UB ⟹ DROP
-       3. Local Pareto dominance check against VertexFrontier[u] ⟹ DROP or INSERT
+   Min-heap priority search from s with admissible key c + L_u^Λ(W - w).
+   At each edge relaxation (u → v):
+     Filter 1 (Feasibility): w + w_e + dist_weight[v] > W ⟹ PRUNE
+     Filter 2 (Dual Hull):  c + c_e + L_v^Λ(rem_w) > C_UB + tol ⟹ PRUNE
+     Filter 3 (Dominance):  Frontiers[v].is_dominated(new_c, new_w) ⟹ PRUNE
+   If non-dominated, Frontiers[v].insert_and_prune(new_c, new_w) and push to heap.
 ```
 
 ---
 
-### 2. Detailed Pseudocode
+### 2. Algorithms and Pseudocode
 
-#### Algorithm 1: Adaptive Dual Multiplier Discovery
+#### Algorithm 1: Backward-Centric Preprocessing & Adaptive Facet Discovery
 ```text
-function DISCOVER_DUAL_MULTIPLIERS(G, s, t, W, K_max):
-    // Step 1: Solve extreme points
-    P_c ← ShortestPath(G, s, t, cost=c)
-    if P_c is null:
-        return Infeasible
+function ADHP_PREPROCESS(G, s, t, W, K_max):
+    // Step 1: Backward tree on pure weight
+    tree_w ← DijkstraBackwardTree(G, target=t, lambda=0, use_weight_only=true)
+    if tree_w.dist[s] > W or tree_w.dist[s] == +∞:
+        return (Infeasible, null)
+        
+    P_w ← tree_w.reconstruct_path(s, t)
+    best_cost ← c(P_w)
+    best_weight ← w(P_w)
+    best_path ← P_w
+    
+    // Step 2: Backward tree on pure cost (lambda_1 = 0)
+    tree_c ← DijkstraBackwardTree(G, target=t, lambda=0, use_weight_only=false)
+    P_c ← tree_c.reconstruct_path(s, t)
+    
     if w(P_c) ≤ W:
-        return Optimal(P_c, cost=c(P_c)) // Unconstrained path is feasible
+        // Unconstrained cost-minimal path satisfies budget -> globally optimal!
+        return (EarlyOptimal, P_c)
         
-    P_w ← ShortestPath(G, s, t, cost=w)
-    if P_w is null or w(P_w) > W:
-        return Infeasible // Even minimum weight path exceeds budget
-        
-    // Extreme multipliers: λ_1 = 0 (pure cost), λ_end = ∞ (pure weight)
-    Λ ← [0.0]
-    queue ← PriorityQueue() // Order by potential gap: (c(P_w) - c(P_c))
+    lambdas ← [0.0]
+    dist_dual ← [tree_c.dist]
     
-    initial_slope ← (c(P_w) - c(P_c)) / (w(P_c) - w(P_w))
-    queue.push(segment=(P_c, P_w, initial_slope))
+    // Step 3: Adaptive Bisection
+    queue ← [(c(P_c), w(P_c), c(P_w), w(P_w))]
     
-    while |Λ| < K_max and not queue.isEmpty():
-        (P_left, P_right, λ_mid) ← queue.pop()
+    while |lambdas| < K_max and not queue.isEmpty():
+        (c_l, w_l, c_r, w_r) ← queue.pop_front()
+        dw ← w_l - w_r
+        dc ← c_r - c_l
+        if dw ≤ 1e-9 or dc ≤ 1e-9:
+            continue
+            
+        lambda_mid ← dc / dw
+        if lambda_mid in lambdas:
+            continue
+            
+        // Single backward pass computes path for C_UB AND reverse distance field
+        tree_mid ← DijkstraBackwardTree(G, target=t, lambda=lambda_mid, use_weight_only=false)
+        P_mid ← tree_mid.reconstruct_path(s, t)
         
-        // Solve shortest path with composite metric c + λ_mid * w
-        P_mid ← ShortestPath(G, s, t, cost=c + λ_mid * w)
+        if w(P_mid) ≤ W and c(P_mid) < best_cost:
+            best_cost ← c(P_mid)
+            best_weight ← w(P_mid)
+            best_path ← P_mid
+            
+        // Root lower bound marginal gain check
+        root_lb_mid ← tree_mid.dist[s] - lambda_mid * W
+        cur_root_lb ← max_{k} [dist_dual[k][s] - lambdas[k] * W]
+        rel_gain ← (root_lb_mid - cur_root_lb) / max(1.0, |cur_root_lb|)
         
-        // Check if P_mid represents a genuine new extreme point on the lower hull
-        if P_mid != P_left and P_mid != P_right:
-            Λ.append(λ_mid)
-            if w(P_left) > w(P_mid) and c(P_mid) > c(P_left):
-                s1 ← (c(P_mid) - c(P_left)) / (w(P_left) - w(P_mid))
-                queue.push((P_left, P_mid, s1))
-            if w(P_mid) > w(P_right) and c(P_right) > c(P_mid):
-                s2 ← (c(P_right) - c(P_mid)) / (w(P_mid) - w(P_right))
-                queue.push((P_mid, P_right, s2))
+        if rel_gain > 0.02:
+            lambdas.append(lambda_mid)
+            dist_dual.append(tree_mid.dist)
+            if w_l - w(P_mid) > 1e-6 and c(P_mid) - c_l > 1e-6:
+                queue.push((c_l, w_l, c(P_mid), w(P_mid)))
+            if w(P_mid) - w_r > 1e-6 and c_r - c(P_mid) > 1e-6:
+                queue.push((c(P_mid), w(P_mid), c_r, w_r))
                 
-    sort(Λ) // Ensure λ_1 < λ_2 < ... < λ_K
-    return Λ
+    return (Ready, lambdas, dist_dual, tree_w.dist, best_cost, best_path)
 ```
 
 ---
 
-#### Algorithm 2: Reverse Multi-Tree Preprocessing
+#### Algorithm 2: Strict Pareto Frontier Maintenance
 ```text
-function PREPROCESS_REVERSE_TREES(G, t, Λ):
-    K ← |Λ|
-    n ← |V|
-    dist_dual ← 2D Array of size [K][n], initialized to +∞
-    G_rev ← ReverseGraph(G)
+class VertexFrontier:
+    points: Array of (cost, weight) sorted strictly by weight ascending
     
-    for k from 1 to K:
-        λ_k ← Λ[k]
-        // Run Dijkstra from destination t on reversed graph using edge weight c_e + λ_k * w_e
-        dist_dual[k] ← Dijkstra(G_rev, source=t, edge_weight=(c + λ_k * w))
-        
-    // Also store pure weight distance from t
-    dist_weight ← Dijkstra(G_rev, source=t, edge_weight=w)
-    
-    return (dist_dual, dist_weight)
-```
-
----
-
-#### Algorithm 3: Dual Lower-Bound Envelope Evaluation
-```text
-function EVAL_DUAL_LOWER_BOUND(u, remaining_weight, Λ, dist_dual):
-    max_lb ← -∞
-    K ← |Λ|
-    for k from 1 to K:
-        val ← dist_dual[k][u] - Λ[k] * remaining_weight
-        if val > max_lb:
-            max_lb ← val
-    return max_lb
-```
-
-*Note on binary search optimization*: Since the values $f_k(\Delta w) = d_{\lambda_k}(u, t) - \lambda_k \Delta w$ have slopes $-\lambda_k$ that are strictly decreasing ($\lambda_1 < \lambda_2 < \dots < \lambda_K$), the index attaining the maximum is unimodal. For larger $K \ge 16$, a ternary search or convex upper hull binary search computes the maximum in $O(\log K)$ time. For practical $K \in \{3, 5, 8\}$, an unrolled linear loop exhibits superior SIMD and cache locality.
-
----
-
-#### Algorithm 4: Pareto Frontier Maintenance and Dominance Check
-```text
-class ParetoFrontier:
-    labels: List of pairs (cost, weight) sorted by weight ascending
-
     function IS_DOMINATED(new_c, new_w):
-        // Since list is sorted by weight ascending:
-        // Any existing label with weight ≤ new_w must have cost < new_c,
-        // otherwise it would dominate the new label.
-        for each (c, w) in labels:
-            if w ≤ new_w and c ≤ new_c:
-                return true
-            if w > new_w:
-                break // No subsequent label can have smaller weight
+        if points is empty:
+            return false
+            
+        // Binary search: pos is the index of first point with weight > new_w
+        pos ← partition_point(points, pt => pt.weight ≤ new_w)
+        if pos > 0:
+            // Point at pos - 1 has maximum weight ≤ new_w, hence minimum cost
+            return points[pos - 1].cost ≤ new_c
         return false
 
     function INSERT_AND_PRUNE(new_c, new_w):
-        // Remove existing labels that are dominated by (new_c, new_w):
-        // A label with w ≥ new_w and c ≥ new_c is dominated.
-        filtered ← []
-        for each (c, w) in labels:
-            if not (w ≥ new_w and c ≥ new_c):
-                filtered.append((c, w))
-        filtered.insert_sorted((new_c, new_w))
-        labels ← filtered
+        // Remove existing points weakly dominated by (new_c, new_w)
+        points.retain(pt => not (new_w ≤ pt.weight and new_c ≤ pt.cost))
+        
+        // Insert maintaining sorted order by weight ascending
+        pos ← partition_point(points, pt => pt.weight < new_w)
+        points.insert(pos, (new_c, new_w))
 ```
 
 ---
 
-#### Algorithm 5: ADHP Search Loop
+#### Algorithm 3: Priority Queue Search Loop
 ```text
 function ADHP_SOLVE(G, s, t, W, K_max=5):
-    // Phase 1: Dual Discovery
-    Λ ← DISCOVER_DUAL_MULTIPLIERS(G, s, t, W, K_max)
-    if Λ is Infeasible:
-        return NoSolution
-    if Λ is Optimal:
-        return EarlySolution
+    prep_result ← ADHP_PREPROCESS(G, s, t, W, K_max)
+    if prep_result is Infeasible:
+        return Infeasible
+    if prep_result is EarlyOptimal:
+        return Solution(prep_result.path)
         
-    // Phase 2: Reverse Multi-Tree Preprocessing
-    (dist_dual, dist_w) ← PREPROCESS_REVERSE_TREES(G, t, Λ)
+    (lambdas, dist_dual, dist_weight, C_UB, best_path) ← prep_result
     
-    // Check feasibility
-    if dist_w[s] > W:
-        return NoSolution
-        
-    // Phase 3: Initial Upper Bound
-    C_UB ← +∞
-    best_path ← null
-    
-    // Evaluate candidate paths discovered during Phase 1
-    for each path P in DiscoveredPaths:
-        if w(P) ≤ W and c(P) < C_UB:
-            C_UB ← c(P)
-            best_path ← P
-
-    // Phase 4: Priority Queue Search
-    // Priority Key: c + L_u^Λ(W - w) (admissible A* estimate)
     PQ ← MinHeap()
+    Frontiers ← Array of VertexFrontier[|V|]
     
-    root_lb ← EVAL_DUAL_LOWER_BOUND(s, W, Λ, dist_dual)
-    PQ.push(Label(vertex=s, cost=0.0, weight=0.0, path=[s]), key=root_lb)
-    
-    Frontiers ← Array of ParetoFrontier[|V|]
+    root_lb ← max_k [dist_dual[k][s] - lambdas[k] * W]
+    PQ.push(Label(vertex=s, cost=0.0, weight=0.0), key=root_lb)
     Frontiers[s].INSERT_AND_PRUNE(0.0, 0.0)
     
     while not PQ.isEmpty():
-        curr_label ← PQ.pop()
-        u ← curr_label.vertex
-        c_u ← curr_label.cost
-        w_u ← curr_label.weight
+        curr ← PQ.pop()
+        u ← curr.vertex
+        c_u ← curr.cost
+        w_u ← curr.weight
         
-        // Target check
         if u == t:
-            if c_u < C_UB:
+            if w_u ≤ W + tol_feas and c_u < C_UB:
                 C_UB ← c_u
-                best_path ← curr_label.path
+                best_path ← curr.path
             continue
             
-        // Global Upper Bound Check
-        lb_u ← EVAL_DUAL_LOWER_BOUND(u, W - w_u, Λ, dist_dual)
-        if c_u + lb_u ≥ C_UB:
-            continue // Pruned by Dual Hull
+        prune_tol ← max(1.0, |C_UB|) * 1e-9
+        lb_u ← max_k [dist_dual[k][u] - lambdas[k] * (W - w_u)]
+        if c_u + lb_u > C_UB + prune_tol:
+            continue
             
-        // Edge Expansion
-        for each directed edge (u, v) with cost c_e and weight w_e in G.out_edges(u):
+        for edge (u → v, cost c_e, weight w_e) in G.out_edges(u):
             new_c ← c_u + c_e
             new_w ← w_u + w_e
             
             // Filter 1: Resource feasibility
-            if new_w + dist_w[v] > W:
-                continue // Infeasible to reach t
+            if new_w + dist_weight[v] > W + tol_feas:
+                continue
                 
-            // Filter 2: Dual Hull Bound (with conservative floating-point tolerance ε = 1e-9)
+            // Filter 2: Dual Hull Pruning
             rem_w ← W - new_w
-            lb_v ← EVAL_DUAL_LOWER_BOUND(v, rem_w, Λ, dist_dual)
-            if new_c + lb_v ≥ C_UB - 1e-9:
-                continue // Cannot beat best known solution (safely accounting for float rounding)
+            lb_v ← max_k [dist_dual[k][v] - lambdas[k] * rem_w]
+            if new_c + lb_v > C_UB + prune_tol:
+                continue
                 
-            // Filter 3: Local Pareto Dominance
+            // Filter 3: Strict Pareto Dominance
             if Frontiers[v].IS_DOMINATED(new_c, new_w):
-                continue // Dominated at vertex v
+                continue
                 
-            // Passed all filters: Update vertex frontier and enqueue
             Frontiers[v].INSERT_AND_PRUNE(new_c, new_w)
-            new_path ← curr_label.path + [v]
-            PQ.push(Label(vertex=v, cost=new_c, weight=new_w, path=new_path), key=new_c + lb_v)
+            PQ.push(Label(vertex=v, cost=new_c, weight=new_w), key=new_c + lb_v)
             
     if best_path is not null:
-        return Optimal(best_path, cost=C_UB, weight=w(best_path))
+        return Solution(best_path, cost=C_UB, weight=w(best_path))
     else:
-        return NoSolution
+        return Infeasible
 ```

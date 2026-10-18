@@ -186,22 +186,90 @@ fn dijkstra_forward_internal(
     }
 }
 
-/// Computes the reverse shortest path tree from `target` on the reversed graph $G^R$
-/// using custom edge metric $c_e + \lambda w_e$.
-///
-/// For each vertex $u$, `distances[u]` gives the shortest path distance from $u$ to $target$.
-pub fn dijkstra_backward(
+/// Result of a single-target reverse shortest path query on $G^R$.
+#[derive(Debug, Clone)]
+pub struct BackwardTree {
+    /// Distances from each vertex to the target vertex.
+    pub distances: Vec<f64>,
+    /// Successor vertex along the shortest path toward target (`None` if unreachable or target).
+    pub successors: Vec<Option<usize>>,
+    /// Successor edge (cost, weight) metrics.
+    pub successor_edges: Vec<Option<(f64, f64)>>,
+    /// Successor edge IDs.
+    pub successor_edge_ids: Vec<Option<usize>>,
+}
+
+impl BackwardTree {
+    /// Reconstructs the shortest path from `source` to `target`.
+    pub fn reconstruct_path(&self, source: usize, target: usize) -> Option<Vec<usize>> {
+        self.reconstruct_path_with_metrics(source, target)
+            .map(|(p, _, _, _)| p)
+    }
+
+    /// Reconstructs the shortest path from `source` to `target` along with exact cost and resource weight.
+    pub fn reconstruct_path_with_metrics(
+        &self,
+        source: usize,
+        target: usize,
+    ) -> Option<(Vec<usize>, Vec<usize>, f64, f64)> {
+        if source >= self.distances.len() || self.distances[source].is_infinite() {
+            return None;
+        }
+        if source == target {
+            return Some((vec![source], Vec::new(), 0.0, 0.0));
+        }
+
+        let mut path = Vec::new();
+        let mut edge_path = Vec::new();
+        let mut curr = source;
+        path.push(curr);
+        let mut total_cost = 0.0;
+        let mut total_weight = 0.0;
+
+        let max_steps = self.distances.len();
+        let mut steps = 0;
+
+        while curr != target {
+            steps += 1;
+            if steps > max_steps {
+                return None;
+            }
+            let next = self.successors[curr]?;
+            let (c, w) = self.successor_edges[curr]?;
+            if let Some(e_id) = self.successor_edge_ids[curr] {
+                edge_path.push(e_id);
+            }
+            total_cost += c;
+            total_weight += w;
+            curr = next;
+            path.push(curr);
+        }
+
+        Some((path, edge_path, total_cost, total_weight))
+    }
+}
+
+/// Computes the reverse shortest path tree from `target` on $G^R$, recording distances and successors.
+pub fn dijkstra_backward_tree(
     graph: &DirectedGraph,
     target: usize,
     lambda: f64,
     use_weight_only: bool,
-) -> Vec<f64> {
+) -> BackwardTree {
     let n = graph.num_nodes();
     let mut distances = vec![f64::INFINITY; n];
+    let mut successors = vec![None; n];
+    let mut successor_edges = vec![None; n];
+    let mut successor_edge_ids = vec![None; n];
     let mut visited = vec![false; n];
 
     if target >= n {
-        return distances;
+        return BackwardTree {
+            distances,
+            successors,
+            successor_edges,
+            successor_edge_ids,
+        };
     }
 
     let mut heap = BinaryHeap::new();
@@ -223,7 +291,7 @@ pub fn dijkstra_backward(
 
         // Traverse incoming edges in G (which are outgoing edges from u in G^R)
         for edge in graph.incoming_edges(u) {
-            let v = edge.target;
+            let v = edge.target; // v is the tail of edge v -> u in G
             let edge_len = if use_weight_only {
                 edge.weight
             } else {
@@ -233,6 +301,9 @@ pub fn dijkstra_backward(
             let new_dist = d + edge_len;
             if new_dist < distances[v] {
                 distances[v] = new_dist;
+                successors[v] = Some(u);
+                successor_edges[v] = Some((edge.cost, edge.weight));
+                successor_edge_ids[v] = Some(edge.edge_id);
                 heap.push(HeapItem {
                     vertex: v,
                     dist: new_dist,
@@ -241,5 +312,23 @@ pub fn dijkstra_backward(
         }
     }
 
-    distances
+    BackwardTree {
+        distances,
+        successors,
+        successor_edges,
+        successor_edge_ids,
+    }
+}
+
+/// Computes the reverse shortest path tree from `target` on the reversed graph $G^R$
+/// using custom edge metric $c_e + \lambda w_e$.
+///
+/// For each vertex $u$, `distances[u]` gives the shortest path distance from $u$ to $target$.
+pub fn dijkstra_backward(
+    graph: &DirectedGraph,
+    target: usize,
+    lambda: f64,
+    use_weight_only: bool,
+) -> Vec<f64> {
+    dijkstra_backward_tree(graph, target, lambda, use_weight_only).distances
 }

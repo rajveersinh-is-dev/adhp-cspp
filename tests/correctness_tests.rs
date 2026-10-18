@@ -437,3 +437,121 @@ fn test_integer_dp_oracle_fuzz() {
         }
     }
 }
+
+#[test]
+fn test_pareto_dominance_tiny_difference_preservation() {
+    use adhp_cspp::frontier::VertexFrontier;
+
+    let mut frontier = VertexFrontier::new();
+
+    // Insert an existing point (10.0 + 1e-10, 10.0 + 1e-10)
+    frontier.insert_and_prune(10.0 + 1e-10, 10.0 + 1e-10);
+
+    // Candidate point (10.0, 10.0) is STRICTLY BETTER in both cost and weight!
+    // In old buggy code with + 1e-9 tolerance, (10.0, 10.0) was falsely deemed dominated.
+    assert!(
+        !frontier.is_dominated(10.0, 10.0),
+        "Candidate (10.0, 10.0) must NOT be dominated by (10.0 + 1e-10, 10.0 + 1e-10)!"
+    );
+
+    // Inserting (10.0, 10.0) must strictly prune the worse point (10.0 + 1e-10, 10.0 + 1e-10)
+    frontier.insert_and_prune(10.0, 10.0);
+    assert_eq!(frontier.len(), 1);
+    assert_eq!(frontier.points()[0].cost, 10.0);
+    assert_eq!(frontier.points()[0].weight, 10.0);
+
+    // Now insert a valid non-dominated trade-off: (9.9999999995, 10.0000000005)
+    // (cheaper cost, higher weight)
+    assert!(!frontier.is_dominated(9.9999999995, 10.0000000005));
+    frontier.insert_and_prune(9.9999999995, 10.0000000005);
+
+    // Both points must coexist as valid non-dominated trade-offs
+    assert_eq!(frontier.len(), 2);
+}
+
+#[test]
+fn test_large_magnitude_inputs() {
+    let mut g = DirectedGraph::new(3);
+    // Large edge metrics up to 10^9
+    assert!(g.add_edge(0, 1, 1_000_000_000.0, 500_000_000.0));
+    assert!(g.add_edge(1, 2, 2_000_000_000.0, 400_000_000.0));
+
+    let inst = CsppInstance::new(g, 0, 2, 1_000_000_000.0);
+    let solver = AdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 2]);
+    assert!((sol.cost - 3_000_000_000.0).abs() < 1e-3);
+    assert!((sol.weight - 900_000_000.0).abs() < 1e-3);
+}
+
+#[test]
+fn test_zero_weight_and_zero_cost_edges() {
+    let mut g = DirectedGraph::new(4);
+    assert!(g.add_edge(0, 1, 0.0, 10.0)); // zero cost
+    assert!(g.add_edge(1, 2, 10.0, 0.0)); // zero weight
+    assert!(g.add_edge(2, 3, 5.0, 5.0));
+
+    let inst = CsppInstance::new(g, 0, 3, 15.0);
+    let solver = AdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 2, 3]);
+    assert!((sol.cost - 15.0).abs() < 1e-9);
+    assert!((sol.weight - 15.0).abs() < 1e-9);
+}
+
+#[test]
+fn test_exact_integer_adhp_solver() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    let mut g = IntDirectedGraph::new(4);
+    assert!(g.add_edge(0, 1, 10, 2));
+    assert!(g.add_edge(1, 3, 10, 2));
+    assert!(g.add_edge(0, 2, 5, 6));
+    assert!(g.add_edge(2, 3, 5, 6));
+
+    let solver = IntAdhpSolver::new(3);
+
+    // Budget = 5: Path 1 is the only feasible path (weight 4 <= 5), cost = 20
+    let inst1 = IntCsppInstance::new(g.clone(), 0, 3, 5);
+    let sol1 = solver.solve(&inst1);
+    assert_eq!(sol1.status, SolutionStatus::Optimal);
+    assert_eq!(sol1.path, vec![0, 1, 3]);
+    assert_eq!(sol1.cost, 20);
+    assert_eq!(sol1.weight, 4);
+
+    // Budget = 15: Both paths feasible, Path 2 has cost 10 < 20
+    let inst2 = IntCsppInstance::new(g, 0, 3, 15);
+    let sol2 = solver.solve(&inst2);
+    assert_eq!(sol2.status, SolutionStatus::Optimal);
+    assert_eq!(sol2.path, vec![0, 2, 3]);
+    assert_eq!(sol2.cost, 10);
+    assert_eq!(sol2.weight, 12);
+}
+
+#[test]
+fn test_float_to_integer_scaling() {
+    use adhp_cspp::exact::IntAdhpSolver;
+
+    let mut g = DirectedGraph::new(3);
+    assert!(g.add_edge(0, 1, 1.25, 0.50));
+    assert!(g.add_edge(1, 2, 2.50, 0.75));
+
+    let inst = CsppInstance::new(g, 0, 2, 1.50);
+    let int_inst = inst
+        .to_integer_scaled(100.0, 100.0)
+        .expect("scaling succeeds");
+
+    assert_eq!(int_inst.budget, 150);
+
+    let int_solver = IntAdhpSolver::new(3);
+    let sol = int_solver.solve(&int_inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 2]);
+    assert_eq!(sol.cost, 375); // (1.25 + 2.50) * 100
+    assert_eq!(sol.weight, 125); // (0.50 + 0.75) * 100
+}
