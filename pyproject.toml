@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adhp_cspp"
+version = "1.0.0"
+description = "Adaptive Dual Hull Pruning (ADHP): Exact, high-performance algorithm for the Weight-Constrained Shortest Path Problem"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "rajveersinh-is-dev"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[project.urls]
+Homepage = "https://github.com/rajveersinh-is-dev/adhp-cspp"
+
+[tool.setuptools]
+py-modules = ['']
