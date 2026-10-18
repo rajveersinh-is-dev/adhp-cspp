@@ -22,39 +22,43 @@ To ensure strict scientific reproducibility and eliminate measurement artifacts:
 
 ### 2. Experimental Protocols
 
-1. **Warmup Protocol**:
-   - Every individual test configuration was executed for **5 discarded warmup runs** immediately prior to timing. This ensured that CPU branch predictors, instruction caches, and data caches reached steady state before data collection began.
-2. **Repetition & Statistical Aggregation**:
-   - Each configuration was measured across **10 timed repetitions**.
-   - Reported statistics include the arithmetic mean ($\mu$) and sample standard deviation ($\sigma$).
+1. **Multi-Instance Sample Evaluation**:
+   - Rather than repeatedly timing a single synthetic instance, every configuration is evaluated across **10 distinct random instances** generated with independent seeds.
+   - For each instance, 3 discarded warmup runs ensure instruction and data cache warmness, followed by 3 timed runs to eliminate transient OS scheduling jitter.
+2. **Statistical Distribution Metrics**:
+   - Reports the sample arithmetic mean ($\mu$), sample median, and sample standard deviation ($\sigma$) across the 10 instances.
+   - Preprocessing time and forward search time are measured and reported separately to isolate the algorithmic cost of bound construction from search-space exploration.
+   - Peak heap memory allocation (in bytes) is tracked by monitoring active priority queue capacity, path pool capacity, and vertex Pareto frontier point arrays.
 3. **Execution Purity**:
-   - All algorithms were compiled in the same binary under identical compiler flags, executing in a single thread without concurrency jitter.
-   - No precomputed constants, synthetic benchmark lookup tables, or shortcut function-name matching were permitted.
-   - All graph instances were generated deterministically using an explicit Linear Congruential Generator (LCG) initialized with documented seeds.
+   - All algorithms are compiled in the same binary under identical release profile flags (`opt-level = 3`, `lto = true`, `codegen-units = 1`), executing single-threaded on a dedicated core.
+   - Zero precomputed lookup tables or shortcut heuristic stubs. All bounds and shortest path trees are computed dynamically from first principles.
+   - All graph instances are deterministically generated using an explicit Linear Congruential Generator (LCG) with documented seeds.
 
 ---
 
 ### 3. Benchmark Suites and Input Topology Families
 
 1. **Anti-Correlated Scaling Suite**:
-   - Graph sizes $n \in \{20, 40, 60, 80, 100\}$.
+   - Graph sizes $n \in \{20, 40, 60, 80, 100, 150\}$.
    - Edge density $p = 0.25$.
    - Cost and weight generated with strong negative correlation: $w_e = 100 - c_e + \epsilon$, where $\epsilon \sim \text{Uniform}(-5, 5)$.
+   - Evaluated across 10 distinct random instances per size (60 instances total).
    - *Rationale*: Classic hard benchmark from operations research literature where unconstrained shortest cost paths severely violate the budget, inducing massive Pareto frontiers.
 2. **2D Mesh Grid Scaling Suite**:
-   - Grid dimensions $4\times 4, 6\times 6, 8\times 8, 9\times 9$ ($n \in \{16, 36, 64, 81\}$).
+   - Grid dimensions $4\times 4, 6\times 6, 8\times 8, 10\times 10$ ($n \in \{16, 36, 64, 100\}$).
    - Planar-like topologies with directed transitions (right, down, diagonal).
+   - Evaluated across 10 distinct random instances per dimension (40 instances total).
    - *Rationale*: Models transportation networks, VLSI routing, and robot grid navigation with localized spatial bottlenecks.
 3. **Random Erdős-Rényi Scaling Suite**:
    - Graph sizes $n \in \{30, 60, 90, 120\}$.
    - Edge density $p = 0.20$.
-   - Uncorrelated uniform costs and weights in $[1, 100]$.
+   - Uncorrelated uniform costs and weights in $[1, 100]$ across 10 instances per size.
 4. **Budget Sensitivity Suite**:
    - Fixed graph size $n = 50$, varying budget tightness factor $\alpha \in \{0.10, 0.25, 0.50, 0.75, 0.90\}$ where $W = W_{\min} + \alpha(W_{\max} - W_{\min})$.
-   - *Rationale*: Tests solver behavior from extremely constrained (near-infeasible) to loose budget regimes.
+   - 10 distinct instances per $\alpha$ level (50 instances total).
 5. **Ablation Study on Facet Count $K$**:
-   - Fixed instance ($n = 70$, anti-correlated), varying $K \in \{2, 3, 5, 8, 12\}$.
-   - Evaluates the marginal benefit of additional supporting hyperplanes versus the added preprocessing cost.
+   - Multi-facet instances ($n = 70$, anti-correlated), testing $K \in \{1, 2, 3, 5, 8, 12\}$.
+   - Explicitly evaluates $K=1$ (single 1D cost bounding) through $K=12$ (fine discretization).
 
 ---
 

@@ -139,3 +139,62 @@ fn test_differential_agreement_across_all_solvers() {
         }
     }
 }
+
+#[test]
+fn test_zero_cost_zero_weight_cycle_termination() {
+    // Graph with zero-cost zero-weight cycle between nodes 1 and 2:
+    // 0 -> 1 (cost 5, weight 2)
+    // 1 -> 2 (cost 0, weight 0)
+    // 2 -> 1 (cost 0, weight 0)
+    // 2 -> 3 (cost 5, weight 2)
+    let mut g = DirectedGraph::new(4);
+    g.add_edge(0, 1, 5.0, 2.0);
+    g.add_edge(1, 2, 0.0, 0.0);
+    g.add_edge(2, 1, 0.0, 0.0);
+    g.add_edge(2, 3, 5.0, 2.0);
+
+    let inst = CsppInstance::new(g, 0, 3, 10.0);
+    let solver = AdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert!((sol.cost - 10.0).abs() < 1e-9);
+    assert!((sol.weight - 4.0).abs() < 1e-9);
+    assert!(sol.path.len() <= 4, "Path should not endlessly loop in cycle");
+}
+
+#[test]
+fn test_k1_pure_cost_bounding() {
+    let mut g = DirectedGraph::new(4);
+    g.add_edge(0, 1, 10.0, 2.0);
+    g.add_edge(1, 3, 10.0, 2.0);
+    g.add_edge(0, 2, 5.0, 6.0);
+    g.add_edge(2, 3, 5.0, 6.0);
+
+    let inst = CsppInstance::new(g, 0, 3, 5.0);
+    // K = 1: ADHP must work as 1D-bounded solver without panic
+    let solver_k1 = AdhpSolver::new(1);
+    let sol = solver_k1.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 3]);
+    assert!((sol.cost - 20.0).abs() < 1e-9);
+}
+
+#[test]
+fn test_floating_point_epsilon_near_tie() {
+    let mut g = DirectedGraph::new(3);
+    // Path 1: 0 -> 1 -> 2: cost = 10.000000001, weight = 5.0
+    // Path 2: 0 -> 2 direct: cost = 10.000000002, weight = 4.0
+    g.add_edge(0, 1, 5.0, 2.5);
+    g.add_edge(1, 2, 5.000000001, 2.5);
+    g.add_edge(0, 2, 10.000000002, 4.0);
+
+    let inst = CsppInstance::new(g, 0, 2, 6.0);
+    let solver = AdhpSolver::new(2);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert!(sol.cost <= 10.000000001 + 1e-8);
+}
+

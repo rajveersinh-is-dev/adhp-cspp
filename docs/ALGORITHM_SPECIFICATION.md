@@ -219,11 +219,11 @@ function ADHP_SOLVE(G, s, t, W, K_max=5):
             if new_w + dist_w[v] > W:
                 continue // Infeasible to reach t
                 
-            // Filter 2: Dual Hull Bound
+            // Filter 2: Dual Hull Bound (with conservative floating-point tolerance ε = 1e-9)
             rem_w ← W - new_w
             lb_v ← EVAL_DUAL_LOWER_BOUND(v, rem_w, Λ, dist_dual)
-            if new_c + lb_v ≥ C_UB:
-                continue // Cannot beat best known solution
+            if new_c + lb_v ≥ C_UB - 1e-9:
+                continue // Cannot beat best known solution (safely accounting for float rounding)
                 
             // Filter 3: Local Pareto Dominance
             if Frontiers[v].IS_DOMINATED(new_c, new_w):

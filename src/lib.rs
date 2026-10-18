@@ -37,6 +37,8 @@ pub struct SolverStats {
     pub labels_pruned_dominance: usize,
     /// Maximum number of active labels in the priority queue at any point.
     pub peak_queue_size: usize,
+    /// Estimated peak memory allocated by label queues and frontiers in bytes.
+    pub peak_memory_bytes: usize,
     /// Total number of labels popped and explored from the priority queue.
     pub labels_explored: usize,
 }

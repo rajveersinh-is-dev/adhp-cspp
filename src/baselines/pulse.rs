@@ -67,8 +67,18 @@ impl PulseSolver {
             return;
         }
 
+        if current_path.len() > stats.peak_queue_size {
+            stats.peak_queue_size = current_path.len();
+            let est_mem = current_path.capacity() * std::mem::size_of::<usize>()
+                + std::mem::size_of_val(visited)
+                + memory.iter().map(|m| m.points.capacity() * std::mem::size_of::<(f64, f64)>()).sum::<usize>();
+            if est_mem > stats.peak_memory_bytes {
+                stats.peak_memory_bytes = est_mem;
+            }
+        }
+
         // Bound Pruning 1: 1D Cost bound
-        if c_u + dist_cost[u] >= *best_cost - 1e-12 {
+        if c_u + dist_cost[u] > *best_cost + 1e-9 {
             stats.labels_pruned_dual_bound += 1;
             return;
         }
@@ -99,7 +109,7 @@ impl PulseSolver {
             }
 
             // Cost Pruning
-            if new_c + dist_cost[v] >= *best_cost - 1e-12 {
+            if new_c + dist_cost[v] > *best_cost + 1e-9 {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }

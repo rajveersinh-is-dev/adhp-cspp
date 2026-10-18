@@ -31,7 +31,7 @@ struct VerificationRecord {
 }
 
 fn main() {
-    println!("=== ADHP-CSPP: Running Certified Differential Verification ===");
+    println!("=== ADHP-CSPP: Running Differential Testing Against 4 Baselines (100 Instances) ===");
 
     let adhp = AdhpSolver::new(5);
     let martins = MartinsSolver::new();
@@ -43,23 +43,28 @@ fn main() {
     let mut total_verified = 0;
     let mut total_agreed = 0;
 
-    // Test across 30 diverse instances
-    for seed in 1..=10 {
+    // Test across 100 diverse instances
+    for seed in 1..=25 {
         let instances = vec![
             (
-                format!("anticorr_n25_s{}", seed),
+                format!("anticorr_n{}_s{}", 15 + (seed % 5) * 5, seed),
                 "Anti-Correlated".to_string(),
-                generate_anticorrelated_instance(25, 0.25, 0.40, seed * 100),
+                generate_anticorrelated_instance(15 + (seed % 5) * 5, 0.25, 0.20 + (seed as f64 % 5.0) * 0.12, (seed as u64) * 100),
             ),
             (
-                format!("grid_5x5_s{}", seed),
-                "Grid 5x5".to_string(),
-                generate_grid_instance(5, 5, 0.45, seed * 200),
+                format!("grid_{}x{}_s{}", 3 + (seed % 4), 3 + (seed % 4), seed),
+                format!("Grid {}x{}", 3 + (seed % 4), 3 + (seed % 4)),
+                generate_grid_instance(3 + (seed % 4), 3 + (seed % 4), 0.35 + (seed as f64 % 4.0) * 0.10, (seed as u64) * 200),
             ),
             (
-                format!("random_n30_s{}", seed),
+                format!("random_n{}_s{}", 20 + (seed % 6) * 5, seed),
                 "Random ER".to_string(),
-                generate_random_instance(30, 0.20, 0.50, seed * 300),
+                generate_random_instance(20 + (seed % 6) * 5, 0.22, 0.40 + (seed as f64 % 5.0) * 0.08, (seed as u64) * 300),
+            ),
+            (
+                format!("anticorr_dense_n{}_s{}", 20 + (seed % 4) * 8, seed),
+                "Anti-Correlated Dense".to_string(),
+                generate_anticorrelated_instance(20 + (seed % 4) * 8, 0.40, 0.50, (seed as u64) * 500 + 77),
             ),
         ];
 

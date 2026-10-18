@@ -218,6 +218,15 @@ impl CsppSolver for MartinsSolver {
 
                 if heap.len() > stats.peak_queue_size {
                     stats.peak_queue_size = heap.len();
+                    let est_mem = heap.capacity() * std::mem::size_of::<MartinsLabel>()
+                        + pool.capacity() * std::mem::size_of::<PoolNode>()
+                        + frontiers
+                            .iter()
+                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
+                            .sum::<usize>();
+                    if est_mem > stats.peak_memory_bytes {
+                        stats.peak_memory_bytes = est_mem;
+                    }
                 }
             }
         }

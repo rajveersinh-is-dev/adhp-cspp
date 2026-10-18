@@ -113,11 +113,16 @@ impl Default for AdhpSolver {
     }
 }
 
+/// Conservative numerical tolerance to prevent premature pruning of near-optimal paths
+/// due to floating-point rounding errors during discrete Legendre-Fenchel evaluation.
+pub const PRUNE_EPSILON: f64 = 1e-9;
+
 impl AdhpSolver {
     /// Creates a new ADHP solver with the specified maximum number of facets $K$.
+    /// Supports $K \ge 1$, where $K=1$ corresponds to pure 1D cost bounding ($\lambda_1 = 0$).
     pub fn new(max_facets: usize) -> Self {
         Self {
-            max_facets: max_facets.max(2),
+            max_facets: max_facets.max(1),
         }
     }
 
@@ -346,7 +351,7 @@ impl CsppSolver for AdhpSolver {
 
             // Global upper bound pruning
             let lb_u = Self::eval_dual_bound(u, budget - w_u, &lambdas, &dist_dual);
-            if c_u + lb_u >= best_cost - 1e-12 {
+            if c_u + lb_u > best_cost + PRUNE_EPSILON {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }
@@ -357,16 +362,16 @@ impl CsppSolver for AdhpSolver {
                 let new_c = c_u + edge.cost;
                 let new_w = w_u + edge.weight;
 
-                // Filter 1: Resource feasibility
+                // Filter 1: Resource feasibility (Weight infeasibility bounding)
                 if new_w + dist_weight[v] > budget {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
 
-                // Filter 2: Dual Hull Pruning
+                // Filter 2: Dual Hull Pruning (Conservative epsilon policy)
                 let rem_w = budget - new_w;
                 let lb_v = Self::eval_dual_bound(v, rem_w, &lambdas, &dist_dual);
-                if new_c + lb_v >= best_cost - 1e-12 {
+                if new_c + lb_v > best_cost + PRUNE_EPSILON {
                     stats.labels_pruned_dual_bound += 1;
                     continue;
                 }
@@ -396,6 +401,15 @@ impl CsppSolver for AdhpSolver {
 
                 if heap.len() > stats.peak_queue_size {
                     stats.peak_queue_size = heap.len();
+                    let est_mem = heap.capacity() * std::mem::size_of::<SearchLabel>()
+                        + pool.capacity() * std::mem::size_of::<PoolNode>()
+                        + frontiers
+                            .iter()
+                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
+                            .sum::<usize>();
+                    if est_mem > stats.peak_memory_bytes {
+                        stats.peak_memory_bytes = est_mem;
+                    }
                 }
             }
         }

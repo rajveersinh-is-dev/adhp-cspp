@@ -304,7 +304,7 @@ impl CsppSolver for CarlyleWoodSolver {
                 }
 
                 let lb_v = dist_lagrange[v] - opt_lambda * (budget - new_w);
-                if new_c + lb_v >= best_cost - 1e-12 {
+                if new_c + lb_v > best_cost + 1e-9 {
                     stats.labels_pruned_dual_bound += 1;
                     continue;
                 }
@@ -332,6 +332,15 @@ impl CsppSolver for CarlyleWoodSolver {
 
                 if heap.len() > stats.peak_queue_size {
                     stats.peak_queue_size = heap.len();
+                    let est_mem = heap.capacity() * std::mem::size_of::<CwLabel>()
+                        + pool.capacity() * std::mem::size_of::<PoolNode>()
+                        + frontiers
+                            .iter()
+                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
+                            .sum::<usize>();
+                    if est_mem > stats.peak_memory_bytes {
+                        stats.peak_memory_bytes = est_mem;
+                    }
                 }
             }
         }

@@ -45,3 +45,30 @@
   1. Updated `docs/COMPLEXITY_ANALYSIS.md` to state that worst-case theoretical complexity remains exponential in $n$ (or pseudo-polynomial in $W$).
   2. Explicitly documented the break-even frontier in `research/BENCHMARK_REPORT.md` and `README.md`: ADHP dominates on planar grids, dense Pareto frontiers, and larger instances where label explosion occurs, while 1D bounding is preferable for small graphs ($n \le 50$).
 - **Verification**: Full benchmark suite re-executed with all data transparently documented in `results/raw/benchmark_raw.csv`.
+
+---
+
+### 4. Cycle 4: Rigorous External Audit Resolution (20-Point Remediation)
+
+- **Audit Origin**: Independent External Review of Mathematical Foundations, Benchmarking, and Reporting
+- **Items Addressed & Remediations**:
+  1. *Grid Benchmark Claims*: Fully restored all 5 solvers (Dumitrescu-Boland, Pulse, Carlyle-Wood, Martins, ADHP) in all tables. Clarified that ADHP beats Martins (3.54x) and Pulse (3.42x) on $10 \times 10$ grids, while Carlyle-Wood and Dumitrescu-Boland have faster total wall-clock time due to lower preprocessing overhead.
+  2. *Anti-Correlated Runtimes*: Clearly documented that total runtime for ADHP on small graphs ($n \le 100$) is dominated by $K=5$ reverse Dijkstra passes ($234 \, \mu\text{s}$ at $n=150$), so 1D methods have faster total runtime, while ADHP's forward search is 17.9x faster (4.74 µs vs 84.90 µs for Martins).
+  3. *Label Suppression Transparency*: Explicitly identified comparisons against Martins (97.0% suppression) and Pulse (97.6% suppression), while reporting exact label counts alongside Carlyle-Wood and Dumitrescu-Boland.
+  4. *Break-Even Boundary*: Accurately stated that break-even is achieved on dense combinatorial planar grids where label explosion dominates, and that 1D bounds are faster on small graphs ($n \le 100$).
+  5. *Multi-Instance Evaluation*: Replaced single-instance benchmarking with 10 distinct random instances per configuration (250 distinct instances total), reporting mean, median, standard deviation, and peak memory.
+  6. *Ablation with $K=1$ Baseline*: Added $K=1$ (pure 1D cost bounding) to the ablation study ($K \in [1, 2, 3, 5, 8, 12]$), demonstrating the dramatic 67.6% label drop from $K=1$ (148 labels) to $K=2$ (48 labels) and saturation at $K=5$ (40 labels).
+  7. *Preprocessing Overhead Accounting*: Separated preprocessing time from search time in all empirical tables and discussion sections.
+  8. *Peak Memory Reporting*: Added heap memory tracking (`peak_memory_bytes`) across all 5 solvers and reported memory consumption in all benchmark tables.
+  9. *Theorem 2 Tightness Conditions*: Stated exact strict dominance conditions ($d_{\lambda_k} - d_c > \lambda_k \Delta w$) taking into account min-weight ties among cost-optimal paths, and formally showed that Filter 1 + Filter 2 subsume 1D bounds.
+  10. *Theorem 4 Formal Proof*: Expanded into a complete 4-part proof establishing admissibility, Pareto dominance preservation, zero-cost/zero-weight cycle termination, and floating-point epsilon safety.
+  11. *Floating-Point Epsilon Safety*: Implemented conservative tolerance `PRUNE_EPSILON = 1e-9` in all solvers.
+  12. *Prior Literature Context*: Accurately credited Handler & Zang (1980), Carlyle & Wood (2008), Muhandiramge & Boland (2009), Dumitrescu & Boland (2003), and Lozano & Medaglia (2013).
+  13. *Motivation Scoping*: Clarified that the implemented algorithm targets canonical single-resource CSPP with $c \ge 0, w \ge 0$.
+  14. *Differential Oracle Scaling*: Scaled oracle testing to 100 diverse instances across all 5 solvers and validated against SciPy/HiGHS 0-1 ILP solver with 100% agreement.
+  15. *Scientific Terminology*: Replaced "certified differential oracle" with "differentially verified against independent oracles across 100 instances".
+  16. *Removed Leaked Terminology*: Cleaned up prompt references and framework jargon.
+  17. *Rust Toolchain Synchronization*: Updated `rust-version = "1.80"` in `Cargo.toml` and synchronized all badges.
+  18. *Dual Licensing*: Split `LICENSE` into standard `LICENSE-MIT` and `LICENSE-APACHE`.
+  19. *LaTeX and Math Formatting*: Corrected KaTeX formatting and unified theorem numbering across `README.md` and `docs/`.
+  20. *Algorithm Specification Completeness*: Added adaptive multiplier discovery pseudocode and complexity breakdown to `README.md`.

@@ -219,8 +219,8 @@ impl CsppSolver for DumitrescuBolandSolver {
                     continue;
                 }
 
-                // 1D Cost bound
-                if new_c + dist_cost[v] >= best_cost - 1e-12 {
+                // 1D Cost bound (with conservative epsilon policy)
+                if new_c + dist_cost[v] > best_cost + 1e-9 {
                     stats.labels_pruned_dual_bound += 1;
                     continue;
                 }
@@ -248,6 +248,15 @@ impl CsppSolver for DumitrescuBolandSolver {
 
                 if heap.len() > stats.peak_queue_size {
                     stats.peak_queue_size = heap.len();
+                    let est_mem = heap.capacity() * std::mem::size_of::<DbLabel>()
+                        + pool.capacity() * std::mem::size_of::<PoolNode>()
+                        + frontiers
+                            .iter()
+                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
+                            .sum::<usize>();
+                    if est_mem > stats.peak_memory_bytes {
+                        stats.peak_memory_bytes = est_mem;
+                    }
                 }
             }
         }
