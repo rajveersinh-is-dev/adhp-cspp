@@ -1,0 +1,32 @@
+[package]
+name = "adhp-cspp"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rajve"]
+description = "Adaptive Dual Hull Pruning (ADHP): Exact, high-performance solver for the Weight-Constrained Shortest Path Problem"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rajveersinh-is-dev/adhp-cspp"
+keywords = ["algorithms", "graph-algorithms", "shortest-path", "operations-research", "optimization"]
+categories = ["algorithms", "mathematics", "science"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+rand = "0.8"
+
+[[bin]]
+name = "benchmark_suite"
+path = "src/bin/benchmark_suite.rs"
+
+[[bin]]
+name = "verify_oracle"
+path = "src/bin/verify_oracle.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
