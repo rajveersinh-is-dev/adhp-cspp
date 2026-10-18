@@ -1,7 +1,7 @@
 # REVISION LOG & ADVERSARIAL DEFECT RESOLUTION
 ## Autonomous Algorithm Discovery Lab: ADHP-CSPP Three-Persona Review Cycles
 
-**Project Author**: Rajve  
+**Project Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `reviews/REVISION_LOG.md`  
 

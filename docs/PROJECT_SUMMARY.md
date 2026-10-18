@@ -1,7 +1,7 @@
 # PROJECT SUMMARY & TECHNICAL OVERVIEW
 ## Adaptive Dual Hull Pruning (ADHP) for the Constrained Shortest Path Problem
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/PROJECT_SUMMARY.md`  
 

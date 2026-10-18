@@ -1,7 +1,7 @@
 # BENCHMARK METHODOLOGY & EXPERIMENTAL CONTROLS
 ## Autonomous Algorithm Discovery Lab: Empirical Evaluation of ADHP-CSPP
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `research/BENCHMARK_METHODOLOGY.md`  
 

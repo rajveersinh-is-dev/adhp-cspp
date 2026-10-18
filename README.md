@@ -183,8 +183,8 @@ cargo run --example simple_solve
 If you use ADHP in your research, please cite:
 
 ```bibtex
-@software{rajve2026adhp,
-  author    = {Rajve},
+@software{pardeshi2026adhp,
+  author    = {Rajveersinh Vishal Pardeshi},
   title     = {Adaptive Dual Hull Pruning: An Exact Algorithm for the Weight-Constrained Shortest Path Problem},
   year      = {2026},
   url       = {https://github.com/rajveersinh-is-dev/adhp-cspp},

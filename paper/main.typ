@@ -6,7 +6,7 @@
   #v(1em)
   #text(size: 17pt, weight: "bold")[Adaptive Dual Hull Pruning: An Exact Algorithm for the Weight-Constrained Shortest Path Problem]
   #v(0.8em)
-  #text(size: 12pt, weight: "medium")[*Rajve*] \
+  #text(size: 12pt, weight: "medium")[*Rajveersinh Vishal Pardeshi*] \
   #text(size: 10pt, fill: luma(100))[Autonomous Mathematical Algorithm Discovery Lab] \
   #text(size: 9.5pt, fill: luma(120))[October 2026]
   #v(1.2em)

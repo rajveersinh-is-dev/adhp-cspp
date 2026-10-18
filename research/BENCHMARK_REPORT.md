@@ -1,7 +1,7 @@
 # COMPREHENSIVE BENCHMARK REPORT
 ## Empirical Evaluation of Adaptive Dual Hull Pruning (ADHP) vs Established State-of-the-Art Solvers
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `research/BENCHMARK_REPORT.md`  
 **Data Sources**: `results/raw/benchmark_raw.csv`, `results/raw/benchmark_raw.json`, `results/processed/summary_table.csv`  

@@ -1,7 +1,7 @@
 # NOVELTY ASSESSMENT & DIFFERENTIATION GATE
 ## Autonomous Algorithm Discovery Lab: Multi-Faceted Adaptive Dual Hull Pruning (ADHP) for CSPP
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Status**: PASSED NOVELTY GATE  
 
@@ -11,7 +11,7 @@
 
 | Dimension | Standard Label Setting | Dumitrescu & Boland (2003) | Carlyle & Wood (2008) | Lozano & Medaglia (2013) Pulse | **ADHP (This Work)** |
 |---|---|---|---|---|---|
-| **Original Reference** | Martins (1984), Desrochers & Soumis (1988) | INFORMS J. Comput. 15(4) | INFORMS J. Comput. 20(3) | Comput. & Oper. Res. 40(1) | **Rajve (2026)** |
+| **Original Reference** | Martins (1984), Desrochers & Soumis (1988) | INFORMS J. Comput. 15(4) | INFORMS J. Comput. 20(3) | Comput. & Oper. Res. 40(1) | **Rajveersinh Vishal Pardeshi (2026)** |
 | **Mathematical Mechanism** | Dijkstra-like expansion with Pareto dominance in $(c, w)$ | Preprocessed 1D lower bounds $d_c(u, t), d_w(u, t)$ | Single global Lagrangian multiplier $\lambda^*_{s,t}$ + $K$-shortest path enumeration | Recursive DFS with 1D bounds and localized dominance | **$K$-Faceted Adaptive Dual Hull: Legendre-Fenchel lower-bound envelope $\mathcal{L}_u(w) = \max_k \{ d_{\lambda_k}(u, t) - \lambda_k(W - w) \}$** |
 | **Pruning Geometry** | Axis-aligned quadrant dominance | Orthogonal 1D box pruning | 1D projected hyperplane through $(s, t)$ | Orthogonal 1D box pruning + local history | **Piecewise-linear convex envelope bounding the full Pareto lower hull** |
 | **Bound Multiplicity** | 0 bounds | 2 bounds ($d_c, d_w$) | 1 global slope ($\lambda^*_{s,t}$) | 2 bounds ($d_c, d_w$) | **$K$ adaptively chosen slopes $\{\lambda_1, \dots, \lambda_K\}$ capturing hull vertices** |

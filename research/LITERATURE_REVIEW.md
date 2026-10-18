@@ -1,7 +1,7 @@
 # LITERATURE REVIEW & RESEARCH EVIDENCE LEDGER
 ## Autonomous Algorithm Discovery Lab: Constrained Shortest Path & Exact Discrete Optimization
 
-**Project Author**: Rajve  
+**Project Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Environment**: Windows 11, Intel Core i5-11260H @ 2.60GHz (6 physical cores, 12 logical threads, 16 GB RAM), Rust 1.98.1, Cargo 1.98.1, Python 3.14.6  
 

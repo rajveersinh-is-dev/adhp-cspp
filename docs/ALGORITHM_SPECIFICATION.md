@@ -1,7 +1,7 @@
 # ALGORITHM SPECIFICATION: ADAPTIVE DUAL HULL PRUNING (ADHP)
 ## Exact Solver for the Weight-Constrained Shortest Path Problem
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/ALGORITHM_SPECIFICATION.md`  
 

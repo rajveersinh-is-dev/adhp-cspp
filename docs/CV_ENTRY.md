@@ -1,7 +1,7 @@
 # VERIFIED CURRICULUM VITAE (CV) ENTRY
 ## Autonomous Mathematical Algorithm Discovery Lab: ADHP-CSPP
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/CV_ENTRY.md`  
 

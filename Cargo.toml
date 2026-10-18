@@ -2,7 +2,7 @@
 name = "adhp-cspp"
 version = "0.1.0"
 edition = "2021"
-authors = ["Rajve"]
+authors = ["Rajveersinh Vishal Pardeshi"]
 description = "Adaptive Dual Hull Pruning (ADHP): Exact, high-performance solver for the Weight-Constrained Shortest Path Problem"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rajveersinh-is-dev/adhp-cspp"

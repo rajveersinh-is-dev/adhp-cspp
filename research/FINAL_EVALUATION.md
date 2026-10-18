@@ -1,7 +1,7 @@
 # FINAL INDEPENDENT EVALUATION & HONEST SCORECARD
 ## Autonomous Mathematical Algorithm Discovery Lab: ADHP-CSPP
 
-**Project Author**: Rajve  
+**Project Author**: Rajveersinh Vishal Pardeshi  
 **Evaluation Date**: October 2026  
 **Document**: `research/FINAL_EVALUATION.md`  
 

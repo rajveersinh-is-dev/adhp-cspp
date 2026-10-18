@@ -1,7 +1,7 @@
 # PROBLEM DEFINITION & MATHEMATICAL SPECIFICATION
 ## Exact Weight-Constrained Shortest Path Problem (CSPP)
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/PROBLEM_DEFINITION.md`  
 

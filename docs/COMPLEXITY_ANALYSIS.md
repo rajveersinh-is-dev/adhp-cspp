@@ -1,7 +1,7 @@
 # COMPLEXITY ANALYSIS & THEORETICAL COMPARISON
 ## Adaptive Dual Hull Pruning (ADHP) for the Constrained Shortest Path Problem
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/COMPLEXITY_ANALYSIS.md`  
 

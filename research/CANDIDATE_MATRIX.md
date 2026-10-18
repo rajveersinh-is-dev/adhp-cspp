@@ -1,7 +1,7 @@
 # RESEARCH CANDIDATE SELECTION MATRIX
 ## Autonomous Algorithm Discovery Lab: Evaluation of 10 Candidate Problems
 
-**Author**: Rajve  
+**Author**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Methodology**: Evaluation against an 8-dimension weighted rubric (Part III, Section 8) with explicit novelty risk assessment and falsification conditions.
 
