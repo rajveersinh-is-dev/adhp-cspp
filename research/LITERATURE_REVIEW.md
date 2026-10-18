@@ -38,7 +38,11 @@ To ensure complete scientific integrity, this ledger records:
    - Introduced **LARAC** (Lagrangian Relaxation-Based Aggregated Cost).
    - Solves the single-multiplier Lagrangian dual $\max_{\lambda \ge 0} \{ \min_{P} \sum_{e \in P} (c_e + \lambda w_e) - \lambda W \}$.
    - Finds an optimal dual multiplier $\lambda^*$ using bisection / subgradient. Yields a tight lower bound and an upper bound, but leaves a duality gap.
-4. **Dumitrescu, I., & Boland, N. (2003)**. *Improved methods for the constrained shortest path problem*. INFORMS Journal on Computing, 15(4):343–353.
+4. **Mehlhorn, K., & Ziegelmann, M. (2000)**. *Resource constrained shortest paths*. European Symposium on Algorithms (ESA), Springer, 32–42.
+   - Traces the lower convex hull of the bicriteria shortest path problem using recursive parametric search (parametric bisection on $\lambda$).
+   - Computes the lower convex hull for global approximation and root lower bounds.
+   - Distinction with ADHP: While Mehlhorn & Ziegelmann evaluate the parametric lower hull globally for the source-target pair, ADHP uses the discovered hull facets to construct localized, multi-faceted lower bounding hyperplanes $\mathcal{L}_u^\Lambda(\Delta w)$ across every intermediate vertex simultaneously during forward label-setting.
+5. **Dumitrescu, I., & Boland, N. (2003)**. *Improved methods for the constrained shortest path problem*. INFORMS Journal on Computing, 15(4):343–353.
    - Integrated preprocessing and label-setting with 1-dimensional lower bounds: $d_c(u, t)$ (cost distance) and $d_w(u, t)$ (weight distance).
    - Labels at $u$ with $w + d_w(u, t) > W$ are pruned by feasibility; labels with $c + d_c(u, t) \ge C_{UB}$ are pruned by cost.
    - Bottleneck: Because $d_c$ minimizes cost ignoring weight, and $d_w$ minimizes weight ignoring cost, neither bound captures the cost-weight trade-off along the constrained Pareto frontier.

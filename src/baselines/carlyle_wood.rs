@@ -1,6 +1,6 @@
-//! Carlyle & Wood (2008) Lagrangian Relaxation & Bounding Solver for CSPP.
+//! Carlyle & Wood (2008) LARAC single-multiplier Lagrangian bounding algorithm.
 
-use crate::dijkstra::{dijkstra_backward, dijkstra_forward};
+use crate::dijkstra::{dijkstra_backward, dijkstra_forward, dijkstra_forward_target};
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -41,6 +41,7 @@ impl PartialOrd for CwLabel {
 #[derive(Clone, Copy)]
 struct PoolNode {
     vertex: usize,
+    edge_id: Option<usize>,
     parent_idx: Option<usize>,
 }
 
@@ -59,10 +60,10 @@ impl VertexFrontier {
     #[inline(always)]
     fn is_dominated(&self, new_c: f64, new_w: f64) -> bool {
         for pt in &self.points {
-            if pt.weight <= new_w && pt.cost <= new_c {
+            if pt.weight <= new_w + 1e-9 && pt.cost <= new_c + 1e-9 {
                 return true;
             }
-            if pt.weight > new_w {
+            if pt.weight > new_w + 1e-9 {
                 break;
             }
         }
@@ -72,7 +73,7 @@ impl VertexFrontier {
     #[inline(always)]
     fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
         self.points
-            .retain(|pt| !(pt.weight >= new_w && pt.cost >= new_c));
+            .retain(|pt| !(pt.weight >= new_w - 1e-9 && pt.cost >= new_c - 1e-9));
         let pos = self
             .points
             .binary_search_by(|pt| pt.weight.partial_cmp(&new_w).unwrap_or(Ordering::Equal))
@@ -96,17 +97,22 @@ impl CarlyleWoodSolver {
         Self
     }
 
-    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> Vec<usize> {
+    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> (Vec<usize>, Vec<usize>) {
         let mut path = Vec::new();
+        let mut edge_path = Vec::new();
         while let Some(node) = pool.get(curr_idx) {
             path.push(node.vertex);
+            if let Some(e_id) = node.edge_id {
+                edge_path.push(e_id);
+            }
             match node.parent_idx {
                 Some(p_idx) => curr_idx = p_idx,
                 None => break,
             }
         }
         path.reverse();
-        path
+        edge_path.reverse();
+        (path, edge_path)
     }
 }
 
@@ -124,11 +130,12 @@ impl CsppSolver for CarlyleWoodSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        if s >= n || t >= n {
+        if !budget.is_finite() || budget < 0.0 || s >= n || t >= n {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
@@ -140,36 +147,41 @@ impl CsppSolver for CarlyleWoodSolver {
             return CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: vec![s],
+                edge_path: Vec::new(),
                 cost: 0.0,
                 weight: 0.0,
                 stats,
             };
         }
 
+        let weight_tol = budget.abs().max(1.0) * 1e-9;
         let prep_start = Instant::now();
 
         // Step 1: Solve extreme points on (s, t)
         let tree_c = dijkstra_forward(&instance.graph, s, 0.0, false);
-        let (path_c, cost_c, weight_c) = match tree_c.reconstruct_path_with_metrics(s, t) {
-            Some(res) => res,
-            None => {
-                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-                return CsppSolution {
-                    status: SolutionStatus::Infeasible,
-                    path: Vec::new(),
-                    cost: f64::INFINITY,
-                    weight: f64::INFINITY,
-                    stats,
-                };
-            }
-        };
+        let (path_c, edge_path_c, cost_c, weight_c) =
+            match tree_c.reconstruct_path_with_metrics(s, t) {
+                Some(res) => res,
+                None => {
+                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    return CsppSolution {
+                        status: SolutionStatus::Infeasible,
+                        path: Vec::new(),
+                        edge_path: Vec::new(),
+                        cost: f64::INFINITY,
+                        weight: f64::INFINITY,
+                        stats,
+                    };
+                }
+            };
 
-        if weight_c <= budget {
+        if weight_c <= budget + weight_tol {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: path_c,
+                edge_path: edge_path_c,
                 cost: cost_c,
                 weight: weight_c,
                 stats,
@@ -177,35 +189,39 @@ impl CsppSolver for CarlyleWoodSolver {
         }
 
         let tree_w = dijkstra_forward(&instance.graph, s, 0.0, true);
-        if tree_w.distances[t] > budget {
+        if tree_w.distances[t] > budget + weight_tol {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
             };
         }
 
-        let (path_w, cost_w, weight_w) = match tree_w.reconstruct_path_with_metrics(s, t) {
-            Some(res) => res,
-            None => {
-                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-                return CsppSolution {
-                    status: SolutionStatus::Infeasible,
-                    path: Vec::new(),
-                    cost: f64::INFINITY,
-                    weight: f64::INFINITY,
-                    stats,
-                };
-            }
-        };
+        let (path_w, edge_path_w, cost_w, weight_w) =
+            match tree_w.reconstruct_path_with_metrics(s, t) {
+                Some(res) => res,
+                None => {
+                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    return CsppSolution {
+                        status: SolutionStatus::Infeasible,
+                        path: Vec::new(),
+                        edge_path: Vec::new(),
+                        cost: f64::INFINITY,
+                        weight: f64::INFINITY,
+                        stats,
+                    };
+                }
+            };
 
         let mut best_cost = cost_w;
         let mut best_weight = weight_w;
         let mut best_path = path_w.clone();
+        let mut best_edge_path = edge_path_w;
 
         // Bisection for LARAC lambda*
         let mut p_c = (cost_c, weight_c, path_c);
@@ -220,23 +236,25 @@ impl CsppSolver for CarlyleWoodSolver {
             let lambda = (p_w.0 - p_c.0) / dw;
             opt_lambda = lambda;
 
-            let tree_r = dijkstra_forward(&instance.graph, s, lambda, false);
-            let (path_r, cost_r, weight_r) = match tree_r.reconstruct_path_with_metrics(s, t) {
+            let tree_r = dijkstra_forward_target(&instance.graph, s, t, lambda, false);
+            let (path_r, ep_r, cost_r, weight_r) = match tree_r.reconstruct_path_with_metrics(s, t)
+            {
                 Some(res) => res,
                 None => break,
             };
 
-            if weight_r <= budget && cost_r < best_cost {
+            if weight_r <= budget + weight_tol && cost_r < best_cost {
                 best_cost = cost_r;
                 best_weight = weight_r;
                 best_path = path_r.clone();
+                best_edge_path = ep_r;
             }
 
             if (cost_r + lambda * weight_r - (p_c.0 + lambda * p_c.1)).abs() < 1e-9 {
                 break;
             }
 
-            if weight_r <= budget {
+            if weight_r <= budget + weight_tol {
                 p_w = (cost_r, weight_r, path_r);
             } else {
                 p_c = (cost_r, weight_r, path_r);
@@ -255,6 +273,7 @@ impl CsppSolver for CarlyleWoodSolver {
 
         pool.push(PoolNode {
             vertex: s,
+            edge_id: None,
             parent_idx: None,
         });
 
@@ -278,16 +297,18 @@ impl CsppSolver for CarlyleWoodSolver {
             let w_u = label.weight;
 
             if u == t {
-                if c_u < best_cost {
+                if c_u < best_cost && w_u <= budget + weight_tol {
                     best_cost = c_u;
                     best_weight = w_u;
-                    best_path = Self::reconstruct_path(&pool, label.pool_idx);
+                    let (p, ep) = Self::reconstruct_path(&pool, label.pool_idx);
+                    best_path = p;
+                    best_edge_path = ep;
                 }
                 continue;
             }
 
             let lb_u = dist_lagrange[u] - opt_lambda * (budget - w_u);
-            if c_u + lb_u >= best_cost - 1e-12 {
+            if c_u + lb_u > best_cost + 1e-9 {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }
@@ -298,7 +319,7 @@ impl CsppSolver for CarlyleWoodSolver {
                 let new_c = c_u + edge.cost;
                 let new_w = w_u + edge.weight;
 
-                if new_w + dist_weight[v] > budget {
+                if new_w + dist_weight[v] > budget + weight_tol {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
@@ -319,6 +340,7 @@ impl CsppSolver for CarlyleWoodSolver {
                 let pool_idx = pool.len();
                 pool.push(PoolNode {
                     vertex: v,
+                    edge_id: Some(edge.edge_id),
                     parent_idx: Some(label.pool_idx),
                 });
 
@@ -332,15 +354,6 @@ impl CsppSolver for CarlyleWoodSolver {
 
                 if heap.len() > stats.peak_queue_size {
                     stats.peak_queue_size = heap.len();
-                    let est_mem = heap.capacity() * std::mem::size_of::<CwLabel>()
-                        + pool.capacity() * std::mem::size_of::<PoolNode>()
-                        + frontiers
-                            .iter()
-                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
-                            .sum::<usize>();
-                    if est_mem > stats.peak_memory_bytes {
-                        stats.peak_memory_bytes = est_mem;
-                    }
                 }
             }
         }
@@ -351,6 +364,7 @@ impl CsppSolver for CarlyleWoodSolver {
             CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: best_path,
+                edge_path: best_edge_path,
                 cost: best_cost,
                 weight: best_weight,
                 stats,
@@ -359,6 +373,7 @@ impl CsppSolver for CarlyleWoodSolver {
             CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,

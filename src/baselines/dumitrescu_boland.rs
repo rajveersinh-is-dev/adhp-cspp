@@ -1,4 +1,4 @@
-//! Dumitrescu & Boland (2003) 1D-bounded label-setting solver.
+//! Dumitrescu & Boland (2003) 1D-bounded label setting algorithm.
 
 use crate::dijkstra::dijkstra_backward;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
@@ -11,7 +11,7 @@ struct DbLabel {
     vertex: usize,
     cost: f64,
     weight: f64,
-    key: f64, // c + d_c(u, t)
+    key: f64,
     pool_idx: usize,
 }
 
@@ -19,6 +19,7 @@ impl Eq for DbLabel {}
 
 impl Ord for DbLabel {
     fn cmp(&self, other: &Self) -> Ordering {
+        // Min-heap ordering on cost lower bound
         other
             .key
             .partial_cmp(&self.key)
@@ -41,6 +42,7 @@ impl PartialOrd for DbLabel {
 #[derive(Clone, Copy)]
 struct PoolNode {
     vertex: usize,
+    edge_id: Option<usize>,
     parent_idx: Option<usize>,
 }
 
@@ -59,10 +61,10 @@ impl VertexFrontier {
     #[inline(always)]
     fn is_dominated(&self, new_c: f64, new_w: f64) -> bool {
         for pt in &self.points {
-            if pt.weight <= new_w && pt.cost <= new_c {
+            if pt.weight <= new_w + 1e-9 && pt.cost <= new_c + 1e-9 {
                 return true;
             }
-            if pt.weight > new_w {
+            if pt.weight > new_w + 1e-9 {
                 break;
             }
         }
@@ -72,7 +74,7 @@ impl VertexFrontier {
     #[inline(always)]
     fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
         self.points
-            .retain(|pt| !(pt.weight >= new_w && pt.cost >= new_c));
+            .retain(|pt| !(pt.weight >= new_w - 1e-9 && pt.cost >= new_c - 1e-9));
         let pos = self
             .points
             .binary_search_by(|pt| pt.weight.partial_cmp(&new_w).unwrap_or(Ordering::Equal))
@@ -96,17 +98,22 @@ impl DumitrescuBolandSolver {
         Self
     }
 
-    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> Vec<usize> {
+    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> (Vec<usize>, Vec<usize>) {
         let mut path = Vec::new();
+        let mut edge_path = Vec::new();
         while let Some(node) = pool.get(curr_idx) {
             path.push(node.vertex);
+            if let Some(e_id) = node.edge_id {
+                edge_path.push(e_id);
+            }
             match node.parent_idx {
                 Some(p_idx) => curr_idx = p_idx,
                 None => break,
             }
         }
         path.reverse();
-        path
+        edge_path.reverse();
+        (path, edge_path)
     }
 }
 
@@ -124,11 +131,12 @@ impl CsppSolver for DumitrescuBolandSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        if s >= n || t >= n {
+        if !budget.is_finite() || budget < 0.0 || s >= n || t >= n {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
@@ -140,11 +148,14 @@ impl CsppSolver for DumitrescuBolandSolver {
             return CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: vec![s],
+                edge_path: Vec::new(),
                 cost: 0.0,
                 weight: 0.0,
                 stats,
             };
         }
+
+        let weight_tol = budget.abs().max(1.0) * 1e-9;
 
         let prep_start = Instant::now();
         // Compute 1D reverse shortest path trees: d_c and d_w
@@ -152,11 +163,12 @@ impl CsppSolver for DumitrescuBolandSolver {
         let dist_weight = dijkstra_backward(&instance.graph, t, 0.0, true);
         stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
 
-        if dist_weight[s] > budget || dist_cost[s].is_infinite() {
+        if dist_weight[s] > budget + weight_tol || dist_cost[s].is_infinite() {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
@@ -169,6 +181,7 @@ impl CsppSolver for DumitrescuBolandSolver {
 
         pool.push(PoolNode {
             vertex: s,
+            edge_id: None,
             parent_idx: None,
         });
 
@@ -186,6 +199,7 @@ impl CsppSolver for DumitrescuBolandSolver {
         let mut best_cost = f64::INFINITY;
         let mut best_weight = f64::INFINITY;
         let mut best_path = Vec::new();
+        let mut best_edge_path = Vec::new();
 
         while let Some(label) = heap.pop() {
             stats.labels_explored += 1;
@@ -194,15 +208,17 @@ impl CsppSolver for DumitrescuBolandSolver {
             let w_u = label.weight;
 
             if u == t {
-                if c_u < best_cost {
+                if c_u < best_cost && w_u <= budget + weight_tol {
                     best_cost = c_u;
                     best_weight = w_u;
-                    best_path = Self::reconstruct_path(&pool, label.pool_idx);
+                    let (p, ep) = Self::reconstruct_path(&pool, label.pool_idx);
+                    best_path = p;
+                    best_edge_path = ep;
                 }
                 continue;
             }
 
-            if c_u + dist_cost[u] >= best_cost - 1e-12 {
+            if c_u + dist_cost[u] > best_cost + 1e-9 {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }
@@ -214,7 +230,7 @@ impl CsppSolver for DumitrescuBolandSolver {
                 let new_w = w_u + edge.weight;
 
                 // 1D Resource bound
-                if new_w + dist_weight[v] > budget {
+                if new_w + dist_weight[v] > budget + weight_tol {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
@@ -235,6 +251,7 @@ impl CsppSolver for DumitrescuBolandSolver {
                 let pool_idx = pool.len();
                 pool.push(PoolNode {
                     vertex: v,
+                    edge_id: Some(edge.edge_id),
                     parent_idx: Some(label.pool_idx),
                 });
 
@@ -245,28 +262,20 @@ impl CsppSolver for DumitrescuBolandSolver {
                     key: new_c + dist_cost[v],
                     pool_idx,
                 });
+            }
 
-                if heap.len() > stats.peak_queue_size {
-                    stats.peak_queue_size = heap.len();
-                    let est_mem = heap.capacity() * std::mem::size_of::<DbLabel>()
-                        + pool.capacity() * std::mem::size_of::<PoolNode>()
-                        + frontiers
-                            .iter()
-                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
-                            .sum::<usize>();
-                    if est_mem > stats.peak_memory_bytes {
-                        stats.peak_memory_bytes = est_mem;
-                    }
-                }
+            if heap.len() > stats.peak_queue_size {
+                stats.peak_queue_size = heap.len();
             }
         }
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 
-        if best_cost.is_finite() && !best_path.is_empty() {
+        if !best_path.is_empty() {
             CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: best_path,
+                edge_path: best_edge_path,
                 cost: best_cost,
                 weight: best_weight,
                 stats,
@@ -275,6 +284,7 @@ impl CsppSolver for DumitrescuBolandSolver {
             CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,

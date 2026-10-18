@@ -12,18 +12,18 @@ fn main() {
 
     // Path 1 (Fast but expensive): 0 -> 1 -> 4
     // Cost: 25 + 25 = 50, Weight: 2 + 2 = 4
-    graph.add_edge(0, 1, 25.0, 2.0);
-    graph.add_edge(1, 4, 25.0, 2.0);
+    assert!(graph.add_edge(0, 1, 25.0, 2.0));
+    assert!(graph.add_edge(1, 4, 25.0, 2.0));
 
     // Path 2 (Cheap but slow): 0 -> 2 -> 4
     // Cost: 10 + 10 = 20, Weight: 8 + 8 = 16
-    graph.add_edge(0, 2, 10.0, 8.0);
-    graph.add_edge(2, 4, 10.0, 8.0);
+    assert!(graph.add_edge(0, 2, 10.0, 8.0));
+    assert!(graph.add_edge(2, 4, 10.0, 8.0));
 
     // Path 3 (Balanced trade-off): 0 -> 3 -> 4
     // Cost: 15 + 15 = 30, Weight: 5 + 5 = 10
-    graph.add_edge(0, 3, 15.0, 5.0);
-    graph.add_edge(3, 4, 15.0, 5.0);
+    assert!(graph.add_edge(0, 3, 15.0, 5.0));
+    assert!(graph.add_edge(3, 4, 15.0, 5.0));
 
     let budget = 12.0;
     println!(

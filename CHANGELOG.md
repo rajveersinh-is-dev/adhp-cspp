@@ -14,5 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - High-performance Rust 2021 implementation with zero `.unwrap()` in lowering pipelines.
 - Implemented four state-of-the-art baselines: Martins (1984), Dumitrescu-Boland (2003), Carlyle-Wood (2008), and Lozano-Medaglia Pulse (2013).
 - High-resolution empirical benchmark suite across Anti-Correlated, 2D Grid, and Random ER graph families.
-- Automated differential verification suite (30/30 verified instances) and mathematical property test suite.
+- Automated differential verification suite (100/100 verified instances against 4 baseline solvers) and certified ground-truth verification against independent HiGHS 0-1 ILP oracle.
 - Complete research manuscript (`paper/main.tex` and compiled `paper/paper.pdf`).

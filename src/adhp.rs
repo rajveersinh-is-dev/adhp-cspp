@@ -1,6 +1,6 @@
 //! Adaptive Dual Hull Pruning (ADHP) Solver for the Constrained Shortest Path Problem.
 
-use crate::dijkstra::{dijkstra_backward, dijkstra_forward};
+use crate::dijkstra::{dijkstra_backward, dijkstra_forward, dijkstra_forward_target};
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -46,6 +46,7 @@ impl PartialOrd for SearchLabel {
 #[derive(Clone, Copy)]
 struct PoolNode {
     vertex: usize,
+    edge_id: Option<usize>,
     parent_idx: Option<usize>,
 }
 
@@ -67,10 +68,10 @@ impl VertexFrontier {
     #[inline(always)]
     fn is_dominated(&self, new_c: f64, new_w: f64) -> bool {
         for pt in &self.points {
-            if pt.weight <= new_w && pt.cost <= new_c {
+            if pt.weight <= new_w + 1e-9 && pt.cost <= new_c + 1e-9 {
                 return true;
             }
-            if pt.weight > new_w {
+            if pt.weight > new_w + 1e-9 {
                 break;
             }
         }
@@ -82,7 +83,7 @@ impl VertexFrontier {
     fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
         // Remove existing points with weight >= new_w and cost >= new_c
         self.points
-            .retain(|pt| !(pt.weight >= new_w && pt.cost >= new_c));
+            .retain(|pt| !(pt.weight >= new_w - 1e-9 && pt.cost >= new_c - 1e-9));
 
         // Insert maintaining sorted order by weight ascending
         let pos = self
@@ -116,6 +117,18 @@ impl Default for AdhpSolver {
 /// Conservative numerical tolerance to prevent premature pruning of near-optimal paths
 /// due to floating-point rounding errors during discrete Legendre-Fenchel evaluation.
 pub const PRUNE_EPSILON: f64 = 1e-9;
+/// Numerical feasibility tolerance for resource constraint checks.
+pub const FEASIBILITY_EPSILON: f64 = 1e-9;
+
+#[inline(always)]
+fn is_weight_infeasible(w: f64, budget: f64) -> bool {
+    w > budget + budget.abs().max(1.0) * FEASIBILITY_EPSILON
+}
+
+#[inline(always)]
+fn is_weight_feasible(w: f64, budget: f64) -> bool {
+    w <= budget + budget.abs().max(1.0) * FEASIBILITY_EPSILON
+}
 
 impl AdhpSolver {
     /// Creates a new ADHP solver with the specified maximum number of facets $K$.
@@ -139,18 +152,23 @@ impl AdhpSolver {
         max_lb
     }
 
-    /// Reconstructs the vertex path from the label pool.
-    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> Vec<usize> {
+    /// Reconstructs the vertex path and edge path from the label pool.
+    fn reconstruct_path(pool: &[PoolNode], mut curr_idx: usize) -> (Vec<usize>, Vec<usize>) {
         let mut path = Vec::new();
+        let mut edge_path = Vec::new();
         while let Some(node) = pool.get(curr_idx) {
             path.push(node.vertex);
+            if let Some(e_id) = node.edge_id {
+                edge_path.push(e_id);
+            }
             match node.parent_idx {
                 Some(p_idx) => curr_idx = p_idx,
                 None => break,
             }
         }
         path.reverse();
-        path
+        edge_path.reverse();
+        (path, edge_path)
     }
 }
 
@@ -168,11 +186,13 @@ impl CsppSolver for AdhpSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        if s >= n || t >= n {
+        // Validate inputs: reject non-finite or negative budget, or invalid source/target.
+        if !budget.is_finite() || budget < 0.0 || s >= n || t >= n {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
@@ -184,6 +204,7 @@ impl CsppSolver for AdhpSolver {
             return CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: vec![s],
+                edge_path: Vec::new(),
                 cost: 0.0,
                 weight: 0.0,
                 stats,
@@ -194,27 +215,30 @@ impl CsppSolver for AdhpSolver {
 
         // Step 1: Solve extreme points on (s, t)
         let tree_c = dijkstra_forward(&instance.graph, s, 0.0, false);
-        let (path_c, cost_c, weight_c) = match tree_c.reconstruct_path_with_metrics(s, t) {
-            Some(res) => res,
-            None => {
-                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-                return CsppSolution {
-                    status: SolutionStatus::Infeasible,
-                    path: Vec::new(),
-                    cost: f64::INFINITY,
-                    weight: f64::INFINITY,
-                    stats,
-                };
-            }
-        };
+        let (path_c, edge_path_c, cost_c, weight_c) =
+            match tree_c.reconstruct_path_with_metrics(s, t) {
+                Some(res) => res,
+                None => {
+                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    return CsppSolution {
+                        status: SolutionStatus::Infeasible,
+                        path: Vec::new(),
+                        edge_path: Vec::new(),
+                        cost: f64::INFINITY,
+                        weight: f64::INFINITY,
+                        stats,
+                    };
+                }
+            };
 
         // If unconstrained minimum cost path is feasible, it is globally optimal!
-        if weight_c <= budget {
+        if is_weight_feasible(weight_c, budget) {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: path_c,
+                edge_path: edge_path_c,
                 cost: cost_c,
                 weight: weight_c,
                 stats,
@@ -223,37 +247,41 @@ impl CsppSolver for AdhpSolver {
 
         // Check minimum weight path
         let tree_w = dijkstra_forward(&instance.graph, s, 0.0, true);
-        if tree_w.distances[t] > budget {
+        if is_weight_infeasible(tree_w.distances[t], budget) {
             // Even minimum weight path exceeds budget: certified infeasible!
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,
             };
         }
 
-        let (path_w, cost_w, weight_w) = match tree_w.reconstruct_path_with_metrics(s, t) {
-            Some(res) => res,
-            None => {
-                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-                return CsppSolution {
-                    status: SolutionStatus::Infeasible,
-                    path: Vec::new(),
-                    cost: f64::INFINITY,
-                    weight: f64::INFINITY,
-                    stats,
-                };
-            }
-        };
+        let (path_w, edge_path_w, cost_w, weight_w) =
+            match tree_w.reconstruct_path_with_metrics(s, t) {
+                Some(res) => res,
+                None => {
+                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    return CsppSolution {
+                        status: SolutionStatus::Infeasible,
+                        path: Vec::new(),
+                        edge_path: Vec::new(),
+                        cost: f64::INFINITY,
+                        weight: f64::INFINITY,
+                        stats,
+                    };
+                }
+            };
 
         // Initialize best upper bound with feasible weight-minimizing path
         let mut best_cost = cost_w;
         let mut best_weight = weight_w;
         let mut best_path = path_w.clone();
+        let mut best_edge_path = edge_path_w;
 
         // Step 2: Adaptive Dual Multiplier Selection
         let mut lambdas = Vec::with_capacity(self.max_facets);
@@ -281,12 +309,16 @@ impl CsppSolver for AdhpSolver {
 
             lambdas.push(lambda_mid);
 
-            let tree_mid = dijkstra_forward(&instance.graph, s, lambda_mid, false);
-            if let Some((p_mid, c_mid, w_mid)) = tree_mid.reconstruct_path_with_metrics(s, t) {
-                if w_mid <= budget && c_mid < best_cost {
+            // Use early-exit target stopping Dijkstra during bisection
+            let tree_mid = dijkstra_forward_target(&instance.graph, s, t, lambda_mid, false);
+            if let Some((p_mid, ep_mid, c_mid, w_mid)) =
+                tree_mid.reconstruct_path_with_metrics(s, t)
+            {
+                if is_weight_feasible(w_mid, budget) && c_mid < best_cost {
                     best_cost = c_mid;
                     best_weight = w_mid;
                     best_path = p_mid.clone();
+                    best_edge_path = ep_mid;
                 }
 
                 if w_l - w_mid > 1e-6 && c_mid - c_l > 1e-6 {
@@ -300,24 +332,25 @@ impl CsppSolver for AdhpSolver {
 
         lambdas.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
 
-        // Step 3: Compute backward shortest path trees from target t
+        // Step 3: Reverse Shortest Path Trees Preprocessing
         let mut dist_dual = Vec::with_capacity(lambdas.len());
         for &lambda in &lambdas {
-            let d_back = dijkstra_backward(&instance.graph, t, lambda, false);
-            dist_dual.push(d_back);
+            dist_dual.push(dijkstra_backward(&instance.graph, t, lambda, false));
         }
 
+        // Distance in pure weight to t
         let dist_weight = dijkstra_backward(&instance.graph, t, 0.0, true);
 
         stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
 
-        // Step 4: Priority Search with Adaptive Dual Hull Pruning
-        let mut heap = BinaryHeap::new();
+        // Step 4: Priority Search
+        let mut heap: BinaryHeap<SearchLabel> = BinaryHeap::new();
+        let mut frontiers: Vec<VertexFrontier> = vec![VertexFrontier::default(); n];
         let mut pool: Vec<PoolNode> = Vec::with_capacity(1024);
-        let mut frontiers = vec![VertexFrontier::default(); n];
 
         pool.push(PoolNode {
             vertex: s,
+            edge_id: None,
             parent_idx: None,
         });
 
@@ -341,10 +374,12 @@ impl CsppSolver for AdhpSolver {
             let w_u = label.weight;
 
             if u == t {
-                if c_u < best_cost {
+                if is_weight_feasible(w_u, budget) && c_u < best_cost {
                     best_cost = c_u;
                     best_weight = w_u;
-                    best_path = Self::reconstruct_path(&pool, label.pool_idx);
+                    let (p, ep) = Self::reconstruct_path(&pool, label.pool_idx);
+                    best_path = p;
+                    best_edge_path = ep;
                 }
                 continue;
             }
@@ -363,7 +398,7 @@ impl CsppSolver for AdhpSolver {
                 let new_w = w_u + edge.weight;
 
                 // Filter 1: Resource feasibility (Weight infeasibility bounding)
-                if new_w + dist_weight[v] > budget {
+                if is_weight_infeasible(new_w + dist_weight[v], budget) {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
@@ -388,6 +423,7 @@ impl CsppSolver for AdhpSolver {
                 let pool_idx = pool.len();
                 pool.push(PoolNode {
                     vertex: v,
+                    edge_id: Some(edge.edge_id),
                     parent_idx: Some(label.pool_idx),
                 });
 
@@ -398,28 +434,20 @@ impl CsppSolver for AdhpSolver {
                     key: new_c + lb_v,
                     pool_idx,
                 });
+            }
 
-                if heap.len() > stats.peak_queue_size {
-                    stats.peak_queue_size = heap.len();
-                    let est_mem = heap.capacity() * std::mem::size_of::<SearchLabel>()
-                        + pool.capacity() * std::mem::size_of::<PoolNode>()
-                        + frontiers
-                            .iter()
-                            .map(|f| f.points.capacity() * std::mem::size_of::<ParetoPoint>())
-                            .sum::<usize>();
-                    if est_mem > stats.peak_memory_bytes {
-                        stats.peak_memory_bytes = est_mem;
-                    }
-                }
+            if heap.len() > stats.peak_queue_size {
+                stats.peak_queue_size = heap.len();
             }
         }
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 
-        if best_cost.is_finite() && !best_path.is_empty() {
+        if !best_path.is_empty() {
             CsppSolution {
                 status: SolutionStatus::Optimal,
                 path: best_path,
+                edge_path: best_edge_path,
                 cost: best_cost,
                 weight: best_weight,
                 stats,
@@ -428,6 +456,7 @@ impl CsppSolver for AdhpSolver {
             CsppSolution {
                 status: SolutionStatus::Infeasible,
                 path: Vec::new(),
+                edge_path: Vec::new(),
                 cost: f64::INFINITY,
                 weight: f64::INFINITY,
                 stats,

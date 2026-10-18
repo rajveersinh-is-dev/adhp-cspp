@@ -27,5 +27,17 @@ jobs:
       - name: Run unit & differential tests
         run: cargo test --verbose
 
-      - name: Run certified differential oracle
+      - name: Run differential baseline verification (100 instances)
         run: cargo run --bin verify_oracle --release
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python verification dependencies
+        run: pip install numpy scipy
+
+      - name: Run independent HiGHS ILP oracle verification
+        run: python scripts/verify_against_ilp.py
+

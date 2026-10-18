@@ -30,6 +30,32 @@ struct VerificationRecord {
     pruning_ratio_percent: f64,
 }
 
+#[derive(Serialize, Deserialize)]
+struct VerificationEdge {
+    from: usize,
+    to: usize,
+    cost: f64,
+    weight: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct FullVerificationInstance {
+    instance_id: String,
+    family: String,
+    num_nodes: usize,
+    source: usize,
+    target: usize,
+    budget: f64,
+    edges: Vec<VerificationEdge>,
+    adhp_status: String,
+    adhp_cost: f64,
+    adhp_weight: f64,
+    adhp_edge_path: Vec<usize>,
+    martins_status: String,
+    martins_cost: f64,
+    all_solvers_agreed: bool,
+}
+
 fn main() {
     println!("=== ADHP-CSPP: Running Differential Testing Against 4 Baselines (100 Instances) ===");
 
@@ -40,6 +66,7 @@ fn main() {
     let carlyle = CarlyleWoodSolver::new();
 
     let mut records = Vec::new();
+    let mut full_instances = Vec::new();
     let mut total_verified = 0;
     let mut total_agreed = 0;
 
@@ -79,12 +106,19 @@ fn main() {
             (
                 format!("anticorr_dense_n{}_s{}", 20 + (seed % 4) * 8, seed),
                 "Anti-Correlated Dense".to_string(),
-                generate_anticorrelated_instance(
-                    20 + (seed % 4) * 8,
-                    0.40,
-                    0.50,
-                    (seed as u64) * 500 + 77,
-                ),
+                {
+                    let mut inst = generate_anticorrelated_instance(
+                        20 + (seed % 4) * 8,
+                        0.40,
+                        0.50,
+                        (seed as u64) * 500 + 77,
+                    );
+                    if seed >= 24 {
+                        // Guarantee strict infeasibility (budget far below min weight path)
+                        inst.budget = 1.0;
+                    }
+                    inst
+                },
             ),
         ];
 
@@ -149,8 +183,8 @@ fn main() {
             };
 
             records.push(VerificationRecord {
-                instance_id: id,
-                family,
+                instance_id: id.clone(),
+                family: family.clone(),
                 num_nodes: inst.graph.num_nodes(),
                 num_edges: inst.graph.num_edges(),
                 budget: inst.budget,
@@ -161,6 +195,35 @@ fn main() {
                 adhp_labels_generated: sol_adhp.stats.labels_generated,
                 martins_labels_generated: sol_martins.stats.labels_generated,
                 pruning_ratio_percent: pruning_ratio,
+            });
+
+            let edges_vec: Vec<VerificationEdge> = inst
+                .graph
+                .edges()
+                .iter()
+                .map(|e| VerificationEdge {
+                    from: e.from,
+                    to: e.to,
+                    cost: e.cost,
+                    weight: e.weight,
+                })
+                .collect();
+
+            full_instances.push(FullVerificationInstance {
+                instance_id: id,
+                family,
+                num_nodes: inst.graph.num_nodes(),
+                source: inst.source,
+                target: inst.target,
+                budget: inst.budget,
+                edges: edges_vec,
+                adhp_status: format!("{:?}", sol_adhp.status),
+                adhp_cost: sol_adhp.cost,
+                adhp_weight: sol_adhp.weight,
+                adhp_edge_path: sol_adhp.edge_path,
+                martins_status: format!("{:?}", sol_martins.status),
+                martins_cost: sol_martins.cost,
+                all_solvers_agreed: agreed,
             });
         }
     }
@@ -181,5 +244,14 @@ fn main() {
         .expect("Failed to write verification file");
     file.write_all(json_data.as_bytes())
         .expect("Failed to write bytes");
-    println!("Saved results to results/raw/verification_results.json");
+    println!("Saved summary to results/raw/verification_results.json");
+
+    let full_json_data = serde_json::to_string_pretty(&full_instances)
+        .expect("Failed to serialize full verification instances");
+    let mut full_file = File::create("results/raw/verification_instances.json")
+        .expect("Failed to write full verification instances file");
+    full_file
+        .write_all(full_json_data.as_bytes())
+        .expect("Failed to write full bytes");
+    println!("Saved full instances to results/raw/verification_instances.json");
 }

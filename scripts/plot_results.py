@@ -104,6 +104,54 @@ if not abl_df.empty:
     plt.close()
 
 # -------------------------------------------------------------
+# Figure 4: Runtime Scaling on Random Erdős–Rényi Graphs
+# -------------------------------------------------------------
+plt.figure(figsize=(8, 5), dpi=300)
+er_df = df[df['benchmark_category'] == 'Random ER Scaling']
+
+for solver, group in er_df.groupby('solver_name'):
+    group = group.sort_values('nodes')
+    color = colors.get(solver, '#333333')
+    plt.plot(group['nodes'], group['mean_runtime_micros'], marker='^', linewidth=2, label=solver, color=color)
+
+plt.xlabel('Number of Vertices ($n$)')
+plt.ylabel('Execution Time (µs)')
+plt.title('Runtime Scaling on Random Erdős–Rényi Graphs ($p=0.22$)')
+plt.legend(frameon=True)
+plt.tight_layout()
+plt.savefig('results/figures/fig4_runtime_random_er.png')
+plt.close()
+
+# -------------------------------------------------------------
+# Figure 5: Budget Sensitivity
+# -------------------------------------------------------------
+plt.figure(figsize=(8, 5), dpi=300)
+bs_df = df[df['benchmark_category'] == 'Budget Sensitivity'].copy()
+
+alpha_map = {
+    'budget_alpha_0.10': 0.10,
+    'budget_alpha_0.25': 0.25,
+    'budget_alpha_0.50': 0.50,
+    'budget_alpha_0.75': 0.75,
+    'budget_alpha_0.90': 0.90,
+}
+bs_df['alpha'] = bs_df['instance_name'].map(alpha_map)
+
+for solver, group in bs_df.groupby('solver_name'):
+    group = group.sort_values('alpha')
+    color = colors.get(solver, '#333333')
+    plt.plot(group['alpha'], group['mean_runtime_micros'], marker='d', linewidth=2, label=solver, color=color)
+
+plt.xlabel('Budget Tightness Factor $\\alpha$ (0.10 = Tight, 0.90 = Loose)')
+plt.ylabel('Execution Time (µs)')
+plt.title('Budget Sensitivity Analysis ($n=50$ Anti-Correlated Graph)')
+plt.legend(frameon=True)
+plt.tight_layout()
+plt.savefig('results/figures/fig5_budget_sensitivity.png')
+plt.close()
+
+
+# -------------------------------------------------------------
 # Processed Summary Table
 # -------------------------------------------------------------
 summary_table = []

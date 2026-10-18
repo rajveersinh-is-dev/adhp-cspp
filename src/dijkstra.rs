@@ -38,13 +38,15 @@ pub struct ShortestPathTree {
     pub predecessors: Vec<Option<usize>>,
     /// Predecessor edge (cost, weight) metrics.
     pub predecessor_edges: Vec<Option<(f64, f64)>>,
+    /// Predecessor edge IDs.
+    pub predecessor_edge_ids: Vec<Option<usize>>,
 }
 
 impl ShortestPathTree {
     /// Reconstructs the shortest path from the source to target vertex `t`.
     pub fn reconstruct_path(&self, source: usize, target: usize) -> Option<Vec<usize>> {
         self.reconstruct_path_with_metrics(source, target)
-            .map(|(p, _, _)| p)
+            .map(|(p, _, _, _)| p)
     }
 
     /// Reconstructs the shortest path along with exact cost and resource weight.
@@ -52,15 +54,16 @@ impl ShortestPathTree {
         &self,
         source: usize,
         target: usize,
-    ) -> Option<(Vec<usize>, f64, f64)> {
+    ) -> Option<(Vec<usize>, Vec<usize>, f64, f64)> {
         if target >= self.distances.len() || self.distances[target].is_infinite() {
             return None;
         }
         if source == target {
-            return Some((vec![source], 0.0, 0.0));
+            return Some((vec![source], Vec::new(), 0.0, 0.0));
         }
 
         let mut path = Vec::new();
+        let mut edge_path = Vec::new();
         let mut curr = target;
         path.push(curr);
         let mut total_cost = 0.0;
@@ -69,6 +72,9 @@ impl ShortestPathTree {
         while curr != source {
             let pred = self.predecessors[curr]?;
             let (c, w) = self.predecessor_edges[curr]?;
+            if let Some(e_id) = self.predecessor_edge_ids[curr] {
+                edge_path.push(e_id);
+            }
             total_cost += c;
             total_weight += w;
             curr = pred;
@@ -76,7 +82,8 @@ impl ShortestPathTree {
         }
 
         path.reverse();
-        Some((path, total_cost, total_weight))
+        edge_path.reverse();
+        Some((path, edge_path, total_cost, total_weight))
     }
 }
 
@@ -88,10 +95,33 @@ pub fn dijkstra_forward(
     lambda: f64,
     use_weight_only: bool,
 ) -> ShortestPathTree {
+    dijkstra_forward_internal(graph, source, None, lambda, use_weight_only)
+}
+
+/// Computes the shortest path from `source` to `target` with early exit as soon as
+/// the target vertex is popped from the priority queue.
+pub fn dijkstra_forward_target(
+    graph: &DirectedGraph,
+    source: usize,
+    target: usize,
+    lambda: f64,
+    use_weight_only: bool,
+) -> ShortestPathTree {
+    dijkstra_forward_internal(graph, source, Some(target), lambda, use_weight_only)
+}
+
+fn dijkstra_forward_internal(
+    graph: &DirectedGraph,
+    source: usize,
+    target_to_stop: Option<usize>,
+    lambda: f64,
+    use_weight_only: bool,
+) -> ShortestPathTree {
     let n = graph.num_nodes();
     let mut distances = vec![f64::INFINITY; n];
     let mut predecessors = vec![None; n];
     let mut predecessor_edges = vec![None; n];
+    let mut predecessor_edge_ids = vec![None; n];
     let mut visited = vec![false; n];
 
     if source >= n {
@@ -99,6 +129,7 @@ pub fn dijkstra_forward(
             distances,
             predecessors,
             predecessor_edges,
+            predecessor_edge_ids,
         };
     }
 
@@ -114,6 +145,12 @@ pub fn dijkstra_forward(
             continue;
         }
         visited[u] = true;
+
+        if let Some(target) = target_to_stop {
+            if u == target {
+                break;
+            }
+        }
 
         if d > distances[u] {
             continue;
@@ -132,6 +169,7 @@ pub fn dijkstra_forward(
                 distances[v] = new_dist;
                 predecessors[v] = Some(u);
                 predecessor_edges[v] = Some((edge.cost, edge.weight));
+                predecessor_edge_ids[v] = Some(edge.edge_id);
                 heap.push(HeapItem {
                     vertex: v,
                     dist: new_dist,
@@ -144,6 +182,7 @@ pub fn dijkstra_forward(
         distances,
         predecessors,
         predecessor_edges,
+        predecessor_edge_ids,
     }
 }
 

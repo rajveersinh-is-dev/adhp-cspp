@@ -10,8 +10,8 @@
     "optimal_weight": 128.18432650227416,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 11,
-    "martins_labels_generated": 78,
-    "pruning_ratio_percent": 85.8974358974359
+    "martins_labels_generated": 82,
+    "pruning_ratio_percent": 86.58536585365853
   },
   {
     "instance_id": "grid_4x4_s1",
@@ -160,12 +160,12 @@
     "num_edges": 805,
     "budget": 100.61406216106894,
     "status": "Optimal",
-    "optimal_cost": 197.8937028502483,
-    "optimal_weight": 95.47687722169734,
+    "optimal_cost": 191.26780944590217,
+    "optimal_weight": 98.3597366082549,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 286,
-    "martins_labels_generated": 2059,
-    "pruning_ratio_percent": 86.10976202039825
+    "adhp_labels_generated": 185,
+    "martins_labels_generated": 2055,
+    "pruning_ratio_percent": 90.99756690997567
   },
   {
     "instance_id": "anticorr_n35_s4",
@@ -178,8 +178,8 @@
     "optimal_weight": 70.54389150318929,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 35,
-    "martins_labels_generated": 275,
-    "pruning_ratio_percent": 87.27272727272727
+    "martins_labels_generated": 294,
+    "pruning_ratio_percent": 88.09523809523809
   },
   {
     "instance_id": "grid_3x3_s4",
@@ -228,14 +228,14 @@
     "family": "Anti-Correlated",
     "num_nodes": 15,
     "num_edges": 66,
-    "budget": 108.40759135765224,
+    "budget": 106.17595325580554,
     "status": "Optimal",
     "optimal_cost": 136.78498327550244,
-    "optimal_weight": 65.25303280938945,
+    "optimal_weight": 64.45667191097874,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 10,
-    "martins_labels_generated": 34,
-    "pruning_ratio_percent": 70.58823529411765
+    "martins_labels_generated": 28,
+    "pruning_ratio_percent": 64.28571428571429
   },
   {
     "instance_id": "grid_4x4_s5",
@@ -276,8 +276,8 @@
     "optimal_weight": 131.89349523947345,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 26,
-    "martins_labels_generated": 382,
-    "pruning_ratio_percent": 93.19371727748691
+    "martins_labels_generated": 370,
+    "pruning_ratio_percent": 92.97297297297298
   },
   {
     "instance_id": "anticorr_n20_s6",
@@ -332,8 +332,8 @@
     "optimal_weight": 99.97689385865955,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 69,
-    "martins_labels_generated": 265,
-    "pruning_ratio_percent": 73.9622641509434
+    "martins_labels_generated": 280,
+    "pruning_ratio_percent": 75.35714285714286
   },
   {
     "instance_id": "anticorr_n25_s7",
@@ -402,8 +402,8 @@
     "optimal_weight": 163.94232304025695,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 92,
-    "martins_labels_generated": 401,
-    "pruning_ratio_percent": 77.0573566084788
+    "martins_labels_generated": 408,
+    "pruning_ratio_percent": 77.45098039215686
   },
   {
     "instance_id": "grid_3x3_s8",
@@ -455,7 +455,7 @@
     "budget": 71.83209966374704,
     "status": "Optimal",
     "optimal_cost": 239.0586716399,
-    "optimal_weight": 65.77963060731284,
+    "optimal_weight": 61.323809525914584,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 36,
     "martins_labels_generated": 319,
@@ -508,10 +508,10 @@
     "family": "Anti-Correlated",
     "num_nodes": 15,
     "num_edges": 62,
-    "budget": 116.47196021586416,
+    "budget": 107.57402259406189,
     "status": "Optimal",
     "optimal_cost": 290.8670342640286,
-    "optimal_weight": 107.7061514181448,
+    "optimal_weight": 96.58372939089199,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 16,
     "martins_labels_generated": 46,
@@ -564,14 +564,14 @@
     "family": "Anti-Correlated",
     "num_nodes": 20,
     "num_edges": 97,
-    "budget": 82.62246974952892,
+    "budget": 80.62633117569965,
     "status": "Optimal",
     "optimal_cost": 171.12636357594363,
     "optimal_weight": 25.64947481537186,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 9,
-    "martins_labels_generated": 58,
-    "pruning_ratio_percent": 84.48275862068965
+    "martins_labels_generated": 54,
+    "pruning_ratio_percent": 83.33333333333334
   },
   {
     "instance_id": "grid_6x6_s11",
@@ -620,10 +620,10 @@
     "family": "Anti-Correlated",
     "num_nodes": 25,
     "num_edges": 165,
-    "budget": 165.6311246156332,
+    "budget": 161.9116037715806,
     "status": "Optimal",
     "optimal_cost": 104.76671943274377,
-    "optimal_weight": 94.31148768796402,
+    "optimal_weight": 92.18801111387369,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 16,
     "martins_labels_generated": 171,
@@ -668,7 +668,7 @@
     "optimal_weight": 25.5349331455717,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 0,
-    "martins_labels_generated": 10,
+    "martins_labels_generated": 21,
     "pruning_ratio_percent": 100.0
   },
   {
@@ -676,14 +676,14 @@
     "family": "Anti-Correlated",
     "num_nodes": 30,
     "num_edges": 235,
-    "budget": 49.74682446256135,
+    "budget": 46.76812265241277,
     "status": "Optimal",
-    "optimal_cost": 53.47205491888706,
-    "optimal_weight": 48.154254447699586,
+    "optimal_cost": 259.8937385916702,
+    "optimal_weight": 41.16812265241277,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 0,
-    "martins_labels_generated": 12,
-    "pruning_ratio_percent": 100.0
+    "adhp_labels_generated": 27,
+    "martins_labels_generated": 75,
+    "pruning_ratio_percent": 64.0
   },
   {
     "instance_id": "grid_4x4_s13",
@@ -718,14 +718,14 @@
     "family": "Anti-Correlated Dense",
     "num_nodes": 28,
     "num_edges": 311,
-    "budget": 100.02048541040264,
+    "budget": 99.68345947860251,
     "status": "Optimal",
     "optimal_cost": 305.5471606036359,
     "optimal_weight": 92.28217637926824,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 93,
-    "martins_labels_generated": 682,
-    "pruning_ratio_percent": 86.36363636363636
+    "martins_labels_generated": 719,
+    "pruning_ratio_percent": 87.0653685674548
   },
   {
     "instance_id": "anticorr_n35_s14",
@@ -735,7 +735,7 @@
     "budget": 244.79889786317938,
     "status": "Optimal",
     "optimal_cost": 78.08094721667088,
-    "optimal_weight": 223.66041468985722,
+    "optimal_weight": 220.77981260329983,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 45,
     "martins_labels_generated": 342,
@@ -788,7 +788,7 @@
     "family": "Anti-Correlated",
     "num_nodes": 15,
     "num_edges": 66,
-    "budget": 107.91364570334841,
+    "budget": 107.07538939728506,
     "status": "Optimal",
     "optimal_cost": 105.60462309721844,
     "optimal_weight": 95.92618193219124,
@@ -844,14 +844,14 @@
     "family": "Anti-Correlated",
     "num_nodes": 20,
     "num_edges": 100,
-    "budget": 205.20039242289283,
+    "budget": 205.01388263777034,
     "status": "Optimal",
     "optimal_cost": 185.28591322480855,
     "optimal_weight": 110.42859749864283,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 30,
-    "martins_labels_generated": 284,
-    "pruning_ratio_percent": 89.43661971830986
+    "martins_labels_generated": 288,
+    "pruning_ratio_percent": 89.58333333333334
   },
   {
     "instance_id": "grid_3x3_s16",
@@ -892,8 +892,8 @@
     "optimal_weight": 188.65063471972675,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 45,
-    "martins_labels_generated": 212,
-    "pruning_ratio_percent": 78.77358490566037
+    "martins_labels_generated": 225,
+    "pruning_ratio_percent": 80.0
   },
   {
     "instance_id": "anticorr_n25_s17",
@@ -903,7 +903,7 @@
     "budget": 101.51528296372302,
     "status": "Optimal",
     "optimal_cost": 110.16465109559144,
-    "optimal_weight": 86.82679922837855,
+    "optimal_weight": 85.0321145173227,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 12,
     "martins_labels_generated": 83,
@@ -956,7 +956,7 @@
     "family": "Anti-Correlated",
     "num_nodes": 30,
     "num_edges": 232,
-    "budget": 165.0078816427055,
+    "budget": 162.09015257585173,
     "status": "Optimal",
     "optimal_cost": 109.51142398043044,
     "optimal_weight": 87.24923578408934,
@@ -1004,15 +1004,15 @@
     "optimal_weight": 134.68526038091898,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 52,
-    "martins_labels_generated": 321,
-    "pruning_ratio_percent": 83.8006230529595
+    "martins_labels_generated": 334,
+    "pruning_ratio_percent": 84.4311377245509
   },
   {
     "instance_id": "anticorr_n35_s19",
     "family": "Anti-Correlated",
     "num_nodes": 35,
     "num_edges": 315,
-    "budget": 273.2291024974129,
+    "budget": 272.30916499935705,
     "status": "Optimal",
     "optimal_cost": 41.577640615701895,
     "optimal_weight": 154.13686043476886,
@@ -1060,22 +1060,22 @@
     "optimal_weight": 117.57847948453839,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 33,
-    "martins_labels_generated": 741,
-    "pruning_ratio_percent": 95.54655870445345
+    "martins_labels_generated": 760,
+    "pruning_ratio_percent": 95.65789473684211
   },
   {
     "instance_id": "anticorr_n15_s20",
     "family": "Anti-Correlated",
     "num_nodes": 15,
     "num_edges": 61,
-    "budget": 111.36747969270095,
+    "budget": 109.19498157861466,
     "status": "Optimal",
     "optimal_cost": 198.42326087167504,
     "optimal_weight": 103.44777929341606,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 13,
-    "martins_labels_generated": 49,
-    "pruning_ratio_percent": 73.46938775510205
+    "martins_labels_generated": 45,
+    "pruning_ratio_percent": 71.11111111111111
   },
   {
     "instance_id": "grid_3x3_s20",
@@ -1116,8 +1116,8 @@
     "optimal_weight": 129.2521692099038,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 17,
-    "martins_labels_generated": 76,
-    "pruning_ratio_percent": 77.63157894736842
+    "martins_labels_generated": 85,
+    "pruning_ratio_percent": 80.0
   },
   {
     "instance_id": "anticorr_n20_s21",
@@ -1236,14 +1236,14 @@
     "family": "Anti-Correlated",
     "num_nodes": 30,
     "num_edges": 257,
-    "budget": 108.25395453451773,
+    "budget": 106.28003096520187,
     "status": "Optimal",
     "optimal_cost": 115.30021228926444,
     "optimal_weight": 80.59711681448172,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 43,
-    "martins_labels_generated": 199,
-    "pruning_ratio_percent": 78.39195979899498
+    "martins_labels_generated": 193,
+    "pruning_ratio_percent": 77.720207253886
   },
   {
     "instance_id": "grid_6x6_s23",
@@ -1334,13 +1334,13 @@
     "family": "Anti-Correlated Dense",
     "num_nodes": 20,
     "num_edges": 151,
-    "budget": 92.45888973704919,
-    "status": "Optimal",
-    "optimal_cost": 109.4635141123909,
-    "optimal_weight": 88.3660775256115,
+    "budget": 1.0,
+    "status": "Infeasible",
+    "optimal_cost": null,
+    "optimal_weight": null,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 0,
-    "martins_labels_generated": 65,
+    "martins_labels_generated": 9,
     "pruning_ratio_percent": 100.0
   },
   {
@@ -1348,10 +1348,10 @@
     "family": "Anti-Correlated",
     "num_nodes": 15,
     "num_edges": 62,
-    "budget": 119.71047170903944,
+    "budget": 117.8076772401177,
     "status": "Optimal",
     "optimal_cost": 291.0349016459114,
-    "optimal_weight": 116.34781075792908,
+    "optimal_weight": 114.36556730485685,
     "all_solvers_agreed": true,
     "adhp_labels_generated": 18,
     "martins_labels_generated": 86,
@@ -1390,13 +1390,13 @@
     "family": "Anti-Correlated Dense",
     "num_nodes": 28,
     "num_edges": 306,
-    "budget": 217.9579866187728,
-    "status": "Optimal",
-    "optimal_cost": 76.60802725790197,
-    "optimal_weight": 216.59489597371214,
+    "budget": 1.0,
+    "status": "Infeasible",
+    "optimal_cost": null,
+    "optimal_weight": null,
     "all_solvers_agreed": true,
-    "adhp_labels_generated": 45,
-    "martins_labels_generated": 292,
-    "pruning_ratio_percent": 84.58904109589042
+    "adhp_labels_generated": 0,
+    "martins_labels_generated": 7,
+    "pruning_ratio_percent": 100.0
   }
 ]

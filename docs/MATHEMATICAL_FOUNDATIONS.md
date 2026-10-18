@@ -137,38 +137,81 @@ Let $P^* = (s = v_0, v_1, \dots, v_p = t)$ be an optimal constrained $(s, t)$-pa
 Consider any prefix $P_{\text{pref}} = (v_0, \dots, v_i)$ with cost $c_i$ and weight $w_i$, and corresponding suffix $P_{\text{suff}} = (v_i, \dots, v_p)$ with cost $c_{\text{suff}}$ and weight $w_{\text{suff}}$.
 - *Filter 1 (Resource feasibility)*: $w_i + d_w(v_i, t) \le w_i + w_{\text{suff}} = w(P^*) \le W$. Hence, $P_{\text{pref}}$ is never pruned by Filter 1.
 - *Filter 2 (Dual hull pruning)*: By Theorem 1, $\mathcal{L}_{v_i}^\Lambda(W - w_i) \le c_{\text{suff}}$.
-  Therefore, $c_i + \mathcal{L}_{v_i}^\Lambda(W - w_i) \le c_i + c_{\text{suff}} = c(P^*) \le C_{UB}$.
-  Because pruning only occurs when $c_i + \mathcal{L}_{v_i}^\Lambda(W - w_i) > C_{UB} + \epsilon_{\text{prune}}$, and $c(P^*) \le C_{UB} < C_{UB} + \epsilon_{\text{prune}}$, the optimal path prefix is never pruned by Filter 2.
+#### Theorem 4 (Exact Global Optimality, Search Exhaustiveness, and Finite Termination)
+Let $G = (V, E)$ be a directed multigraph with $c(e) \ge 0, w(e) \ge 0$. Let $W \ge 0$ be the resource budget. With relative pruning tolerance $\epsilon_{\text{prune}} = 10^{-9}$ and relative feasibility tolerance $\epsilon_{\text{feas}} = 10^{-9}$, ADHP terminates in finite time and returns an optimal constrained shortest path $P^*$ if one exists, or certifies infeasibility.
 
-**Step 2: Correctness of Local Pareto Dominance.**
-At vertex $v_i$, suppose label $\ell_1 = (c_1, w_1)$ weakly dominates label $\ell_2 = (c_2, w_2)$, meaning $c_1 \le c_2$ and $w_1 \le w_2$.
-For any completion suffix $Q \in \mathcal{P}_{v_i, t}$, the path completed from $\ell_1$ has cost $c_1 + c(Q) \le c_2 + c(Q)$ and weight $w_1 + w(Q) \le w_2 + w(Q)$.
-If the completion from $\ell_2$ is feasible ($w_2 + w(Q) \le W$), then the completion from $\ell_1$ is also feasible ($w_1 + w(Q) \le W$) and has cost at least as low. Thus, discarding $\ell_2$ cannot eliminate the optimal path value.
+---
 
-**Step 3: Floating-Point Numerical Robustness.**
-In floating-point arithmetic ($f64$), let $\text{fl}(\mathcal{L}_u^\Lambda)$ denote the computed lower bound. Rounding errors during $d_{\lambda_k} - \lambda_k \Delta w$ are bounded by $\delta_{\text{round}} \le 2 n \epsilon_{\text{mach}} \cdot \max(c_{\max}, \lambda_{\max} w_{\max}) \ll 10^{-12}$.
-Because the pruning condition requires:
-$$\text{fl}(c_i) + \text{fl}(\mathcal{L}_u^\Lambda) > C_{UB} + \epsilon_{\text{prune}}$$
-with $\epsilon_{\text{prune}} = 10^{-9} \gg \delta_{\text{round}}$, rounding errors cannot push an optimal path's computed bound above $C_{UB} + \epsilon_{\text{prune}}$.
+##### Complete Mathematical Proof
 
-**Step 4: Finite Termination.**
-Because $G$ is finite, the number of vertices $n$ and edges $m$ are finite.
-- *Positive cycles*: Every edge has $c_e \ge 0, w_e \ge 0$. Any cycle $C$ with $c(C) + w(C) > 0$ strictly increases cost or weight. Because labels with $w > W$ are pruned by Filter 1, and labels with $c \ge C_{UB} + \epsilon_{\text{prune}}$ are pruned by Filter 2, the number of distinct non-dominated labels with $w \le W$ and $c \le C_{UB}$ formed by positive cycles is strictly finite.
-- *Zero-cost, zero-weight cycles*: Suppose $G$ contains a directed cycle $C$ such that $\sum_{e \in C} c_e = 0$ and $\sum_{e \in C} w_e = 0$.
-  Traversing $C$ from any vertex $v$ returns to $v$ with accumulated cost $c' = c_v + 0 = c_v$ and weight $w' = w_v + 0 = w_v$.
-  Upon arrival at $v$, the vertex frontier `frontiers[v]` already contains the prior label $(c_v, w_v)$.
-  The weak dominance test `frontiers[v].is_dominated(c', w')` checks whether $c_v \le c' \land w_v \le w'$. Because $c_v \le c_v$ and $w_v \le w_v$, the returned label is recognized as weakly dominated and pruned immediately (Filter 3).
-  Hence, zero-cost, zero-weight cycles cannot be traversed more than once, strictly preventing infinite loops.
+**Part 1: Search Exhaustiveness by Path-Prefix Induction.**
+Let $\mathcal{P}_{s, t}^{\text{feas}} = \{ P \in \mathcal{P}_{s, t} : w(P) \le W \}$ denote the set of feasible $(s, t)$-paths. If $\mathcal{P}_{s, t}^{\text{feas}} = \emptyset$, unconstrained minimum-weight Dijkstra finds $d_w(s, t) > W + \max(1.0, W)\epsilon_{\text{feas}}$, and the algorithm immediately returns $\text{Infeasible}$ at initialization, which is certified correct.
 
-Therefore, the priority queue becomes empty after a finite number of operations, and ADHP terminates, returning the certified optimal path. $\blacksquare$
+Now assume $\mathcal{P}_{s, t}^{\text{feas}} \ne \emptyset$. There exists at least one optimal path $P^* = (s = v_0, v_1, \dots, v_k = t)$ achieving:
+$$c(P^*) = \min_{P \in \mathcal{P}_{s, t}^{\text{feas}}} c(P) \le C_{UB}$$
+We prove by induction on prefix length $i \in \{0, 1, \dots, k\}$ that for every optimal path $P^*$, either the exact prefix label corresponding to $P^*[s \to v_i]$ is settled, or an alternative prefix label $\ell'$ is settled at $v_i$ that weakly Pareto-dominates $P^*[s \to v_i]$:
+
+1. **Base Case ($i = 0$)**:
+   At source $s = v_0$, the initial label $\ell_0 = (0, 0)$ is generated and pushed to the priority queue. It represents the empty prefix $P^*[s \to s]$ with cost $0$ and weight $0$. The base case holds trivially.
+
+2. **Inductive Step ($i \to i+1$)**:
+   Suppose the induction hypothesis holds for prefix $P^*[s \to v_i]$: a label $\ell_i = (c_i, w_i)$ has been popped from the priority queue at vertex $v_i$ such that $c_i \le c(P^*[s \to v_i])$ and $w_i \le w(P^*[s \to v_i])$.
+   When the solver relaxes outgoing edge $e = (v_i, v_{i+1}) \in P^*$, it generates candidate label $\ell_{i+1} = (c_i + c(e), w_i + w(e))$.
+   We verify that $\ell_{i+1}$ cannot be pruned by any of ADHP's three filters:
+   - **Filter 1 (Feasibility)**: By the inductive hypothesis, $w_i \le w(P^*[s \to v_i])$. The reverse minimum-weight distance satisfies $d_w(v_{i+1}, t) \le w(P^*[v_{i+1} \to t])$. Summing yields:
+     $$w_{i+1} + d_w(v_{i+1}, t) = w_i + w(e) + d_w(v_{i+1}, t) \le w(P^*[s \to v_i]) + w(e) + w(P^*[v_{i+1} \to t]) = w(P^*) \le W$$
+     With relative tolerance $W + \max(1.0, W)\epsilon_{\text{feas}}$, Filter 1 never prunes $\ell_{i+1}$.
+   - **Filter 2 (Dual Envelope Lower Bound)**: By Theorem 1 (Admissibility), the remaining suffix $P^*[v_{i+1} \to t]$ has weight $w(P^*[v_{i+1} \to t]) \le W - w(P^*[s \to v_{i+1}]) \le W - w_{i+1} = \Delta w_{i+1}$.
+     Hence:
+     $$\mathcal{L}_{v_{i+1}}^\Lambda(\Delta w_{i+1}) \le c(P^*[v_{i+1} \to t])$$
+     Adding $c_{i+1} \le c(P^*[s \to v_{i+1}])$:
+     $$c_{i+1} + \mathcal{L}_{v_{i+1}}^\Lambda(\Delta w_{i+1}) \le c(P^*[s \to v_{i+1}]) + c(P^*[v_{i+1} \to t]) = c(P^*) \le C_{UB}$$
+     Because Filter 2 prunes only when $c_{i+1} + \mathcal{L}_{v_{i+1}}^\Lambda(\Delta w_{i+1}) > C_{UB} + \max(1.0, C_{UB})\epsilon_{\text{prune}}$, $\ell_{i+1}$ is never pruned by Filter 2.
+   - **Filter 3 (Local Pareto Frontier Dominance)**: At vertex $v_{i+1}$, either $\ell_{i+1}$ is non-dominated and successfully inserted into the frontier and priority queue, OR there already exists an earlier label $\tilde{\ell} = (\tilde{c}, \tilde{w})$ in `frontiers[v_{i+1}]` such that $\tilde{c} \le c_{i+1} \le c(P^*[s \to v_{i+1}])$ and $\tilde{w} \le w_{i+1} \le w(P^*[s \to v_{i+1}])$.
+     In the latter case, $\tilde{\ell}$ is concatenated with suffix $P^*[v_{i+1} \to t]$ to produce a complete $(s, t)$-path with cost $\tilde{c} + c(P^*[v_{i+1} \to t]) \le c(P^*)$ and weight $\tilde{w} + w(P^*[v_{i+1} \to t]) \le w(P^*) \le W$.
+     Thus, replacing the prefix with $\tilde{\ell}$ preserves the existence of an optimal path.
+
+3. **Conclusion of Induction ($i = k$)**:
+   At destination vertex $v_k = t$, an optimal label with cost $\le c(P^*)$ and weight $\le W$ must enter `frontiers[t]`. Since candidate solutions update $C_{UB}$ whenever a feasible label reaches $t$, the final returned path achieves cost exactly $c(P^*)$. Search exhaustiveness is therefore proved.
+
+---
+
+**Part 2: Floating-Point Roundoff and Relative Tolerance Analysis.**
+In IEEE 754 double precision (`f64`), the machine epsilon is $\epsilon_{\text{mach}} \approx 2.22 \times 10^{-16}$.
+For an arbitrary path $P$ with length $|P| \le n$, the accumulated floating-point error in summing edge costs and weights satisfies Higham's standard summation bound:
+$$|\text{fl}(c(P)) - c(P)| \le \gamma_n c(P), \quad |\text{fl}(w(P)) - w(P)| \le \gamma_n w(P)$$
+where $\gamma_n = \frac{n \epsilon_{\text{mach}}}{1 - n \epsilon_{\text{mach}}}$. For $n \le 10^5$, $\gamma_n \le 2.3 \times 10^{-11}$.
+Furthermore, in evaluating the discrete envelope $\mathcal{L}_u^\Lambda(\Delta w) = \max_{k} [d_{\lambda_k}(u, t) - \lambda_k \Delta w]$, the subtractive error is bounded by $\gamma_3 (|d_{\lambda_k}| + \lambda_k |\Delta w|)$.
+By employing relative scaling:
+$$\text{tol}_{\text{feas}}(W) = \max(1.0, |W|) \cdot 10^{-9}, \quad \text{tol}_{\text{prune}}(C_{UB}) = \max(1.0, |C_{UB}|) \cdot 10^{-9}$$
+we guarantee that:
+$$\gamma_n \cdot \max(c, w) \ll 10^{-9} \cdot \max(1.0, c, w)$$
+for all problem instances up to $n = 100,000$ and arbitrary cost/weight magnitudes (including $10^9$).
+Additionally, decimal representations like $0.1 + 0.2 = 0.30000000000000004$ exceed $0.3$ by only $4 \times 10^{-17}$, which is strictly absorbed by $0.3 \times 10^{-9} = 3 \times 10^{-10}$, eliminating false pruning on decimal inputs.
+
+---
+
+**Part 3: Finite Termination.**
+1. **Graph Finiteness**: $V$ and $E$ are finite.
+2. **Positive-Cost or Positive-Weight Cycles**: Any cycle $C$ with $c(C) + w(C) > 0$ strictly increases cost or weight upon each traversal. Because Filter 1 prunes labels when $w > W + \text{tol}_{\text{feas}}$, and Filter 2 prunes labels when $c > C_{UB} + \text{tol}_{\text{prune}}$, no infinite sequence of labels can be generated by repeatedly traversing cycles with positive cost or weight.
+3. **Zero-Cost and Zero-Weight Directed Cycles**: Suppose $G$ contains a cycle $C$ such that $\sum_{e \in C} c(e) = 0$ and $\sum_{e \in C} w(e) = 0$.
+   Traversing $C$ from vertex $v$ returns to $v$ with identical cost $c_v$ and weight $w_v$.
+   The frontier at $v$ already contains $(c_v, w_v)$. Filter 3 checks weak Pareto dominance:
+   $$c_v \le c_v \quad \land \quad w_v \le w_v$$
+   which evaluates to `true`. Thus, the returned label is immediately discarded by Filter 3 and never enqueued.
+   Zero-cost, zero-weight cycles cannot be traversed more than once.
+
+Because the priority queue only receives finite labels and each pop removes an element without infinite cycling, the queue becomes empty in finite steps. ADHP terminates. $\blacksquare$
 
 ---
 
 ### 5. Boundary Analysis and Edge Cases
 
 1. **Disconnected Target**: If $t$ is unreachable from $s$, $d_w(s, t) = +\infty > W$. The algorithm terminates in $O(m + n \log n)$ time reporting infeasibility.
-2. **Zero-Budget ($W = 0$)**: Valid. Any edge with $w_e > 0$ cannot be traversed. Evaluated exactly.
+2. **Zero-Budget ($W = 0$)**: Valid. Any edge with $w_e > 0$ cannot be traversed unless weight is 0. Evaluated exactly.
 3. **Budget Exceeds Unconstrained Minimum Cost**: If $w(P_c^*) \le W$, unconstrained Dijkstra immediately yields $C_{UB} = c(P_c^*)$. The root lower bound matches $C_{UB}$ and terminates in 0 label expansions.
 4. **Degenerate Costs / Weights ($c_e = 0$ or $w_e = 0$)**: Fully supported; edge weights $c_e + \lambda_k w_e$ remain non-negative, and Dijkstra is well-defined.
 5. **Zero-Cost and Zero-Weight Directed Cycles**: Fully supported and formally proven to terminate via weak Pareto dominance elimination.
-6. **Multi-edges**: Supported; outgoing edges from each vertex are relaxed individually without predecessor ambiguity.
+6. **Multi-edges / Parallel Edges**: Fully supported. Outgoing edges are identified by unique `edge_id`, and `CsppSolution` records the exact `edge_path: Vec<usize>` traversed, eliminating multi-edge path evaluation ambiguity.
+7. **Invalid Inputs**: Strict validation catches NaN, non-finite values, negative budgets, and out-of-bounds vertex indices, safely returning `Infeasible`.
+

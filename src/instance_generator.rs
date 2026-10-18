@@ -61,7 +61,7 @@ pub fn generate_random_instance(
     for i in 0..n - 1 {
         let c = rng.gen_range(1.0, 50.0);
         let w = rng.gen_range(1.0, 50.0);
-        graph.add_edge(i, i + 1, c, w);
+        assert!(graph.add_edge(i, i + 1, c, w));
     }
 
     // Add random directed edges
@@ -70,7 +70,7 @@ pub fn generate_random_instance(
             if u != v && u + 1 != v && rng.next_f64() < edge_prob {
                 let c = rng.gen_range(1.0, 100.0);
                 let w = rng.gen_range(1.0, 100.0);
-                graph.add_edge(u, v, c, w);
+                assert!(graph.add_edge(u, v, c, w));
             }
         }
     }
@@ -110,8 +110,8 @@ pub fn generate_anticorrelated_instance(
     // Backbone path for guaranteed connectivity
     for i in 0..n - 1 {
         let c = rng.gen_range(10.0, 90.0);
-        let w = 100.0 - c + rng.gen_range(-5.0, 5.0).max(1.0);
-        graph.add_edge(i, i + 1, c, w);
+        let w = (100.0 - c + rng.gen_range(-5.0, 5.0)).max(1.0);
+        assert!(graph.add_edge(i, i + 1, c, w));
     }
 
     for u in 0..n {
@@ -119,7 +119,7 @@ pub fn generate_anticorrelated_instance(
             if u != v && u + 1 != v && rng.next_f64() < edge_density {
                 let c = rng.gen_range(5.0, 95.0);
                 let w = (100.0 - c + rng.gen_range(-5.0, 5.0)).max(1.0);
-                graph.add_edge(u, v, c, w);
+                assert!(graph.add_edge(u, v, c, w));
             }
         }
     }
@@ -165,21 +165,21 @@ pub fn generate_grid_instance(
             if c + 1 < cols {
                 let cost = rng.gen_range(5.0, 50.0);
                 let weight = (60.0 - cost + rng.gen_range(-5.0, 5.0)).max(1.0);
-                graph.add_edge(u, node_idx(r, c + 1), cost, weight);
+                assert!(graph.add_edge(u, node_idx(r, c + 1), cost, weight));
             }
 
             // Down edge
             if r + 1 < rows {
                 let cost = rng.gen_range(5.0, 50.0);
                 let weight = (60.0 - cost + rng.gen_range(-5.0, 5.0)).max(1.0);
-                graph.add_edge(u, node_idx(r + 1, c), cost, weight);
+                assert!(graph.add_edge(u, node_idx(r + 1, c), cost, weight));
             }
 
             // Diagonal edge
             if r + 1 < rows && c + 1 < cols {
                 let cost = rng.gen_range(8.0, 70.0);
                 let weight = (80.0 - cost + rng.gen_range(-5.0, 5.0)).max(1.0);
-                graph.add_edge(u, node_idx(r + 1, c + 1), cost, weight);
+                assert!(graph.add_edge(u, node_idx(r + 1, c + 1), cost, weight));
             }
         }
     }

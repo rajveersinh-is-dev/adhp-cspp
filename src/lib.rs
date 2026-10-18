@@ -1,7 +1,8 @@
 //! # ADHP-CSPP: Adaptive Dual Hull Pruning for the Constrained Shortest Path Problem
 //!
-//! An exact, mathematically certified, high-performance algorithm for solving the
-//! single-source single-target Weight-Constrained Shortest Path Problem on directed graphs.
+//! An exact, high-performance algorithm for solving the single-source single-target
+//! Weight-Constrained Shortest Path Problem on directed graphs, differentially verified
+//! against four baseline solvers and independent integer linear programming oracles.
 
 pub mod adhp;
 pub mod baselines;
@@ -16,7 +17,7 @@ use serde::{Deserialize, Serialize};
 pub enum SolutionStatus {
     /// A globally optimal path satisfying the resource budget was found.
     Optimal,
-    /// Certified that no path from source to target satisfies the resource budget.
+    /// Proved that no path from source to target satisfies the resource budget.
     Infeasible,
 }
 
@@ -67,10 +68,47 @@ impl CsppInstance {
         }
     }
 
-    /// Evaluates the total cost and resource consumption of a given path.
+    /// Evaluates the total cost and resource consumption of an explicit sequence of edge indices.
+    /// This provides unambiguous, exact path verification even in multigraphs with parallel edges.
+    pub fn evaluate_edge_path(&self, edge_indices: &[usize]) -> Option<(f64, f64)> {
+        if edge_indices.is_empty() {
+            if self.source == self.target {
+                return Some((0.0, 0.0));
+            }
+            return None;
+        }
+
+        let mut total_cost = 0.0;
+        let mut total_weight = 0.0;
+        let mut curr_node = self.source;
+
+        for &e_id in edge_indices {
+            let edge = self.graph.get_edge(e_id)?;
+            if edge.from != curr_node {
+                return None;
+            }
+            total_cost += edge.cost;
+            total_weight += edge.weight;
+            curr_node = edge.to;
+        }
+
+        if curr_node != self.target {
+            return None;
+        }
+
+        Some((total_cost, total_weight))
+    }
+
+    /// Evaluates the total cost and resource consumption of a vertex path.
+    /// In multigraphs with parallel edges between adjacent vertices, this method disambiguates
+    /// by selecting the edge that is budget-feasible and minimizes cost.
     pub fn evaluate_path(&self, path: &[usize]) -> Option<(f64, f64)> {
         if path.is_empty() || path[0] != self.source || *path.last()? != self.target {
             return None;
+        }
+
+        if path.len() == 1 {
+            return Some((0.0, 0.0));
         }
 
         let mut total_cost = 0.0;
@@ -80,15 +118,48 @@ impl CsppInstance {
             let u = window[0];
             let v = window[1];
 
-            // Find matching edge from u to v
-            let edge = self
+            let candidates: Vec<_> = self
                 .graph
                 .outgoing_edges(u)
                 .iter()
-                .find(|e| e.target == v)?;
+                .filter(|e| e.target == v)
+                .collect();
 
-            total_cost += edge.cost;
-            total_weight += edge.weight;
+            if candidates.is_empty() {
+                return None;
+            }
+
+            // Prefer candidate edges whose weight does not exceed the remaining budget,
+            // then choose the one minimizing traversal cost.
+            let rem_budget = self.budget - total_weight + 1e-9;
+            let feasible_candidates: Vec<_> = candidates
+                .iter()
+                .filter(|e| e.weight <= rem_budget)
+                .copied()
+                .collect();
+
+            let pool = if !feasible_candidates.is_empty() {
+                feasible_candidates
+            } else {
+                candidates
+            };
+
+            let best_edge = pool
+                .iter()
+                .min_by(|a, b| {
+                    a.cost
+                        .partial_cmp(&b.cost)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                        .then_with(|| {
+                            a.weight
+                                .partial_cmp(&b.weight)
+                                .unwrap_or(std::cmp::Ordering::Equal)
+                        })
+                })
+                .copied()?;
+
+            total_cost += best_edge.cost;
+            total_weight += best_edge.weight;
         }
 
         Some((total_cost, total_weight))
@@ -102,6 +173,8 @@ pub struct CsppSolution {
     pub status: SolutionStatus,
     /// The sequence of vertices on the optimal path (empty if Infeasible).
     pub path: Vec<usize>,
+    /// The sequence of edge indices on the optimal path (empty if Infeasible or source == target).
+    pub edge_path: Vec<usize>,
     /// Total cost of the optimal path (or +inf if Infeasible).
     pub cost: f64,
     /// Total resource weight of the optimal path (or +inf if Infeasible).
@@ -115,7 +188,7 @@ pub trait CsppSolver {
     /// Returns the human-readable algorithm name.
     fn name(&self) -> &'static str;
 
-    /// Solves the given CSPP instance to certified exact optimality.
+    /// Solves the given CSPP instance to exact optimality.
     fn solve(&self, instance: &CsppInstance) -> CsppSolution;
 }
 
