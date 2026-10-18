@@ -1,6 +1,11 @@
 //! Adaptive Dual Hull Pruning (ADHP) Solver for the Constrained Shortest Path Problem.
+//!
+//! Provides a mathematically rigorous and experimentally optimized solver for CSPP
+//! using adaptive lower-hull bisection, backward-centric preprocessing, and strict
+//! local Pareto dominance.
 
-use crate::dijkstra::{dijkstra_backward, dijkstra_forward, dijkstra_forward_target};
+use crate::dijkstra::dijkstra_backward_tree;
+use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -50,57 +55,6 @@ struct PoolNode {
     parent_idx: Option<usize>,
 }
 
-/// Represents a non-dominated Pareto label stored at a vertex.
-#[derive(Clone, Copy, Debug)]
-struct ParetoPoint {
-    cost: f64,
-    weight: f64,
-}
-
-/// Local Pareto frontier at a vertex, maintained sorted by weight ascending.
-#[derive(Clone, Default)]
-struct VertexFrontier {
-    points: Vec<ParetoPoint>,
-}
-
-impl VertexFrontier {
-    /// Checks if a new label `(c, w)` is weakly dominated by an existing point.
-    #[inline(always)]
-    fn is_dominated(&self, new_c: f64, new_w: f64) -> bool {
-        for pt in &self.points {
-            if pt.weight <= new_w + 1e-9 && pt.cost <= new_c + 1e-9 {
-                return true;
-            }
-            if pt.weight > new_w + 1e-9 {
-                break;
-            }
-        }
-        false
-    }
-
-    /// Prunes any existing points dominated by `(new_c, new_w)` and inserts the new point.
-    #[inline(always)]
-    fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
-        // Remove existing points with weight >= new_w and cost >= new_c
-        self.points
-            .retain(|pt| !(pt.weight >= new_w - 1e-9 && pt.cost >= new_c - 1e-9));
-
-        // Insert maintaining sorted order by weight ascending
-        let pos = self
-            .points
-            .binary_search_by(|pt| pt.weight.partial_cmp(&new_w).unwrap_or(Ordering::Equal))
-            .unwrap_or_else(|e| e);
-
-        self.points.insert(
-            pos,
-            ParetoPoint {
-                cost: new_c,
-                weight: new_w,
-            },
-        );
-    }
-}
-
 /// Adaptive Dual Hull Pruning (ADHP) Solver.
 #[derive(Debug, Clone)]
 pub struct AdhpSolver {
@@ -114,10 +68,10 @@ impl Default for AdhpSolver {
     }
 }
 
-/// Conservative numerical tolerance to prevent premature pruning of near-optimal paths
+/// Conservative numerical relative tolerance to prevent premature pruning of near-optimal paths
 /// due to floating-point rounding errors during discrete Legendre-Fenchel evaluation.
 pub const PRUNE_EPSILON: f64 = 1e-9;
-/// Numerical feasibility tolerance for resource constraint checks.
+/// Numerical relative feasibility tolerance for resource constraint checks.
 pub const FEASIBILITY_EPSILON: f64 = 1e-9;
 
 #[inline(always)]
@@ -213,8 +167,46 @@ impl CsppSolver for AdhpSolver {
 
         let prep_start = Instant::now();
 
-        // Step 1: Solve extreme points on (s, t)
-        let tree_c = dijkstra_forward(&instance.graph, s, 0.0, false);
+        // Step 1: Backward-Centric Weight Preprocessing
+        // A single backward pass from t with use_weight_only = true computes:
+        // - dist_weight array for resource feasibility bounding (Filter 1)
+        // - d_w(s, t) for instant infeasibility certification
+        // - Reconstructed path P_w(s, t) for initial upper bound C_UB
+        let tree_w = dijkstra_backward_tree(&instance.graph, t, 0.0, true);
+        if is_weight_infeasible(tree_w.distances[s], budget) || tree_w.distances[s].is_infinite() {
+            stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+            stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
+            return CsppSolution {
+                status: SolutionStatus::Infeasible,
+                path: Vec::new(),
+                edge_path: Vec::new(),
+                cost: f64::INFINITY,
+                weight: f64::INFINITY,
+                stats,
+            };
+        }
+
+        let (path_w, edge_path_w, cost_w, weight_w) =
+            match tree_w.reconstruct_path_with_metrics(s, t) {
+                Some(res) => res,
+                None => {
+                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    return CsppSolution {
+                        status: SolutionStatus::Infeasible,
+                        path: Vec::new(),
+                        edge_path: Vec::new(),
+                        cost: f64::INFINITY,
+                        weight: f64::INFINITY,
+                        stats,
+                    };
+                }
+            };
+
+        // Step 2: Backward-Centric Unconstrained Cost Preprocessing (lambda_1 = 0)
+        // Computes:
+        // - dist_cost array (d_c(u, t) for all u)
+        // - Reconstructed path P_c(s, t)
+        let tree_c = dijkstra_backward_tree(&instance.graph, t, 0.0, false);
         let (path_c, edge_path_c, cost_c, weight_c) =
             match tree_c.reconstruct_path_with_metrics(s, t) {
                 Some(res) => res,
@@ -245,49 +237,19 @@ impl CsppSolver for AdhpSolver {
             };
         }
 
-        // Check minimum weight path
-        let tree_w = dijkstra_forward(&instance.graph, s, 0.0, true);
-        if is_weight_infeasible(tree_w.distances[t], budget) {
-            // Even minimum weight path exceeds budget: certified infeasible!
-            stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-            stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
-            return CsppSolution {
-                status: SolutionStatus::Infeasible,
-                path: Vec::new(),
-                edge_path: Vec::new(),
-                cost: f64::INFINITY,
-                weight: f64::INFINITY,
-                stats,
-            };
-        }
-
-        let (path_w, edge_path_w, cost_w, weight_w) =
-            match tree_w.reconstruct_path_with_metrics(s, t) {
-                Some(res) => res,
-                None => {
-                    stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-                    return CsppSolution {
-                        status: SolutionStatus::Infeasible,
-                        path: Vec::new(),
-                        edge_path: Vec::new(),
-                        cost: f64::INFINITY,
-                        weight: f64::INFINITY,
-                        stats,
-                    };
-                }
-            };
-
         // Initialize best upper bound with feasible weight-minimizing path
         let mut best_cost = cost_w;
         let mut best_weight = weight_w;
-        let mut best_path = path_w.clone();
+        let mut best_path = path_w;
         let mut best_edge_path = edge_path_w;
 
-        // Step 2: Adaptive Dual Multiplier Selection
         let mut lambdas = Vec::with_capacity(self.max_facets);
-        lambdas.push(0.0); // Pure cost
+        let mut dist_dual = Vec::with_capacity(self.max_facets);
 
-        // Bisection queue: store (c_left, w_left, c_right, w_right)
+        lambdas.push(0.0);
+        dist_dual.push(tree_c.distances);
+
+        // Step 3: Adaptive Dual Multiplier Selection via Backward Trees
         let mut seg_queue: Vec<(f64, f64, f64, f64)> = Vec::new();
         seg_queue.push((cost_c, weight_c, cost_w, weight_w));
 
@@ -307,43 +269,42 @@ impl CsppSolver for AdhpSolver {
                 continue;
             }
 
-            lambdas.push(lambda_mid);
-
-            // Use early-exit target stopping Dijkstra during bisection
-            let tree_mid = dijkstra_forward_target(&instance.graph, s, t, lambda_mid, false);
+            // Single backward pass computes BOTH the path candidate for C_UB AND the reverse distance field!
+            let tree_mid = dijkstra_backward_tree(&instance.graph, t, lambda_mid, false);
             if let Some((p_mid, ep_mid, c_mid, w_mid)) =
                 tree_mid.reconstruct_path_with_metrics(s, t)
             {
                 if is_weight_feasible(w_mid, budget) && c_mid < best_cost {
                     best_cost = c_mid;
                     best_weight = w_mid;
-                    best_path = p_mid.clone();
+                    best_path = p_mid;
                     best_edge_path = ep_mid;
                 }
 
-                if w_l - w_mid > 1e-6 && c_mid - c_l > 1e-6 {
-                    seg_queue.push((c_l, w_l, c_mid, w_mid));
-                }
-                if w_mid - w_r > 1e-6 && c_r - c_mid > 1e-6 {
-                    seg_queue.push((c_mid, w_mid, c_r, w_r));
+                // Check marginal lower bound improvement at the root:
+                let root_lb_mid = tree_mid.distances[s] - lambda_mid * budget;
+                let cur_root_lb = Self::eval_dual_bound(s, budget, &lambdas, &dist_dual);
+                let rel_gain = (root_lb_mid - cur_root_lb) / cur_root_lb.abs().max(1.0);
+
+                // Adaptive selection: only adopt facet if marginal lower bound improvement exceeds threshold
+                if rel_gain > 0.02 {
+                    lambdas.push(lambda_mid);
+                    dist_dual.push(tree_mid.distances);
+
+                    if w_l - w_mid > 1e-6 && c_mid - c_l > 1e-6 {
+                        seg_queue.push((c_l, w_l, c_mid, w_mid));
+                    }
+                    if w_mid - w_r > 1e-6 && c_r - c_mid > 1e-6 {
+                        seg_queue.push((c_mid, w_mid, c_r, w_r));
+                    }
                 }
             }
         }
 
-        lambdas.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-
-        // Step 3: Reverse Shortest Path Trees Preprocessing
-        let mut dist_dual = Vec::with_capacity(lambdas.len());
-        for &lambda in &lambdas {
-            dist_dual.push(dijkstra_backward(&instance.graph, t, lambda, false));
-        }
-
-        // Distance in pure weight to t
-        let dist_weight = dijkstra_backward(&instance.graph, t, 0.0, true);
-
+        let dist_weight = tree_w.distances;
         stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
 
-        // Step 4: Priority Search
+        // Step 4: Priority Search with Strict Local Pareto Dominance
         let mut heap: BinaryHeap<SearchLabel> = BinaryHeap::new();
         let mut frontiers: Vec<VertexFrontier> = vec![VertexFrontier::default(); n];
         let mut pool: Vec<PoolNode> = Vec::with_capacity(1024);
@@ -384,9 +345,11 @@ impl CsppSolver for AdhpSolver {
                 continue;
             }
 
+            let prune_tol = best_cost.abs().max(1.0) * PRUNE_EPSILON;
+
             // Global upper bound pruning
             let lb_u = Self::eval_dual_bound(u, budget - w_u, &lambdas, &dist_dual);
-            if c_u + lb_u > best_cost + PRUNE_EPSILON {
+            if c_u + lb_u > best_cost + prune_tol {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }
@@ -403,15 +366,15 @@ impl CsppSolver for AdhpSolver {
                     continue;
                 }
 
-                // Filter 2: Dual Hull Pruning (Conservative epsilon policy)
+                // Filter 2: Dual Hull Pruning (Conservative relative epsilon policy)
                 let rem_w = budget - new_w;
                 let lb_v = Self::eval_dual_bound(v, rem_w, &lambdas, &dist_dual);
-                if new_c + lb_v > best_cost + PRUNE_EPSILON {
+                if new_c + lb_v > best_cost + prune_tol {
                     stats.labels_pruned_dual_bound += 1;
                     continue;
                 }
 
-                // Filter 3: Local Pareto Dominance
+                // Filter 3: Local Pareto Dominance (Strict mathematical dominance)
                 if frontiers[v].is_dominated(new_c, new_w) {
                     stats.labels_pruned_dominance += 1;
                     continue;

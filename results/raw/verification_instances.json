@@ -1754,7 +1754,7 @@
       }
     ],
     "adhp_status": "Optimal",
-    "adhp_cost": 54.36125764449656,
+    "adhp_cost": 54.36125764449657,
     "adhp_weight": 80.41019969653394,
     "adhp_edge_path": [
       28,
@@ -43887,7 +43887,7 @@
     ],
     "adhp_status": "Optimal",
     "adhp_cost": 155.10357934994215,
-    "adhp_weight": 49.10945026830901,
+    "adhp_weight": 49.10945026830902,
     "adhp_edge_path": [
       31,
       191,
@@ -50990,7 +50990,7 @@
       }
     ],
     "adhp_status": "Optimal",
-    "adhp_cost": 290.8670342640286,
+    "adhp_cost": 290.86703426402863,
     "adhp_weight": 96.58372939089199,
     "adhp_edge_path": [
       15,
@@ -58014,7 +58014,7 @@
       }
     ],
     "adhp_status": "Optimal",
-    "adhp_cost": 174.65952246845566,
+    "adhp_cost": 174.6595224684557,
     "adhp_weight": 239.27002834791642,
     "adhp_edge_path": [
       2,
@@ -74311,7 +74311,7 @@
     ],
     "adhp_status": "Optimal",
     "adhp_cost": 78.08094721667088,
-    "adhp_weight": 220.77981260329983,
+    "adhp_weight": 220.7798126032998,
     "adhp_edge_path": [
       39,
       32,
@@ -74668,7 +74668,7 @@
     ],
     "adhp_status": "Optimal",
     "adhp_cost": 149.08546769410154,
-    "adhp_weight": 163.37255596259277,
+    "adhp_weight": 163.3725559625928,
     "adhp_edge_path": [
       2,
       18,
@@ -114037,7 +114037,7 @@
       }
     ],
     "adhp_status": "Optimal",
-    "adhp_cost": 303.61869410873794,
+    "adhp_cost": 303.618694108738,
     "adhp_weight": 87.80078415892909,
     "adhp_edge_path": [
       19,
@@ -126665,7 +126665,7 @@
     ],
     "adhp_status": "Optimal",
     "adhp_cost": 123.0441619456065,
-    "adhp_weight": 321.8359255306712,
+    "adhp_weight": 321.83592553067126,
     "adhp_edge_path": [
       0,
       5,

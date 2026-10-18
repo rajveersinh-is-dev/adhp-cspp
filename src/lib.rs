@@ -7,6 +7,8 @@
 pub mod adhp;
 pub mod baselines;
 pub mod dijkstra;
+pub mod exact;
+pub mod frontier;
 pub mod graph;
 pub mod instance_generator;
 
@@ -164,6 +166,16 @@ impl CsppInstance {
 
         Some((total_cost, total_weight))
     }
+
+    /// Converts this floating-point CSPP instance into an exact integer CSPP instance
+    /// by scaling costs and weights by positive scale factors and rounding.
+    pub fn to_integer_scaled(
+        &self,
+        scale_cost: f64,
+        scale_weight: f64,
+    ) -> Result<exact::IntCsppInstance, String> {
+        exact::IntCsppInstance::from_scaled_float_instance(self, scale_cost, scale_weight)
+    }
 }
 
 /// The solution returned by a CSPP solver.
@@ -197,3 +209,5 @@ pub use baselines::carlyle_wood::CarlyleWoodSolver;
 pub use baselines::dumitrescu_boland::DumitrescuBolandSolver;
 pub use baselines::martins::MartinsSolver;
 pub use baselines::pulse::PulseSolver;
+pub use exact::{IntAdhpSolver, IntCsppInstance, IntCsppSolution, IntDirectedGraph};
+pub use frontier::{ParetoPoint, VertexFrontier};

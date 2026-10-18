@@ -1,6 +1,7 @@
 //! Carlyle & Wood (2008) LARAC single-multiplier Lagrangian bounding algorithm.
 
 use crate::dijkstra::{dijkstra_backward, dijkstra_forward, dijkstra_forward_target};
+use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -43,49 +44,6 @@ struct PoolNode {
     vertex: usize,
     edge_id: Option<usize>,
     parent_idx: Option<usize>,
-}
-
-#[derive(Clone, Copy, Debug)]
-struct ParetoPoint {
-    cost: f64,
-    weight: f64,
-}
-
-#[derive(Clone, Default)]
-struct VertexFrontier {
-    points: Vec<ParetoPoint>,
-}
-
-impl VertexFrontier {
-    #[inline(always)]
-    fn is_dominated(&self, new_c: f64, new_w: f64) -> bool {
-        for pt in &self.points {
-            if pt.weight <= new_w + 1e-9 && pt.cost <= new_c + 1e-9 {
-                return true;
-            }
-            if pt.weight > new_w + 1e-9 {
-                break;
-            }
-        }
-        false
-    }
-
-    #[inline(always)]
-    fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
-        self.points
-            .retain(|pt| !(pt.weight >= new_w - 1e-9 && pt.cost >= new_c - 1e-9));
-        let pos = self
-            .points
-            .binary_search_by(|pt| pt.weight.partial_cmp(&new_w).unwrap_or(Ordering::Equal))
-            .unwrap_or_else(|e| e);
-        self.points.insert(
-            pos,
-            ParetoPoint {
-                cost: new_c,
-                weight: new_w,
-            },
-        );
-    }
 }
 
 /// Carlyle & Wood (2008) Solver using single-multiplier LARAC Lagrangian Bounding.

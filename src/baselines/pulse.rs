@@ -1,32 +1,7 @@
-//! Pulse algorithm (Lozano & Medaglia 2013) exact depth-first search with 1D bounds.
-
 use crate::dijkstra::dijkstra_backward;
+use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::time::Instant;
-
-#[derive(Clone, Default)]
-struct PulseMemory {
-    points: Vec<(f64, f64)>, // (cost, weight)
-}
-
-impl PulseMemory {
-    #[inline(always)]
-    fn is_dominated(&self, c: f64, w: f64) -> bool {
-        for &(pc, pw) in &self.points {
-            if pw <= w + 1e-9 && pc <= c + 1e-9 {
-                return true;
-            }
-        }
-        false
-    }
-
-    #[inline(always)]
-    fn record(&mut self, c: f64, w: f64) {
-        self.points
-            .retain(|&(pc, pw)| !(pw >= w - 1e-9 && pc >= c - 1e-9));
-        self.points.push((c, w));
-    }
-}
 
 /// Pulse Algorithm Solver (Lozano & Medaglia 2013).
 #[derive(Debug, Clone, Default)]
@@ -47,7 +22,7 @@ impl PulseSolver {
         instance: &CsppInstance,
         dist_cost: &[f64],
         dist_weight: &[f64],
-        memory: &mut [PulseMemory],
+        memory: &mut [VertexFrontier],
         visited: &mut [bool],
         current_path: &mut Vec<usize>,
         current_edges: &mut Vec<usize>,
@@ -84,7 +59,7 @@ impl PulseSolver {
             stats.labels_pruned_dominance += 1;
             return;
         }
-        memory[u].record(c_u, w_u);
+        memory[u].insert_and_prune(c_u, w_u);
 
         visited[u] = true;
 
@@ -195,7 +170,7 @@ impl CsppSolver for PulseSolver {
             };
         }
 
-        let mut memory = vec![PulseMemory::default(); n];
+        let mut memory = vec![VertexFrontier::default(); n];
         let mut visited = vec![false; n];
         let mut current_path = vec![s];
         let mut current_edges = Vec::new();
