@@ -35,7 +35,7 @@ ADHP adaptively discovers a set of $K$ dual shadow prices $\Lambda = \{\lambda_1
 
 $$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
 
-where $d_{\lambda_k}(u, t)$ is the backward shortest path distance from vertex $u$ to destination $t$ under composite metric $c_e + \lambda_k w_e$.
+where $d_{\lambda_k}(u, t)$ is the backward shortest path distance from vertex $u$ to destination $t$ under composite metric $c(e) + \lambda_k w(e)$.
 
 ```
 Cost ^
@@ -51,9 +51,15 @@ Cost ^
 ```
 
 ### Strongest Defensible Guarantees
-- **Theorem 1 (Admissibility)**: For every vertex $u$ and remaining budget $\Delta w \ge 0$, $\mathcal{L}_u^\Lambda(\Delta w) \le \min \{ c(P) : P \in \mathcal{P}_{u,t}, w(P) \le \Delta w \}$.
-- **Theorem 2 (Strict Dominance)**: $\mathcal{L}_u^\Lambda(\Delta w) \ge d_c(u, t)$ universally, with strict inequality $\mathcal{L}_u^\Lambda(\Delta w) > d_c(u, t)$ on all non-extreme budget intervals.
-- **Theorem 3 (Exact Optimality)**: Pruning any label with $c + \mathcal{L}_u^\Lambda(W - w) \ge C_{UB}$ preserves exact global optimality.
+
+- **Theorem 1 (Admissibility)**: For every vertex $u$ and remaining budget $\Delta w \ge 0$:
+  $$\mathcal{L}_u^\Lambda(\Delta w) \le \min_{P \in \mathcal{P}_{u,t}, \, w(P) \le \Delta w} c(P)$$
+- **Theorem 2 (Strict Dominance)**: For all vertices $u$ and remaining budget $\Delta w \ge 0$:
+  $$\mathcal{L}_u^\Lambda(\Delta w) \ge d_c(u, t)$$
+  with strict inequality $\mathcal{L}_u^\Lambda(\Delta w) > d_c(u, t)$ on all non-extreme budget intervals.
+- **Theorem 3 (Exact Optimality)**: Pruning any candidate label satisfying:
+  $$c(P) + \mathcal{L}_u^\Lambda(W - w(P)) \ge C_{\text{UB}}$$
+  preserves exact global optimality.
 
 Full mathematical proofs are documented in [`docs/MATHEMATICAL_FOUNDATIONS.md`](docs/MATHEMATICAL_FOUNDATIONS.md).
 

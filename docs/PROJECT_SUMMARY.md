@@ -19,12 +19,13 @@ Existing exact algorithms either suffer from exponential label explosion (Martin
 
 **ADHP** discovers a set of $K$ dual slopes $\Lambda = \{\lambda_1, \dots, \lambda_K\}$ on the biobjective lower hull and constructs a discrete Legendre-Fenchel lower-bound envelope across all vertices simultaneously:
 $$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
-where $d_{\lambda_k}(u, t)$ is the shortest path distance from $u$ to $t$ under edge weights $c_e + \lambda_k w_e$.
+where $d_{\lambda_k}(u, t)$ is the shortest path distance from $u$ to $t$ under edge weights $c(e) + \lambda_k w(e)$.
 
 We prove:
-1. **Admissibility**: For every vertex $u$ and remaining budget $\Delta w \ge 0$, $\mathcal{L}_u^\Lambda(\Delta w) \le \min \{ c(P) : P \in \mathcal{P}_{u, t}, w(P) \le \Delta w \}$.
-2. **Strict Dominance**: $\mathcal{L}_u^\Lambda(\Delta w) > d_c(u, t)$ whenever an active dual facet separates the budget constraint.
-3. **Exact Global Optimality**: Filtering any label with $c + \mathcal{L}_u^\Lambda(W - w) \ge C_{UB}$ preserves exact optimality.
+1. **Admissibility**: For every vertex $u$ and remaining budget $\Delta w \ge 0$:
+   $$\mathcal{L}_u^\Lambda(\Delta w) \le \min_{P \in \mathcal{P}_{u, t}, \, w(P) \le \Delta w} c(P)$$
+2. **Strict Dominance**: $\mathcal{L}_u^\Lambda(\Delta w) \ge d_c(u, t)$ universally, with strict inequality whenever an active dual facet separates the budget constraint.
+3. **Exact Global Optimality**: Filtering any candidate label with $c(P) + \mathcal{L}_u^\Lambda(W - w(P)) \ge C_{\text{UB}}$ preserves exact optimality.
 
 ---
 
