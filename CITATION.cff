@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software or algorithm in your research, please cite it as below."
+title: "Adaptive Dual Hull Pruning: An Exact Algorithm for the Weight-Constrained Shortest Path Problem"
+authors:
+  - given-names: "Rajve"
+repository-code: "https://github.com/rajveersinh-is-dev/adhp-cspp"
+date-released: 2026-10-18
+version: 0.1.0
+license: "MIT OR Apache-2.0"
+keywords:
+  - "constrained shortest path"
+  - "discrete optimization"
+  - "operations research"
+  - "graph algorithms"
+  - "lagrangian relaxation"
+  - "pareto dominance"
