@@ -1,0 +1,96 @@
+benchmark_category,instance_name,nodes,edges,budget,solver_name,mean_runtime_micros,std_dev_micros,mean_preprocessing_micros,mean_labels_generated,mean_labels_pruned_dual,mean_labels_pruned_dominance,mean_labels_explored,peak_queue_size,cost,weight
+Anti-Correlated Scaling,anticorr_n20,20,128,185.8310,ADHP (Adaptive Dual Hull Pruning),10.93,1.68,9.82,5,3,0,1,0,89.8432,108.7500
+Anti-Correlated Scaling,anticorr_n20,20,128,185.8310,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),6.78,0.27,5.74,10,4,0,3,1,89.8432,108.7500
+Anti-Correlated Scaling,anticorr_n20,20,128,185.8310,Dumitrescu-Boland (1D-Bounded Label Setting),2.49,0.19,1.51,10,3,1,6,4,89.8432,108.7500
+Anti-Correlated Scaling,anticorr_n20,20,128,185.8310,Pulse (Lozano & Medaglia 2013),4.40,0.21,1.61,59,6,0,17,0,89.8432,108.7500
+Anti-Correlated Scaling,anticorr_n20,20,128,185.8310,Martins (Standard Multi-Label Dijkstra),3.86,1.24,0.00,65,0,14,11,15,89.8432,108.7500
+Anti-Correlated Scaling,anticorr_n40,40,423,114.2115,ADHP (Adaptive Dual Hull Pruning),21.16,0.51,19.78,14,11,0,1,0,49.7498,51.3265
+Anti-Correlated Scaling,anticorr_n40,40,423,114.2115,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),13.31,0.31,12.16,14,10,0,2,1,49.7498,51.3265
+Anti-Correlated Scaling,anticorr_n40,40,423,114.2115,Dumitrescu-Boland (1D-Bounded Label Setting),7.32,1.16,4.09,14,10,0,12,11,49.7498,51.3265
+Anti-Correlated Scaling,anticorr_n40,40,423,114.2115,Pulse (Lozano & Medaglia 2013),7.55,0.97,4.20,204,30,0,24,0,49.7498,51.3265
+Anti-Correlated Scaling,anticorr_n40,40,423,114.2115,Martins (Standard Multi-Label Dijkstra),3.50,0.17,0.00,69,0,8,7,23,49.7498,51.3265
+Anti-Correlated Scaling,anticorr_n60,60,942,163.7263,ADHP (Adaptive Dual Hull Pruning),44.39,2.42,42.68,19,18,0,1,0,60.7019,39.3493
+Anti-Correlated Scaling,anticorr_n60,60,942,163.7263,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),27.72,1.82,26.09,38,23,0,3,2,60.7019,39.3493
+Anti-Correlated Scaling,anticorr_n60,60,942,163.7263,Dumitrescu-Boland (1D-Bounded Label Setting),14.36,1.34,8.70,38,22,1,25,23,60.7019,39.3493
+Anti-Correlated Scaling,anticorr_n60,60,942,163.7263,Pulse (Lozano & Medaglia 2013),21.04,2.63,10.23,1150,232,5,89,0,60.7019,39.3493
+Anti-Correlated Scaling,anticorr_n60,60,942,163.7263,Martins (Standard Multi-Label Dijkstra),13.31,3.89,0.00,523,0,76,35,114,60.7019,39.3493
+Anti-Correlated Scaling,anticorr_n80,80,1616,121.1283,ADHP (Adaptive Dual Hull Pruning),62.62,1.54,61.31,50,22,0,2,1,76.1839,27.9373
+Anti-Correlated Scaling,anticorr_n80,80,1616,121.1283,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),35.56,0.74,34.39,50,21,0,3,2,76.1839,27.9373
+Anti-Correlated Scaling,anticorr_n80,80,1616,121.1283,Dumitrescu-Boland (1D-Bounded Label Setting),16.53,0.40,11.73,191,29,9,39,30,76.1839,27.9373
+Anti-Correlated Scaling,anticorr_n80,80,1616,121.1283,Pulse (Lozano & Medaglia 2013),16.95,1.46,11.81,700,100,0,41,0,76.1839,27.9373
+Anti-Correlated Scaling,anticorr_n80,80,1616,121.1283,Martins (Standard Multi-Label Dijkstra),13.82,7.50,0.00,477,0,58,23,141,76.1839,27.9373
+Anti-Correlated Scaling,anticorr_n100,100,2446,169.1347,ADHP (Adaptive Dual Hull Pruning),107.31,5.26,105.00,48,31,0,2,1,65.8649,132.5393
+Anti-Correlated Scaling,anticorr_n100,100,2446,169.1347,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),67.07,31.69,64.92,70,39,0,4,2,65.8649,132.5393
+Anti-Correlated Scaling,anticorr_n100,100,2446,169.1347,Dumitrescu-Boland (1D-Bounded Label Setting),39.36,10.45,24.83,120,51,10,57,52,65.8649,132.5393
+Anti-Correlated Scaling,anticorr_n100,100,2446,169.1347,Pulse (Lozano & Medaglia 2013),56.90,9.44,33.21,2671,448,7,129,0,65.8649,132.5393
+Anti-Correlated Scaling,anticorr_n100,100,2446,169.1347,Martins (Standard Multi-Label Dijkstra),26.28,9.85,0.00,1449,0,263,62,195,65.8649,132.5393
+Grid Scaling,grid_4x4,16,33,151.8495,ADHP (Adaptive Dual Hull Pruning),7.78,1.94,6.26,11,1,0,6,2,128.8211,148.0842
+Grid Scaling,grid_4x4,16,33,151.8495,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),5.48,0.50,3.39,27,5,0,18,7,128.8211,148.0842
+Grid Scaling,grid_4x4,16,33,151.8495,Dumitrescu-Boland (1D-Bounded Label Setting),1.75,0.20,0.87,11,1,0,6,2,128.8211,148.0842
+Grid Scaling,grid_4x4,16,33,151.8495,Pulse (Lozano & Medaglia 2013),2.95,2.46,0.76,37,3,0,21,0,128.8211,148.0842
+Grid Scaling,grid_4x4,16,33,151.8495,Martins (Standard Multi-Label Dijkstra),1.99,0.18,0.00,56,0,10,28,13,128.8211,148.0842
+Grid Scaling,grid_6x6,36,85,211.6246,ADHP (Adaptive Dual Hull Pruning),12.73,5.70,8.61,31,11,2,22,12,214.6377,211.0524
+Grid Scaling,grid_6x6,36,85,211.6246,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),8.94,2.24,6.25,39,11,2,28,12,214.6377,211.0524
+Grid Scaling,grid_6x6,36,85,211.6246,Dumitrescu-Boland (1D-Bounded Label Setting),4.07,0.45,1.67,85,5,16,34,7,214.6377,211.0524
+Grid Scaling,grid_6x6,36,85,211.6246,Pulse (Lozano & Medaglia 2013),5.05,0.43,1.55,238,19,7,100,0,214.6377,211.0524
+Grid Scaling,grid_6x6,36,85,211.6246,Martins (Standard Multi-Label Dijkstra),6.87,1.44,0.00,266,0,64,112,36,214.6377,211.0524
+Grid Scaling,grid_8x8,64,161,315.1235,ADHP (Adaptive Dual Hull Pruning),24.40,0.93,18.84,91,45,4,75,45,288.4519,306.4493
+Grid Scaling,grid_8x8,64,161,315.1235,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),19.56,0.33,12.25,224,88,15,108,36,288.4519,306.4493
+Grid Scaling,grid_8x8,64,161,315.1235,Dumitrescu-Boland (1D-Bounded Label Setting),10.28,0.28,2.82,265,50,50,139,51,288.4519,306.4493
+Grid Scaling,grid_8x8,64,161,315.1235,Pulse (Lozano & Medaglia 2013),11.98,0.44,2.84,919,176,60,383,0,288.4519,306.4493
+Grid Scaling,grid_8x8,64,161,315.1235,Martins (Standard Multi-Label Dijkstra),40.51,6.73,0.00,1332,0,572,538,117,288.4519,306.4493
+Grid Scaling,grid_9x9,81,208,453.7111,ADHP (Adaptive Dual Hull Pruning),26.29,0.25,23.02,40,23,1,28,15,234.7616,452.8653
+Grid Scaling,grid_9x9,81,208,453.7111,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),22.06,2.83,17.94,67,38,1,47,24,234.7616,452.8653
+Grid Scaling,grid_9x9,81,208,453.7111,Dumitrescu-Boland (1D-Bounded Label Setting),11.81,0.42,3.48,244,67,53,149,68,234.7616,452.8653
+Grid Scaling,grid_9x9,81,208,453.7111,Pulse (Lozano & Medaglia 2013),19.77,2.61,3.50,1422,437,89,588,0,234.7616,452.8653
+Grid Scaling,grid_9x9,81,208,453.7111,Martins (Standard Multi-Label Dijkstra),69.34,6.82,0.00,1603,0,738,631,189,234.7616,452.8653
+Random ER Scaling,random_er_n30,30,203,100.2568,ADHP (Adaptive Dual Hull Pruning),14.82,1.98,13.07,45,6,0,7,2,130.9229,98.6198
+Random ER Scaling,random_er_n30,30,203,100.2568,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),9.96,0.39,8.23,67,5,1,12,3,130.9229,98.6198
+Random ER Scaling,random_er_n30,30,203,100.2568,Dumitrescu-Boland (1D-Bounded Label Setting),3.75,0.23,2.20,52,4,2,12,5,130.9229,98.6198
+Random ER Scaling,random_er_n30,30,203,100.2568,Pulse (Lozano & Medaglia 2013),3.69,0.18,2.20,85,7,0,16,0,130.9229,98.6198
+Random ER Scaling,random_er_n30,30,203,100.2568,Martins (Standard Multi-Label Dijkstra),3.97,0.91,0.00,317,0,48,46,23,130.9229,98.6198
+Random ER Scaling,random_er_n60,60,729,86.9944,ADHP (Adaptive Dual Hull Pruning),52.27,7.73,50.48,66,16,0,5,3,88.4510,57.8716
+Random ER Scaling,random_er_n60,60,729,86.9944,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),25.71,2.44,23.88,127,25,0,12,5,88.4510,57.8716
+Random ER Scaling,random_er_n60,60,729,86.9944,Dumitrescu-Boland (1D-Bounded Label Setting),10.36,1.00,6.68,155,21,3,34,22,88.4510,57.8716
+Random ER Scaling,random_er_n60,60,729,86.9944,Pulse (Lozano & Medaglia 2013),10.10,1.30,6.70,417,32,1,44,0,88.4510,57.8716
+Random ER Scaling,random_er_n60,60,729,86.9944,Martins (Standard Multi-Label Dijkstra),9.06,1.48,0.00,858,0,121,74,70,88.4510,57.8716
+Random ER Scaling,random_er_n90,90,1622,122.4121,ADHP (Adaptive Dual Hull Pruning),89.18,9.89,85.83,138,40,0,16,9,64.0487,99.5114
+Random ER Scaling,random_er_n90,90,1622,122.4121,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),44.88,1.72,41.95,237,79,1,22,9,64.0487,99.5114
+Random ER Scaling,random_er_n90,90,1622,122.4121,Dumitrescu-Boland (1D-Bounded Label Setting),20.29,0.95,12.93,357,69,20,91,71,64.0487,99.5114
+Random ER Scaling,random_er_n90,90,1622,122.4121,Pulse (Lozano & Medaglia 2013),16.29,1.63,12.27,681,152,1,47,0,64.0487,99.5114
+Random ER Scaling,random_er_n90,90,1622,122.4121,Martins (Standard Multi-Label Dijkstra),14.74,1.65,0.00,2348,0,622,133,190,64.0487,99.5114
+Random ER Scaling,random_er_n120,120,2930,46.0757,ADHP (Adaptive Dual Hull Pruning),144.75,10.22,142.09,101,14,0,3,2,52.5045,29.2410
+Random ER Scaling,random_er_n120,120,2930,46.0757,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),84.85,9.26,82.51,122,14,1,5,2,52.5045,29.2410
+Random ER Scaling,random_er_n120,120,2930,46.0757,Dumitrescu-Boland (1D-Bounded Label Setting),33.98,1.94,28.73,236,20,0,30,22,52.5045,29.2410
+Random ER Scaling,random_er_n120,120,2930,46.0757,Pulse (Lozano & Medaglia 2013),35.16,3.66,26.20,1538,49,0,70,0,52.5045,29.2410
+Random ER Scaling,random_er_n120,120,2930,46.0757,Martins (Standard Multi-Label Dijkstra),18.66,4.72,0.00,1154,0,34,49,93,52.5045,29.2410
+Budget Sensitivity,budget_alpha_0.10,50,628,51.8578,ADHP (Adaptive Dual Hull Pruning),34.97,3.16,33.09,58,3,0,7,3,247.2622,47.4206
+Budget Sensitivity,budget_alpha_0.10,50,628,51.8578,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),21.57,3.62,19.45,70,2,0,8,3,247.2622,47.4206
+Budget Sensitivity,budget_alpha_0.10,50,628,51.8578,Dumitrescu-Boland (1D-Bounded Label Setting),7.11,1.29,5.39,94,1,1,10,4,247.2622,47.4206
+Budget Sensitivity,budget_alpha_0.10,50,628,51.8578,Pulse (Lozano & Medaglia 2013),6.26,0.92,5.04,102,2,0,10,0,247.2622,47.4206
+Budget Sensitivity,budget_alpha_0.10,50,628,51.8578,Martins (Standard Multi-Label Dijkstra),4.75,0.86,0.00,439,0,8,37,23,247.2622,47.4206
+Budget Sensitivity,budget_alpha_0.25,50,628,65.6226,ADHP (Adaptive Dual Hull Pruning),35.53,7.17,33.18,80,5,1,9,4,233.2401,59.7721
+Budget Sensitivity,budget_alpha_0.25,50,628,65.6226,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),15.78,0.38,14.18,103,5,1,11,4,233.2401,59.7721
+Budget Sensitivity,budget_alpha_0.25,50,628,65.6226,Dumitrescu-Boland (1D-Bounded Label Setting),7.01,0.60,5.24,129,4,3,16,7,233.2401,59.7721
+Budget Sensitivity,budget_alpha_0.25,50,628,65.6226,Pulse (Lozano & Medaglia 2013),6.25,0.25,4.73,160,6,0,15,0,233.2401,59.7721
+Budget Sensitivity,budget_alpha_0.25,50,628,65.6226,Martins (Standard Multi-Label Dijkstra),4.54,0.34,0.00,649,0,31,53,38,233.2401,59.7721
+Budget Sensitivity,budget_alpha_0.50,50,628,88.5640,ADHP (Adaptive Dual Hull Pruning),29.45,0.97,28.32,16,9,0,1,0,106.8022,86.7263
+Budget Sensitivity,budget_alpha_0.50,50,628,88.5640,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),21.24,5.49,19.87,44,9,0,4,2,106.8022,86.7263
+Budget Sensitivity,budget_alpha_0.50,50,628,88.5640,Dumitrescu-Boland (1D-Bounded Label Setting),9.60,0.75,6.78,72,8,1,14,9,106.8022,86.7263
+Budget Sensitivity,budget_alpha_0.50,50,628,88.5640,Pulse (Lozano & Medaglia 2013),10.50,0.62,7.08,198,13,0,19,0,106.8022,86.7263
+Budget Sensitivity,budget_alpha_0.50,50,628,88.5640,Martins (Standard Multi-Label Dijkstra),6.82,0.39,0.00,225,0,18,19,62,106.8022,86.7263
+Budget Sensitivity,budget_alpha_0.75,50,628,111.5054,ADHP (Adaptive Dual Hull Pruning),35.89,8.01,34.40,16,13,0,1,0,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.75,50,628,111.5054,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),21.07,3.47,19.63,39,15,0,4,2,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.75,50,628,111.5054,Dumitrescu-Boland (1D-Bounded Label Setting),9.40,0.45,6.38,64,13,3,19,14,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.75,50,628,111.5054,Pulse (Lozano & Medaglia 2013),14.70,2.27,7.74,460,45,0,47,0,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.75,50,628,111.5054,Martins (Standard Multi-Label Dijkstra),9.51,4.98,0.00,201,0,34,17,86,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.90,50,628,125.2702,ADHP (Adaptive Dual Hull Pruning),50.94,23.67,48.95,16,14,0,1,0,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.90,50,628,125.2702,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),24.48,1.63,22.44,69,26,0,8,4,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.90,50,628,125.2702,Dumitrescu-Boland (1D-Bounded Label Setting),10.03,0.67,6.21,64,22,4,28,23,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.90,50,628,125.2702,Pulse (Lozano & Medaglia 2013),14.66,1.29,6.44,684,106,0,70,0,84.7335,111.3558
+Budget Sensitivity,budget_alpha_0.90,50,628,125.2702,Martins (Standard Multi-Label Dijkstra),11.64,4.88,0.00,386,0,49,33,92,84.7335,111.3558
+Ablation K Facets,ablation_k2,70,1255,158.7409,ADHP (K=2),35.59,3.51,33.03,74,32,0,4,3,68.4189,28.6083
+Ablation K Facets,ablation_k3,70,1255,158.7409,ADHP (K=3),30.59,1.20,29.03,74,32,0,4,3,68.4189,28.6083
+Ablation K Facets,ablation_k5,70,1255,158.7409,ADHP (K=5),30.26,0.97,28.57,74,32,0,4,3,68.4189,28.6083
+Ablation K Facets,ablation_k8,70,1255,158.7409,ADHP (K=8),29.57,1.34,27.99,74,32,0,4,3,68.4189,28.6083
+Ablation K Facets,ablation_k12,70,1255,158.7409,ADHP (K=12),45.64,14.63,42.77,74,32,0,4,3,68.4189,28.6083
