@@ -33,7 +33,7 @@ Traditional exact algorithms encounter severe bottlenecks:
 ### The Multi-Faceted Adaptive Dual Hull (ADH)
 ADHP adaptively discovers a set of $K$ dual shadow prices $\Lambda = \{\lambda_1, \dots, \lambda_K\}$ on the biobjective lower hull and constructs a **discrete Legendre-Fenchel lower-bound envelope** across all vertices simultaneously:
 
-$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left\{ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right\}$$
+$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
 
 where $d_{\lambda_k}(u, t)$ is the backward shortest path distance from vertex $u$ to destination $t$ under composite metric $c_e + \lambda_k w_e$.
 

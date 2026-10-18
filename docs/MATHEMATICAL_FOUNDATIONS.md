@@ -37,7 +37,7 @@ Any completion path $P_{u, t} \in \mathcal{P}_{u, t}$ is feasible if and only if
 
 #### Definition 2.2 (Continuous Dual Lower-Bound Function)
 For any vertex $u \in V$ and remaining budget $\Delta w \ge 0$, the continuous Lagrangian dual lower-bound function $\mathcal{L}_u^*(\Delta w)$ is defined as:
-$$\mathcal{L}_u^*(\Delta w) = \sup_{\lambda \ge 0} \left\{ d_\lambda(u, t) - \lambda \Delta w \right\}$$
+$$\mathcal{L}_u^*(\Delta w) = \sup_{\lambda \ge 0} \left[ d_\lambda(u, t) - \lambda \Delta w \right]$$
 
 Notice that $\mathcal{L}_u^*(\Delta w)$ is precisely the **Legendre-Fenchel conjugate** of the concave function $\lambda \mapsto d_\lambda(u, t)$, evaluated at $-\Delta w$.
 
@@ -52,7 +52,7 @@ $$\Lambda = \{\lambda_1, \lambda_2, \dots, \lambda_K\}, \quad \text{where } 0 = 
 
 #### Definition 2.3 ($K$-Faceted Lower-Bound Envelope)
 For any vertex $u \in V$ and remaining budget $\Delta w \ge 0$, the $K$-faceted envelope $\mathcal{L}_u^\Lambda(\Delta w)$ is defined as:
-$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k \in \{1, \dots, K\}} \left\{ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right\}$$
+$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k \in \{1, \dots, K\}} \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
 
 ---
 
@@ -78,7 +78,7 @@ Substituting this into the inequality gives:
 $$c(P) \ge d_{\lambda_k}(u, t) - \lambda_k \Delta w$$
 
 Since this inequality holds independently for every index $k \in \{1, 2, \dots, K\}$, it holds for the maximum over all $k$:
-$$c(P) \ge \max_{k \in \{1, \dots, K\}} \left\{ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right\} = \mathcal{L}_u^\Lambda(\Delta w)$$
+$$c(P) \ge \max_{k \in \{1, \dots, K\}} \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right] = \mathcal{L}_u^\Lambda(\Delta w)$$
 This completes the proof. $\blacksquare$
 
 ---

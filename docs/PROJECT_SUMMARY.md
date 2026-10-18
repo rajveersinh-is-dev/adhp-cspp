@@ -18,7 +18,7 @@ CSPP is NP-hard in the weak sense and serves as the core subproblem in column ge
 Existing exact algorithms either suffer from exponential label explosion (Martins 1984), use loose 1D orthogonal bounds $d_c(u, t), d_w(u, t)$ (Dumitrescu & Boland 2003, Lozano & Medaglia 2013), or rely on a single static Lagrangian multiplier $\lambda^*_{s,t}$ computed at the search root (Carlyle & Wood 2008).
 
 **ADHP** discovers a set of $K$ dual slopes $\Lambda = \{\lambda_1, \dots, \lambda_K\}$ on the biobjective lower hull and constructs a discrete Legendre-Fenchel lower-bound envelope across all vertices simultaneously:
-$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left\{ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right\}$$
+$$\mathcal{L}_u^\Lambda(\Delta w) = \max_{k=1}^K \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
 where $d_{\lambda_k}(u, t)$ is the shortest path distance from $u$ to $t$ under edge weights $c_e + \lambda_k w_e$.
 
 We prove:

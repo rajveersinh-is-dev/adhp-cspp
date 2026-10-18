@@ -25,7 +25,7 @@
 1. **Local vs. Global Dual Projection**:
    - Carlyle & Wood (2008) find the optimal multiplier $\lambda^*$ for the single pair $(s, t)$ by solving the root Lagrangian dual. When evaluating a partial path at an intermediate node $u$, they only have access to the distance $d_{\lambda^*}(u, t)$. However, the local constrained shortest path from $u$ to $t$ with remaining budget $\Delta w = W - w$ may have an optimal dual shadow price $\lambda_u^*(\Delta w)$ that is completely different from $\lambda^*_{s,t}$.
    - ADHP does not restrict the dual space to a single slope. It constructs a **discrete Legendre-Fenchel envelope** across $K$ supporting hyperplanes simultaneously. For any intermediate vertex $u$ and any arbitrary remaining budget $\Delta w$, ADHP computes:
-     $$\mathcal{L}_u(\Delta w) = \max_{k \in \{1, \dots, K\}} \left\{ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right\}$$
+     $$\mathcal{L}_u(\Delta w) = \max_{k \in \{1, \dots, K\}} \left[ d_{\lambda_k}(u, t) - \lambda_k \Delta w \right]$$
    - This envelope provides a locally active tangent that matches the curvature of the Pareto lower hull at $u$.
 
 2. **Beyond 1D Bounding (Dumitrescu-Boland & Pulse)**:
