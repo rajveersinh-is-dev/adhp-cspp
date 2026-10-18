@@ -49,22 +49,42 @@ fn main() {
             (
                 format!("anticorr_n{}_s{}", 15 + (seed % 5) * 5, seed),
                 "Anti-Correlated".to_string(),
-                generate_anticorrelated_instance(15 + (seed % 5) * 5, 0.25, 0.20 + (seed as f64 % 5.0) * 0.12, (seed as u64) * 100),
+                generate_anticorrelated_instance(
+                    15 + (seed % 5) * 5,
+                    0.25,
+                    0.20 + (seed as f64 % 5.0) * 0.12,
+                    (seed as u64) * 100,
+                ),
             ),
             (
                 format!("grid_{}x{}_s{}", 3 + (seed % 4), 3 + (seed % 4), seed),
                 format!("Grid {}x{}", 3 + (seed % 4), 3 + (seed % 4)),
-                generate_grid_instance(3 + (seed % 4), 3 + (seed % 4), 0.35 + (seed as f64 % 4.0) * 0.10, (seed as u64) * 200),
+                generate_grid_instance(
+                    3 + (seed % 4),
+                    3 + (seed % 4),
+                    0.35 + (seed as f64 % 4.0) * 0.10,
+                    (seed as u64) * 200,
+                ),
             ),
             (
                 format!("random_n{}_s{}", 20 + (seed % 6) * 5, seed),
                 "Random ER".to_string(),
-                generate_random_instance(20 + (seed % 6) * 5, 0.22, 0.40 + (seed as f64 % 5.0) * 0.08, (seed as u64) * 300),
+                generate_random_instance(
+                    20 + (seed % 6) * 5,
+                    0.22,
+                    0.40 + (seed as f64 % 5.0) * 0.08,
+                    (seed as u64) * 300,
+                ),
             ),
             (
                 format!("anticorr_dense_n{}_s{}", 20 + (seed % 4) * 8, seed),
                 "Anti-Correlated Dense".to_string(),
-                generate_anticorrelated_instance(20 + (seed % 4) * 8, 0.40, 0.50, (seed as u64) * 500 + 77),
+                generate_anticorrelated_instance(
+                    20 + (seed % 4) * 8,
+                    0.40,
+                    0.50,
+                    (seed as u64) * 500 + 77,
+                ),
             ),
         ];
 

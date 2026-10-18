@@ -160,7 +160,10 @@ fn test_zero_cost_zero_weight_cycle_termination() {
     assert_eq!(sol.status, SolutionStatus::Optimal);
     assert!((sol.cost - 10.0).abs() < 1e-9);
     assert!((sol.weight - 4.0).abs() < 1e-9);
-    assert!(sol.path.len() <= 4, "Path should not endlessly loop in cycle");
+    assert!(
+        sol.path.len() <= 4,
+        "Path should not endlessly loop in cycle"
+    );
 }
 
 #[test]
@@ -197,4 +200,3 @@ fn test_floating_point_epsilon_near_tie() {
     assert_eq!(sol.status, SolutionStatus::Optimal);
     assert!(sol.cost <= 10.000000001 + 1e-8);
 }
-

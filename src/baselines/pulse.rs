@@ -71,7 +71,10 @@ impl PulseSolver {
             stats.peak_queue_size = current_path.len();
             let est_mem = current_path.capacity() * std::mem::size_of::<usize>()
                 + std::mem::size_of_val(visited)
-                + memory.iter().map(|m| m.points.capacity() * std::mem::size_of::<(f64, f64)>()).sum::<usize>();
+                + memory
+                    .iter()
+                    .map(|m| m.points.capacity() * std::mem::size_of::<(f64, f64)>())
+                    .sum::<usize>();
             if est_mem > stats.peak_memory_bytes {
                 stats.peak_memory_bytes = est_mem;
             }

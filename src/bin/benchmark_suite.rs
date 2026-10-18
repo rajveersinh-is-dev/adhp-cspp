@@ -235,14 +235,7 @@ fn main() {
     for &(r, c) in &[(4, 4), (6, 6), (8, 8), (10, 10)] {
         let n = r * c;
         let instances: Vec<CsppInstance> = (1..=num_instances_per_config)
-            .map(|s| {
-                generate_grid_instance(
-                    r,
-                    c,
-                    0.45,
-                    (n as u64) * 2000 + (s as u64) * 88 + 17,
-                )
-            })
+            .map(|s| generate_grid_instance(r, c, 0.45, (n as u64) * 2000 + (s as u64) * 88 + 17))
             .collect();
 
         let avg_edges =
@@ -300,12 +293,7 @@ fn main() {
     for &n in &[30, 60, 90, 120] {
         let instances: Vec<CsppInstance> = (1..=num_instances_per_config)
             .map(|s| {
-                generate_random_instance(
-                    n,
-                    0.20,
-                    0.45,
-                    (n as u64) * 3000 + (s as u64) * 99 + 23,
-                )
+                generate_random_instance(n, 0.20, 0.45, (n as u64) * 3000 + (s as u64) * 99 + 23)
             })
             .collect();
 
@@ -348,7 +336,9 @@ fn main() {
     // =========================================================================
     // SUITE 4: Budget Tightness Sensitivity (alpha = 0.10 to 0.90)
     // =========================================================================
-    println!("\n>>> SUITE 4: Budget Factor Sensitivity (alpha = 0.10 to 0.90, 10 instances/alpha)...");
+    println!(
+        "\n>>> SUITE 4: Budget Factor Sensitivity (alpha = 0.10 to 0.90, 10 instances/alpha)..."
+    );
     for &alpha in &[0.10, 0.25, 0.50, 0.75, 0.90] {
         let instances: Vec<CsppInstance> = (1..=num_instances_per_config)
             .map(|s| {
@@ -397,14 +387,7 @@ fn main() {
     // =========================================================================
     println!("\n>>> SUITE 5: Ablation Study: Facet Count K (K = 1, 2, 3, 5, 8, 12)...");
     let ablation_instances: Vec<CsppInstance> = (1..=num_instances_per_config)
-        .map(|s| {
-            generate_anticorrelated_instance(
-                70,
-                0.25,
-                0.40,
-                7000 + (s as u64) * 31 + 7,
-            )
-        })
+        .map(|s| generate_anticorrelated_instance(70, 0.25, 0.40, 7000 + (s as u64) * 31 + 7))
         .collect();
 
     for &k in &[1, 2, 3, 5, 8, 12] {
