@@ -31,6 +31,7 @@ plt.rcParams['legend.fontsize'] = 10
 
 colors = {
     'ADHP (Adaptive Dual Hull Pruning)': '#1f77b4',
+    'Adaptive Hybrid ADHP': '#00a86b',
     'Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding)': '#ff7f0e',
     'Dumitrescu-Boland (1D-Bounded Label Setting)': '#2ca02c',
     'Martins (Standard Multi-Label Dijkstra)': '#d62728',
