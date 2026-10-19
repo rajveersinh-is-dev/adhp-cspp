@@ -7,8 +7,8 @@ use adhp_cspp::instance_generator::{
     generate_anticorrelated_instance, generate_grid_instance, generate_random_instance,
 };
 use adhp_cspp::{
-    AdhpSolver, CarlyleWoodSolver, CsppSolver, DumitrescuBolandSolver, MartinsSolver, PulseSolver,
-    SolutionStatus,
+    AdhpSolver, CarlyleWoodSolver, CsppSolver, DumitrescuBolandSolver, HybridAdhpSolver,
+    MartinsSolver, PulseSolver, SolutionStatus,
 };
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -60,6 +60,7 @@ fn main() {
     println!("=== ADHP-CSPP: Running Differential Testing Against 4 Baselines (100 Instances) ===");
 
     let adhp = AdhpSolver::new(5);
+    let hybrid = HybridAdhpSolver::new();
     let martins = MartinsSolver::new();
     let dumitrescu = DumitrescuBolandSolver::new();
     let pulse = PulseSolver::new();
@@ -125,6 +126,7 @@ fn main() {
         for (id, family, inst) in instances {
             total_verified += 1;
             let sol_adhp = adhp.solve(&inst);
+            let sol_hybrid = hybrid.solve(&inst);
             let sol_martins = martins.solve(&inst);
             let sol_db = dumitrescu.solve(&inst);
             let sol_pulse = pulse.solve(&inst);
@@ -137,17 +139,19 @@ fn main() {
                 || sol_adhp.status != sol_db.status
                 || sol_adhp.status != sol_pulse.status
                 || sol_adhp.status != sol_cw.status
+                || sol_adhp.status != sol_hybrid.status
             {
                 agreed = false;
                 println!(
-                    "[DISCREPANCY STATUS] Instance: {} | ADHP: {:?}, Martins: {:?}, DB: {:?}, Pulse: {:?}, CW: {:?}",
-                    id, sol_adhp.status, sol_martins.status, sol_db.status, sol_pulse.status, sol_cw.status
+                    "[DISCREPANCY STATUS] Instance: {} | ADHP: {:?}, Hybrid: {:?}, Martins: {:?}, DB: {:?}, Pulse: {:?}, CW: {:?}",
+                    id, sol_adhp.status, sol_hybrid.status, sol_martins.status, sol_db.status, sol_pulse.status, sol_cw.status
                 );
             }
 
             if sol_adhp.status == SolutionStatus::Optimal {
                 let c_ref = sol_adhp.cost;
                 for (name, sol) in [
+                    ("Hybrid", &sol_hybrid),
                     ("Martins", &sol_martins),
                     ("DB", &sol_db),
                     ("Pulse", &sol_pulse),

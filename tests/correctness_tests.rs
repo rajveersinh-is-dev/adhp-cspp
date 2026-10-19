@@ -75,8 +75,10 @@ fn test_differential_agreement_across_all_solvers() {
     let dumitrescu = DumitrescuBolandSolver::new();
     let pulse = PulseSolver::new();
     let carlyle = CarlyleWoodSolver::new();
+    let hybrid = adhp_cspp::HybridAdhpSolver::new();
 
-    let solvers: Vec<&dyn CsppSolver> = vec![&adhp, &martins, &dumitrescu, &pulse, &carlyle];
+    let solvers: Vec<&dyn CsppSolver> =
+        vec![&adhp, &hybrid, &martins, &dumitrescu, &pulse, &carlyle];
 
     // Run differential tests over 15 distinct generated instances (random, anticorrelated, grid)
     for seed in 1..=5 {
@@ -554,4 +556,230 @@ fn test_float_to_integer_scaling() {
     assert_eq!(sol.path, vec![0, 1, 2]);
     assert_eq!(sol.cost, 375); // (1.25 + 2.50) * 100
     assert_eq!(sol.weight, 125); // (0.50 + 0.75) * 100
+}
+
+#[test]
+fn test_composite_metric_overflow_regression() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    // Regression test for 128-bit exact composite metric arithmetic.
+    // In u64 arithmetic, composite metric c_e * den + w_e * num overflows u64::MAX (~1.84e19)
+    // when edge metrics and path differences are on the order of 10^10 (composite metric ~ 2e20).
+    // In the old 64-bit implementation, this overflowed to u64::MAX, causing reverse Dijkstra
+    // to drop valid edges and corrupting dual lower bounds.
+    let mut g = IntDirectedGraph::new(4);
+    // Path 1 (feasible): 0 -> 1 -> 3: cost = 2e10, weight = 1.5e10
+    g.add_edge(0, 1, 10_000_000_000, 7_500_000_000);
+    g.add_edge(1, 3, 10_000_000_000, 7_500_000_000);
+
+    // Path 2 (cheaper but infeasible): 0 -> 2 -> 3: cost = 1.5e10, weight = 3e10
+    g.add_edge(0, 2, 7_500_000_000, 15_000_000_000);
+    g.add_edge(2, 3, 7_500_000_000, 15_000_000_000);
+
+    let budget = 20_000_000_000; // Allows Path 1 (1.5e10 <= 2e10), disallows Path 2 (3e10 > 2e10)
+    let inst = IntCsppInstance::new(g, 0, 3, budget);
+
+    let solver = IntAdhpSolver::new(5);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 3]);
+    assert_eq!(sol.cost, 20_000_000_000);
+    assert_eq!(sol.weight, 15_000_000_000);
+}
+
+#[test]
+fn test_exact_budget_equality() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    let mut g = IntDirectedGraph::new(3);
+    g.add_edge(0, 1, 10, 50);
+    g.add_edge(1, 2, 10, 50);
+
+    // Total weight is exactly 100. Budget is exactly 100.
+    let inst = IntCsppInstance::new(g, 0, 2, 100);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 2]);
+    assert_eq!(sol.cost, 20);
+    assert_eq!(sol.weight, 100);
+}
+
+#[test]
+fn test_multiple_equal_optima() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    let mut g = IntDirectedGraph::new(4);
+    // Two completely symmetric paths from 0 to 3 with identical cost and weight
+    g.add_edge(0, 1, 15, 20);
+    g.add_edge(1, 3, 15, 20);
+
+    g.add_edge(0, 2, 15, 20);
+    g.add_edge(2, 3, 15, 20);
+
+    let inst = IntCsppInstance::new(g, 0, 3, 50);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert!(sol.path == vec![0, 1, 3] || sol.path == vec![0, 2, 3]);
+    assert_eq!(sol.cost, 30);
+    assert_eq!(sol.weight, 40);
+}
+
+#[test]
+fn test_all_candidate_paths_infeasible() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    let mut g = IntDirectedGraph::new(3);
+    g.add_edge(0, 1, 10, 100);
+    g.add_edge(1, 2, 10, 100);
+
+    // Budget = 150 < 200: all paths strictly infeasible
+    let inst = IntCsppInstance::new(g, 0, 2, 150);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Infeasible);
+    assert!(sol.path.is_empty());
+}
+
+#[test]
+fn test_combinatorial_exhaustive_dfs_oracle() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+
+    // Independent Ground-Truth Combinatorial DFS Oracle:
+    // Enumerates all elementary simple paths, computes cost and weight, and finds exact minimum.
+    struct DfsExplorer<'a> {
+        graph: &'a IntDirectedGraph,
+        target: usize,
+        budget: u64,
+        visited: Vec<bool>,
+        path: Vec<usize>,
+        best: Option<(u64, u64, Vec<usize>)>,
+    }
+
+    impl DfsExplorer<'_> {
+        fn dfs(&mut self, u: usize, c_cur: u64, w_cur: u64) {
+            if u == self.target {
+                if w_cur <= self.budget {
+                    match self.best {
+                        Some((b_c, b_w, _)) => {
+                            if c_cur < b_c || (c_cur == b_c && w_cur < b_w) {
+                                self.best = Some((c_cur, w_cur, self.path.clone()));
+                            }
+                        }
+                        None => {
+                            self.best = Some((c_cur, w_cur, self.path.clone()));
+                        }
+                    }
+                }
+                return;
+            }
+
+            for edge in self.graph.outgoing_edges(u) {
+                let v = edge.target;
+                if !self.visited[v] {
+                    if let (Some(new_c), Some(new_w)) =
+                        (c_cur.checked_add(edge.cost), w_cur.checked_add(edge.weight))
+                    {
+                        if new_w <= self.budget {
+                            self.visited[v] = true;
+                            self.path.push(v);
+                            self.dfs(v, new_c, new_w);
+                            self.path.pop();
+                            self.visited[v] = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn solve_exhaustive_dfs(
+        graph: &IntDirectedGraph,
+        s: usize,
+        t: usize,
+        budget: u64,
+    ) -> Option<(u64, u64, Vec<usize>)> {
+        let n = graph.num_nodes();
+        let mut explorer = DfsExplorer {
+            graph,
+            target: t,
+            budget,
+            visited: vec![false; n],
+            path: vec![s],
+            best: None,
+        };
+        explorer.visited[s] = true;
+        explorer.dfs(s, 0, 0);
+        explorer.best
+    }
+
+    let solver = IntAdhpSolver::new(4);
+
+    // Differential test over 30 randomized pseudo-random micro-instances (n=8)
+    for seed in 1..=30 {
+        let n = 8;
+        let mut g = IntDirectedGraph::new(n);
+        let mut rng_state = (seed as u64)
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+
+        for u in 0..n {
+            for v in 0..n {
+                if u != v {
+                    rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                    if (rng_state % 100) < 35 {
+                        let cost = (rng_state % 50) + 1;
+                        rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                        let weight = (rng_state % 50) + 1;
+                        g.add_edge(u, v, cost, weight);
+                    }
+                }
+            }
+        }
+
+        let budget = 40 + (seed as u64 * 3) % 40;
+        let s = 0;
+        let t = n - 1;
+
+        let oracle_res = solve_exhaustive_dfs(&g, s, t, budget);
+        let inst = IntCsppInstance::new(g, s, t, budget);
+        let adhp_res = solver.solve(&inst);
+
+        match oracle_res {
+            Some((expected_cost, _expected_weight, _)) => {
+                assert_eq!(
+                    adhp_res.status,
+                    SolutionStatus::Optimal,
+                    "Instance seed {}: Oracle found feasible path with cost {}, but ADHP reported {:?}",
+                    seed, expected_cost, adhp_res.status
+                );
+                assert_eq!(
+                    adhp_res.cost, expected_cost,
+                    "Instance seed {}: Cost mismatch! Expected {}, got {}",
+                    seed, expected_cost, adhp_res.cost
+                );
+                assert!(
+                    adhp_res.weight <= budget,
+                    "Instance seed {}: Returned weight {} exceeds budget {}",
+                    seed,
+                    adhp_res.weight,
+                    budget
+                );
+            }
+            None => {
+                assert_eq!(
+                    adhp_res.status,
+                    SolutionStatus::Infeasible,
+                    "Instance seed {}: Oracle proved infeasible, but ADHP returned {:?}",
+                    seed,
+                    adhp_res.status
+                );
+            }
+        }
+    }
 }
