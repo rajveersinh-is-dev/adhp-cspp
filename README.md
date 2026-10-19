@@ -164,7 +164,7 @@ cd adhp-cspp
 # 1. Run all unit, property, and adversarial regression tests (0 failures)
 cargo test
 
-# 2. Run 100-instance differential verification against 4 solvers and HiGHS MILP oracle
+# 2. Run 150-instance differential verification against 4 baseline solvers and HiGHS MILP oracle (100 float + 50 integer)
 cargo run --bin verify_oracle --release
 python scripts/verify_against_ilp.py
 

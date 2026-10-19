@@ -42,7 +42,7 @@ A critical negative result uncovered by our ablation study (Suite 5, $n=70$ Anti
 #### 3.1 128-Bit Integer Domain Bounds (`IntAdhpSolver`)
 - The composite metric evaluated in Dijkstra is $c_e \cdot \text{den} + w_e \cdot \text{num}$.
 - The maximum possible composite path length is bounded by $2 \cdot C_{\max} \cdot W_{\max}$.
-- Because `IntAdhpSolver` uses `u128`, the maximum allowable sum of edge costs and weights is $\approx 1.3 \times 10^{19}$. If total edge costs or weights exceed this, integer overflow is signaled and the solver returns `SolutionStatus::Infeasible` with zero corruption.
+- Because `IntAdhpSolver` uses `u128`, the maximum allowable sum of edge costs and weights is $\approx 1.3 \times 10^{19}$. If total edge costs or weights exceed this representation limit, arithmetic overflow is detected via checked operations and the solver returns `SolutionStatus::ArithmeticOverflow`, safely terminating without false pruning, silent edge omission, or false claims of infeasibility.
 
 #### 3.2 Floating-Point Epsilon Tolerances (`AdhpSolver`)
 - Under IEEE 754 double precision (`f64`), recursive addition of edge weights along long paths accumulates rounding error bounded by Higham's summation theorem ($|\text{fl}(S) - S| \le \gamma_n S \approx 2.3 \times 10^{-11} S$).

@@ -269,19 +269,56 @@ fn test_invalid_inputs_and_edge_cases() {
     assert!(g.add_edge(0, 1, 5.0, 2.0));
     assert!(g.add_edge(1, 2, 5.0, 2.0));
 
-    let solver = AdhpSolver::new(3);
+    let solvers: Vec<Box<dyn CsppSolver>> = vec![
+        Box::new(AdhpSolver::new(3)),
+        Box::new(adhp_cspp::HybridAdhpSolver::new()),
+        Box::new(MartinsSolver::new()),
+        Box::new(DumitrescuBolandSolver::new()),
+        Box::new(PulseSolver::new()),
+        Box::new(CarlyleWoodSolver::new()),
+    ];
 
-    // Negative budget
+    // Negative budget -> Mathematically Infeasible (non-negative edge weights can never be <= -1.0)
     let inst_neg = CsppInstance::new(g.clone(), 0, 2, -1.0);
-    assert_eq!(solver.solve(&inst_neg).status, SolutionStatus::Infeasible);
+    for s in &solvers {
+        assert_eq!(
+            s.solve(&inst_neg).status,
+            SolutionStatus::Infeasible,
+            "Solver {} on negative budget",
+            s.name()
+        );
+    }
 
-    // NaN budget
+    // NaN budget -> UnsupportedInput
     let inst_nan = CsppInstance::new(g.clone(), 0, 2, f64::NAN);
-    assert_eq!(solver.solve(&inst_nan).status, SolutionStatus::Infeasible);
+    for s in &solvers {
+        assert_eq!(
+            s.solve(&inst_nan).status,
+            SolutionStatus::UnsupportedInput,
+            "Solver {} on NaN budget",
+            s.name()
+        );
+    }
 
-    // Out of bounds source / target
-    let inst_oob = CsppInstance::new(g.clone(), 99, 2, 10.0);
-    assert_eq!(solver.solve(&inst_oob).status, SolutionStatus::Infeasible);
+    // Out of bounds source / target -> UnsupportedInput
+    let inst_oob_s = CsppInstance::new(g.clone(), 99, 2, 10.0);
+    for s in &solvers {
+        assert_eq!(
+            s.solve(&inst_oob_s).status,
+            SolutionStatus::UnsupportedInput,
+            "Solver {} on oob source",
+            s.name()
+        );
+    }
+    let inst_oob_t = CsppInstance::new(g.clone(), 0, 99, 10.0);
+    for s in &solvers {
+        assert_eq!(
+            s.solve(&inst_oob_t).status,
+            SolutionStatus::UnsupportedInput,
+            "Solver {} on oob target",
+            s.name()
+        );
+    }
 
     // add_edge rejection of negative/infinite values
     let mut bad_g = DirectedGraph::new(2);

@@ -140,8 +140,20 @@ impl CsppSolver for AdhpSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        // Validate inputs: reject non-finite or negative budget, or invalid source/target.
-        if !budget.is_finite() || budget < 0.0 || s >= n || t >= n {
+        // Validate inputs: reject non-finite/NaN budget or invalid source/target as UnsupportedInput.
+        if s >= n || t >= n || budget.is_nan() {
+            stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+            return CsppSolution {
+                status: SolutionStatus::UnsupportedInput,
+                path: Vec::new(),
+                edge_path: Vec::new(),
+                cost: f64::INFINITY,
+                weight: f64::INFINITY,
+                stats,
+            };
+        }
+
+        if budget < 0.0 {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,

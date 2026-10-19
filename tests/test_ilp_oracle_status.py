@@ -74,10 +74,10 @@ class TestIlpStatusClassification(unittest.TestCase):
                 "adhp_status": "Optimal",
                 "adhp_cost": 1.0,
                 "adhp_weight": 1.0,
+                "adhp_edge_path": [0],
             }
         ]
 
-        # Monkey-patch solve_cspp_ilp to return TIMEOUT
         import scripts.verify_against_ilp as ilp_mod
         orig_solve = ilp_mod.solve_cspp_ilp
 
@@ -91,6 +91,83 @@ class TestIlpStatusClassification(unittest.TestCase):
         finally:
             ilp_mod.solve_cspp_ilp = orig_solve
 
+    def test_validate_edge_path_correctness(self):
+        """Validates path topology, edge continuity, cost/weight recalculation."""
+        from scripts.verify_against_ilp import validate_edge_path
+
+        edges = [
+            {"from": 0, "to": 1, "cost": 10, "weight": 5},
+            {"from": 1, "to": 2, "cost": 15, "weight": 8},
+            {"from": 0, "to": 2, "cost": 100, "weight": 2},
+        ]
+
+        # Valid 2-edge path (0 -> 1 -> 2)
+        valid, cost, weight, err = validate_edge_path(edges, 0, 2, 20, [0, 1])
+        self.assertTrue(valid)
+        self.assertEqual(cost, 25)
+        self.assertEqual(weight, 13)
+        self.assertIsNone(err)
+
+        # Budget exceeded (weight 13 > budget 10)
+        valid, cost, weight, err = validate_edge_path(edges, 0, 2, 10, [0, 1])
+        self.assertFalse(valid)
+        self.assertIn("exceeds budget", err)
+
+        # Disconnected edges (step 0 ends at 1, step 1 starts at 0)
+        valid, _, _, err = validate_edge_path(edges, 0, 2, 20, [0, 2])
+        self.assertFalse(valid)
+        self.assertIn("starts at 0, expected 1", err)
+
+        # Wrong target (path ends at 1, expected 2)
+        valid, _, _, err = validate_edge_path(edges, 0, 2, 20, [0])
+        self.assertFalse(valid)
+        self.assertIn("expected target 2", err)
+
+    def test_integer_ilp_differential_mutations(self):
+        """Tests that verify_integer_instances_against_ilp detects discrepancies when mutated."""
+        from scripts.verify_against_ilp import verify_integer_instances_against_ilp
+
+        base_inst = {
+            "instance_id": "test_int_1",
+            "family": "synthetic",
+            "num_nodes": 3,
+            "source": 0,
+            "target": 2,
+            "budget": 20,
+            "edges": [
+                {"from": 0, "to": 1, "cost": 5, "weight": 5},
+                {"from": 1, "to": 2, "cost": 5, "weight": 5},
+            ],
+            "int_adhp_status": "Optimal",
+            "int_adhp_cost": 10,
+            "int_adhp_weight": 10,
+            "int_adhp_edge_path": [0, 1],
+        }
+
+        # 1. Genuine instance passes
+        res = verify_integer_instances_against_ilp([base_inst])
+        self.assertEqual(res["verified_optimal"], 1)
+        self.assertEqual(len(res["discrepancies"]), 0)
+
+        # 2. Mutated cost triggers discrepancy
+        mutated_cost = dict(base_inst, int_adhp_cost=999)
+        res = verify_integer_instances_against_ilp([mutated_cost])
+        self.assertEqual(len(res["discrepancies"]), 1)
+        self.assertIn("cost mismatch", res["discrepancies"][0].lower())
+
+        # 3. Mutated status triggers discrepancy
+        mutated_status = dict(base_inst, int_adhp_status="Infeasible")
+        res = verify_integer_instances_against_ilp([mutated_status])
+        self.assertEqual(len(res["discrepancies"]), 1)
+        self.assertIn("reported Infeasible", res["discrepancies"][0])
+
+        # 4. Mutated path (corrupted edge index) triggers discrepancy
+        mutated_path = dict(base_inst, int_adhp_edge_path=[0])
+        res = verify_integer_instances_against_ilp([mutated_path])
+        self.assertEqual(len(res["discrepancies"]), 1)
+        self.assertIn("Invalid path", res["discrepancies"][0])
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -29,12 +29,14 @@ class TestBenchmarkVerifier(unittest.TestCase):
     def setUp(self):
         self.raw_csv = os.path.join(REPO_ROOT, "results", "raw", "benchmark_raw.csv")
         self.summary_csv = os.path.join(REPO_ROOT, "results", "processed", "summary_table.csv")
+        self.instances_json = os.path.join(REPO_ROOT, "results", "raw", "benchmark_instances.json")
         self.assertTrue(os.path.exists(self.raw_csv), "Raw benchmark CSV missing")
         self.assertTrue(os.path.exists(self.summary_csv), "Summary table CSV missing")
+        self.assertTrue(os.path.exists(self.instances_json), "Benchmark instances JSON missing")
 
     def test_genuine_data_passes(self):
         """Genuine dataset passes all consistency assertions."""
-        self.assertTrue(verify_benchmarks(self.raw_csv, self.summary_csv))
+        self.assertTrue(verify_benchmarks(self.raw_csv, self.summary_csv, self.instances_json))
 
     def test_missing_column_fails(self):
         """Dropping a required column must fail verification."""
@@ -46,7 +48,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv)
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -61,7 +63,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv)
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -76,7 +78,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv)
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -92,7 +94,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv)
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -110,7 +112,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(self.raw_csv, temp_path)
+                verify_benchmarks(self.raw_csv, temp_path, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -129,7 +131,62 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
         try:
             with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv)
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    def test_corrupted_instance_registry_count_fails(self):
+        """Instance registry with missing evaluation record must fail verification."""
+        import json
+        with open(self.instances_json, 'r', encoding='utf-8') as f:
+            insts = json.load(f)
+        corrupted_insts = insts[:-1]  # Drop one record
+        with tempfile.NamedTemporaryFile(suffix=".json", mode="w", delete=False) as tf:
+            json.dump(corrupted_insts, tf)
+            temp_path = tf.name
+
+        try:
+            with self.assertRaises(AssertionError):
+                verify_benchmarks(self.raw_csv, self.summary_csv, temp_path)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    def test_corrupted_instance_identity_deduplication_fails(self):
+        """Instance registry where canonical graph_id is duplicated across distinct instances must fail."""
+        import json
+        with open(self.instances_json, 'r', encoding='utf-8') as f:
+            insts = json.load(f)
+        corrupted_insts = list(insts)
+        # Force instance 1 and instance 2 to have identical hash in Suite 1, reducing distinct count to 199
+        corrupted_insts[1]['graph_id'] = corrupted_insts[0]['graph_id']
+        with tempfile.NamedTemporaryFile(suffix=".json", mode="w", delete=False) as tf:
+            json.dump(corrupted_insts, tf)
+            temp_path = tf.name
+
+        try:
+            with self.assertRaises(AssertionError):
+                verify_benchmarks(self.raw_csv, self.summary_csv, temp_path)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    def test_corrupted_published_headline_fails(self):
+        """Mutating a published headline value in raw benchmark data must fail verification."""
+        df = pd.read_csv(self.raw_csv)
+        df_corrupted = df.copy()
+        # Mutate Grid 10x10 Hybrid runtime from 33.74 to 999.0
+        g10_idx = df_corrupted[(df_corrupted['instance_name'] == 'grid_10x10') & 
+                               (df_corrupted['solver_name'] == 'Adaptive Hybrid ADHP')].index[0]
+        df_corrupted.loc[g10_idx, 'mean_runtime_micros'] = 999.0
+        with tempfile.NamedTemporaryFile(suffix=".csv", mode="w", delete=False) as tf:
+            df_corrupted.to_csv(tf.name, index=False)
+            temp_path = tf.name
+
+        try:
+            with self.assertRaises(AssertionError):
+                verify_benchmarks(temp_path, self.summary_csv, self.instances_json)
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)

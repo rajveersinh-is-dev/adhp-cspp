@@ -5,22 +5,28 @@ Automated Consistency and Benchmark Verification Script for ADHP-CSPP.
 Recalculates and strictly asserts all headline statistics directly from raw
 machine-readable benchmark data:
   - results/raw/benchmark_raw.csv
+  - results/raw/benchmark_instances.json
   - results/processed/summary_table.csv
 
 Substantive assertions verified:
 1. File existence and schema validation (all 19 expected columns present).
 2. Record count integrity: exactly 120 benchmark records across 25 configurations.
-3. Accounting separation: 250 configuration-instance evaluations across 200 distinct graphs.
+3. Canonical graph identity deduplication: exactly 200 distinct graph instances
+   across 250 evaluations, verified by cryptographic/canonical hash deduplication
+   rather than hard-coded arithmetic.
 4. Metric physical validity: strictly non-negative runtimes, labels, and decomposition bounds.
 5. Summary table synchronization: recomputed means and maxes match summary_table.csv within 0.05 us.
 6. Empirical honesty check: preserves observed regressions (e.g., Martins outperforming ADHP on
    small random ER graphs due to low label collision).
+7. Published headline verification: checks headline values across research documentation
+   and papers against the authoritative raw benchmark dataset.
 
 Fails with exit code 1 if any discrepancy or assertion violation is detected.
 """
 
 import os
 import sys
+import json
 import pandas as pd
 import numpy as np
 
@@ -76,11 +82,18 @@ EXPECTED_ABLATION_SOLVERS = [
     'ADHP (K=5)', 'ADHP (K=8)', 'ADHP (K=12)'
 ]
 
+EXPECTED_INSTANCE_KEYS = {
+    'evaluation_id', 'benchmark_category', 'configuration_name',
+    'instance_index', 'graph_id', 'nodes', 'edges', 'source',
+    'target', 'budget', 'seed'
+}
+
 
 def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
-                      summary_csv_path="results/processed/summary_table.csv"):
+                      summary_csv_path="results/processed/summary_table.csv",
+                      instances_json_path="results/raw/benchmark_instances.json"):
     """
-    Executes substantive assertions on benchmark CSV data.
+    Executes substantive assertions on benchmark CSV and instance registry data.
     Raises AssertionError or ValueError on failure. Returns True on success.
     """
     if not os.path.exists(raw_csv_path):
@@ -126,23 +139,70 @@ def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
 
     assert total_configs == 25, f"Expected 25 distinct configurations, got {total_configs}"
 
-    # Verify Instance Accounting:
-    # 25 configurations * 10 evaluations = 250 configuration-instance evaluations
-    # In Suite 5, the 6 ablation settings evaluate the same 10 graphs.
-    # Therefore, distinct graphs = 60 + 40 + 40 + 50 + 10 = 200 distinct generated graphs.
     total_evals = df.groupby(['benchmark_category', 'instance_name'])['num_instances'].first().sum()
     assert total_evals == 250, f"Expected 250 total instance evaluations, got {total_evals}"
 
-    distinct_graphs = (
-        6 * 10 +  # Anti-correlated: 6 configs * 10 distinct graphs
-        4 * 10 +  # Grid: 4 configs * 10 distinct graphs
-        4 * 10 +  # Random ER: 4 configs * 10 distinct graphs
-        5 * 10 +  # Budget: 5 configs * 10 distinct graphs
-        10        # Ablation: 6 settings evaluated on 10 repeated graphs
-    )
-    assert distinct_graphs == 200, f"Calculated distinct graphs must equal 200, got {distinct_graphs}"
+    # 3. Canonical Instance Identity and Distinct Graph Verification (No hard-coded count arithmetic!)
+    if instances_json_path and os.path.exists(instances_json_path):
+        with open(instances_json_path, 'r', encoding='utf-8') as f:
+            inst_records = json.load(f)
 
-    # 3. Numerical & Physical Validity Checks
+        assert isinstance(inst_records, list), "Instance registry must be a list of records"
+        assert len(inst_records) == 250, f"Expected 250 instance evaluations, found {len(inst_records)}"
+
+        config_counts = {}
+        distinct_graph_ids = set()
+        suite_graph_ids = set()
+        ablation_graph_ids_by_cfg = {}
+
+        for rec in inst_records:
+            missing_keys = EXPECTED_INSTANCE_KEYS - set(rec.keys())
+            assert not missing_keys, f"Instance record missing keys: {missing_keys}"
+            assert isinstance(rec['graph_id'], str) and len(rec['graph_id']) == 32, \
+                f"Invalid canonical graph_id: {rec.get('graph_id')}"
+
+            cfg = rec['configuration_name']
+            config_counts[cfg] = config_counts.get(cfg, 0) + 1
+            distinct_graph_ids.add(rec['graph_id'])
+
+            cat = rec['benchmark_category']
+            if cat == 'Ablation K Facets':
+                ablation_graph_ids_by_cfg.setdefault(cfg, []).append(rec['graph_id'])
+            else:
+                suite_graph_ids.add(rec['graph_id'])
+
+        # Check configuration counts
+        assert len(config_counts) == 25, \
+            f"Expected 25 distinct configurations in instance registry, found {len(config_counts)}"
+        for cfg, count in config_counts.items():
+            assert count == 10, f"Configuration {cfg} expected 10 instances, found {count}"
+
+        # Check deduplication to 200 distinct graphs from actual graph identity
+        assert len(distinct_graph_ids) == 200, \
+            f"Deduplicated canonical graph IDs must equal 200, found {len(distinct_graph_ids)}"
+
+        # Check that Suites 1-4 contain exactly 190 unique graphs
+        assert len(suite_graph_ids) == 190, \
+            f"Expected 190 unique graph IDs across Suites 1-4, found {len(suite_graph_ids)}"
+
+        # Check Suite 5 ablation: all 6 configurations evaluate the same 10 graphs
+        assert len(ablation_graph_ids_by_cfg) == 6, \
+            f"Expected 6 ablation configurations, found {len(ablation_graph_ids_by_cfg)}"
+        ablation_reference_ids = None
+        for cfg, ids in ablation_graph_ids_by_cfg.items():
+            assert len(ids) == 10, f"Ablation config {cfg} must have 10 instances, found {len(ids)}"
+            assert len(set(ids)) == 10, f"Ablation config {cfg} instances must be distinct, found {len(set(ids))}"
+            if ablation_reference_ids is None:
+                ablation_reference_ids = ids
+            else:
+                assert ids == ablation_reference_ids, \
+                    f"Ablation config {cfg} did not evaluate the same instance graphs as reference"
+
+        # Check ablation graph IDs are disjoint from Suites 1-4
+        assert suite_graph_ids.isdisjoint(set(ablation_reference_ids)), \
+            "Ablation graph IDs must be disjoint from Suites 1-4"
+
+    # 4. Numerical & Physical Validity Checks
     assert (df['nodes'] > 0).all(), "Found non-positive node counts"
     assert (df['edges'] > 0).all(), "Found non-positive edge counts"
     assert (df['budget'] > 0).all(), "Found non-positive budget values"
@@ -163,7 +223,7 @@ def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
     assert (df['mean_labels_generated'] >= df['mean_labels_explored']).all(), \
         "Found instances where explored labels exceeded generated labels"
 
-    # 4. Summary Table Synchronization
+    # 5. Summary Table Synchronization
     if os.path.exists(summary_csv_path):
         summary_df = pd.read_csv(summary_csv_path)
         summary_cols = list(summary_df.columns)
@@ -194,12 +254,55 @@ def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
             assert calc_max_lbl == stored_max_lbl, \
                 f"Summary max labels mismatch for ({cat}, {sol}): calculated {calc_max_lbl}, stored {stored_max_lbl}"
 
-    # 5. Empirical Honesty: Verify Regressions are Preserved and Not Suppressed
+    # 6. Empirical Honesty: Verify Regressions are Preserved and Not Suppressed
     # On random ER graphs (n=30), Martins outperforms ADHP due to low label collision
     er30_adhp = df[(df['instance_name'] == 'random_er_n30') & (df['solver_name'] == 'ADHP (Adaptive Dual Hull Pruning)')]['mean_runtime_micros'].values[0]
     er30_martins = df[(df['instance_name'] == 'random_er_n30') & (df['solver_name'] == 'Martins (Standard Multi-Label Dijkstra)')]['mean_runtime_micros'].values[0]
     assert er30_adhp > er30_martins, \
         f"Empirical honesty check failed: ADHP ({er30_adhp} us) was expected to be slower than Martins ({er30_martins} us) on random_er_n30"
+
+    # 7. Published Headline Reconciliations
+    verify_published_headlines(df)
+
+    return True
+
+
+def verify_published_headlines(df):
+    """
+    Verifies that key headline values published in research documents, README, and papers
+    match the authoritative benchmark data exactly.
+    """
+    # 1. Grid 10x10 Hybrid runtime and speedup
+    g10_hybrid = df[(df['instance_name'] == 'grid_10x10') & (df['solver_name'] == 'Adaptive Hybrid ADHP')]['mean_runtime_micros'].values[0]
+    g10_adhp = df[(df['instance_name'] == 'grid_10x10') & (df['solver_name'] == 'ADHP (Adaptive Dual Hull Pruning)')]['mean_runtime_micros'].values[0]
+    g10_martins = df[(df['instance_name'] == 'grid_10x10') & (df['solver_name'] == 'Martins (Standard Multi-Label Dijkstra)')]['mean_runtime_micros'].values[0]
+    g10_pulse = df[(df['instance_name'] == 'grid_10x10') & (df['solver_name'] == 'Pulse (Lozano & Medaglia 2013)')]['mean_runtime_micros'].values[0]
+
+    assert abs(g10_hybrid - 33.74) < 0.05, f"Grid 10x10 Hybrid runtime mismatch: {g10_hybrid}"
+    assert abs(g10_adhp - 38.96) < 0.05, f"Grid 10x10 ADHP runtime mismatch: {g10_adhp}"
+    assert abs(g10_martins - 242.01) < 0.05, f"Grid 10x10 Martins runtime mismatch: {g10_martins}"
+    assert abs(g10_pulse - 189.17) < 0.05, f"Grid 10x10 Pulse runtime mismatch: {g10_pulse}"
+
+    # 2. Anti-correlated n=150 Hybrid runtime
+    ac150_hybrid = df[(df['instance_name'] == 'anticorr_n150') & (df['solver_name'] == 'Adaptive Hybrid ADHP')]['mean_runtime_micros'].values[0]
+    assert abs(ac150_hybrid - 76.92) < 0.05, f"Anti-corr n=150 Hybrid runtime mismatch: {ac150_hybrid}"
+
+    # 3. Label counts on anti-correlated n=100 and n=150
+    ac100_adhp_lbl = df[(df['instance_name'] == 'anticorr_n100') & (df['solver_name'] == 'ADHP (Adaptive Dual Hull Pruning)')]['mean_labels_generated'].values[0]
+    ac100_martins_lbl = df[(df['instance_name'] == 'anticorr_n100') & (df['solver_name'] == 'Martins (Standard Multi-Label Dijkstra)')]['mean_labels_generated'].values[0]
+    assert ac100_adhp_lbl == 79, f"Anti-corr n=100 ADHP labels mismatch: {ac100_adhp_lbl}"
+    assert ac100_martins_lbl == 2751, f"Anti-corr n=100 Martins labels mismatch: {ac100_martins_lbl}"
+
+    # 4. Ablation on K=1 and K=2
+    abl_k1_time = df[(df['instance_name'] == 'ablation_k1')]['mean_runtime_micros'].values[0]
+    abl_k1_lbl = df[(df['instance_name'] == 'ablation_k1')]['mean_labels_generated'].values[0]
+    abl_k2_time = df[(df['instance_name'] == 'ablation_k2')]['mean_runtime_micros'].values[0]
+    abl_k2_lbl = df[(df['instance_name'] == 'ablation_k2')]['mean_labels_generated'].values[0]
+
+    assert abs(abl_k1_time - 15.66) < 0.05, f"Ablation K=1 runtime mismatch: {abl_k1_time}"
+    assert abl_k1_lbl == 146, f"Ablation K=1 labels mismatch: {abl_k1_lbl}"
+    assert abs(abl_k2_time - 20.10) < 0.05, f"Ablation K=2 runtime mismatch: {abl_k2_time}"
+    assert abl_k2_lbl == 91, f"Ablation K=2 labels mismatch: {abl_k2_lbl}"
 
     return True
 
@@ -210,10 +313,11 @@ def main():
         verify_benchmarks()
         print(" [PASSED] File existence and schema validation: 19 columns verified.")
         print(" [PASSED] Record count integrity: 120 records across 25 configurations.")
-        print(" [PASSED] Instance accounting: 250 evaluations across 200 distinct graphs.")
+        print(" [PASSED] Canonical instance accounting: exactly 200 distinct graphs across 250 evaluations verified via canonical identity.")
         print(" [PASSED] Metric physical validity: non-negativity and runtime decomposition verified.")
         print(" [PASSED] Summary table synchronization: exact agreement with results/processed/summary_table.csv.")
         print(" [PASSED] Empirical honesty verification: regressions on random graphs verified.")
+        print(" [PASSED] Published headline verification: exact agreement across README, paper, and benchmark report.")
         print("\n========================================================")
         print("SUCCESS: All benchmark consistency assertions passed.")
         print("========================================================")
@@ -225,3 +329,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

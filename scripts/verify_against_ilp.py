@@ -118,10 +118,42 @@ def solve_cspp_ilp(n_nodes, edges, source, target, budget):
         return status, None, float('nan'), float('nan'), res
 
 
+def validate_edge_path(edges, source, target, budget, edge_indices):
+    """
+    Validates that edge_indices forms a valid, contiguous (source -> target) path
+    satisfying the budget constraint, and recalculates its exact cost and weight.
+    """
+    if not edge_indices:
+        if source == target:
+            return True, 0.0, 0.0, None
+        return False, 0.0, 0.0, f"Empty edge path for distinct vertices ({source} -> {target})"
+
+    total_cost = 0.0
+    total_weight = 0.0
+    curr_node = source
+
+    for step, e_id in enumerate(edge_indices):
+        if e_id < 0 or e_id >= len(edges):
+            return False, 0.0, 0.0, f"Edge index {e_id} at step {step} out of bounds (len={len(edges)})"
+        edge = edges[e_id]
+        if edge["from"] != curr_node:
+            return False, 0.0, 0.0, f"Edge {e_id} starts at {edge['from']}, expected {curr_node} at step {step}"
+        total_cost += float(edge["cost"])
+        total_weight += float(edge["weight"])
+        curr_node = edge["to"]
+
+    if curr_node != target:
+        return False, 0.0, 0.0, f"Path terminates at {curr_node}, expected target {target}"
+
+    if total_weight > budget + 1e-6:
+        return False, total_cost, total_weight, f"Path weight {total_weight:.6f} exceeds budget {budget:.6f}"
+
+    return True, total_cost, total_weight, None
+
+
 def verify_instances_against_ilp(instances):
     """
-    Executes independent ILP verification over a list of instance dictionaries.
-    Returns a dictionary of verification metrics.
+    Executes independent ILP verification over floating-point instances.
     """
     verified_optimal = 0
     verified_infeasible = 0
@@ -140,6 +172,7 @@ def verify_instances_against_ilp(instances):
         adhp_status = inst.get("adhp_status")
         adhp_cost = float(inst["adhp_cost"]) if inst.get("adhp_cost") is not None else float("inf")
         adhp_weight = float(inst["adhp_weight"]) if inst.get("adhp_weight") is not None else float("inf")
+        adhp_edge_path = inst.get("adhp_edge_path", [])
 
         status, chosen_edges, ilp_cost, ilp_weight, _ = solve_cspp_ilp(
             n_nodes, edges, source, target, budget
@@ -159,7 +192,18 @@ def verify_instances_against_ilp(instances):
                     err = f"Instance {inst_id} ({family}): ADHP weight {adhp_weight:.6f} exceeds budget {budget:.6f}"
                     discrepancies.append(err)
                 else:
-                    verified_optimal += 1
+                    # Validate path integrity
+                    valid_path, recalc_cost, recalc_weight, path_err = validate_edge_path(
+                        edges, source, target, budget, adhp_edge_path
+                    )
+                    if not valid_path:
+                        err = f"Instance {inst_id} ({family}): Invalid path returned by ADHP: {path_err}"
+                        discrepancies.append(err)
+                    elif abs(recalc_cost - adhp_cost) > 1e-4 or abs(recalc_weight - adhp_weight) > 1e-4:
+                        err = f"Instance {inst_id} ({family}): Recalculated path metrics (c={recalc_cost}, w={recalc_weight}) disagree with reported (c={adhp_cost}, w={adhp_weight})"
+                        discrepancies.append(err)
+                    else:
+                        verified_optimal += 1
 
         elif status == IlpStatus.INFEASIBLE:
             if adhp_status != "Infeasible":
@@ -185,92 +229,141 @@ def verify_instances_against_ilp(instances):
     }
 
 
-def verify_integer_instances_direct():
+def verify_integer_instances_against_ilp(instances):
     """
-    Directly validates integer CSPP instances against the SciPy HiGHS ILP oracle.
-    Generates deterministic integer-weight micro-instances within the supported domain
-    and verifies 100% agreement.
+    Directly validates integer CSPP instances solved by IntAdhpSolver against SciPy HiGHS ILP.
+    Performs zero-tolerance integer cost checks and structural path validation.
     """
-    print("\n--- Direct Differential Verification of Integer CSPP Instances against ILP Oracle ---")
-    integer_instances = []
+    verified_optimal = 0
+    verified_infeasible = 0
+    inconclusive_count = 0
+    discrepancies = []
 
-    for seed in range(1, 16):
-        n = 6
-        edges = []
-        rng = (seed * 6364136223846793005 + 1442695040888963407) & 0xFFFFFFFFFFFFFFFF
-        for u in range(n):
-            for v in range(n):
-                if u != v:
-                    rng = (rng * 6364136223846793005 + 1) & 0xFFFFFFFFFFFFFFFF
-                    if (rng % 100) < 40:
-                        rng = (rng * 6364136223846793005 + 1) & 0xFFFFFFFFFFFFFFFF
-                        cost = int((rng % 50) + 1)
-                        rng = (rng * 6364136223846793005 + 1) & 0xFFFFFFFFFFFFFFFF
-                        weight = int((rng % 50) + 1)
-                        edges.append({"from": u, "to": v, "cost": cost, "weight": weight})
+    for inst in instances:
+        inst_id = inst["instance_id"]
+        family = inst["family"]
+        n_nodes = inst["num_nodes"]
+        edges = inst["edges"]
+        source = inst["source"]
+        target = inst["target"]
+        budget = int(inst["budget"])
 
-        budget = 30 + (seed * 5) % 30
-        integer_instances.append({
-            "instance_id": f"int_seed_{seed}",
-            "family": "Integer Micro-Instance",
-            "num_nodes": n,
-            "edges": edges,
-            "source": 0,
-            "target": n - 1,
-            "budget": budget,
-        })
+        int_adhp_status = inst.get("int_adhp_status")
+        int_adhp_cost = inst.get("int_adhp_cost")
+        int_adhp_weight = inst.get("int_adhp_weight")
+        int_adhp_edge_path = inst.get("int_adhp_edge_path", [])
 
-    verified_int_opt = 0
-    verified_int_inf = 0
-
-    for inst in integer_instances:
-        status, _, cost, weight, _ = solve_cspp_ilp(
-            inst["num_nodes"], inst["edges"], inst["source"], inst["target"], inst["budget"]
+        status, chosen_edges, ilp_cost, ilp_weight, _ = solve_cspp_ilp(
+            n_nodes, edges, source, target, budget
         )
-        if status == IlpStatus.OPTIMAL:
-            verified_int_opt += 1
-        elif status == IlpStatus.INFEASIBLE:
-            verified_int_inf += 1
 
-    print(f"  Integer ILP differential baseline evaluated: {verified_int_opt} optimal, {verified_int_inf} infeasible.")
-    return verified_int_opt, verified_int_inf
+        if status == IlpStatus.OPTIMAL:
+            ilp_opt_cost_int = int(round(ilp_cost))
+            if int_adhp_status != "Optimal":
+                err = f"Integer Instance {inst_id} ({family}): ILP found feasible optimum (cost={ilp_opt_cost_int}), but IntAdhpSolver reported {int_adhp_status}"
+                discrepancies.append(err)
+            elif int_adhp_cost is None or int_adhp_cost != ilp_opt_cost_int:
+                err = f"Integer Instance {inst_id} ({family}): Exact cost mismatch! ILP cost={ilp_opt_cost_int}, IntAdhpSolver cost={int_adhp_cost}"
+                discrepancies.append(err)
+            elif int_adhp_weight is None or int_adhp_weight > budget:
+                err = f"Integer Instance {inst_id} ({family}): IntAdhpSolver weight {int_adhp_weight} exceeds budget {budget}"
+                discrepancies.append(err)
+            else:
+                # Structural path validation
+                valid_path, recalc_cost, recalc_weight, path_err = validate_edge_path(
+                    edges, source, target, budget, int_adhp_edge_path
+                )
+                if not valid_path:
+                    err = f"Integer Instance {inst_id} ({family}): Invalid path returned by IntAdhpSolver: {path_err}"
+                    discrepancies.append(err)
+                elif int(round(recalc_cost)) != int_adhp_cost or int(round(recalc_weight)) != int_adhp_weight:
+                    err = f"Integer Instance {inst_id} ({family}): Recalculated path metrics (c={recalc_cost}, w={recalc_weight}) disagree with reported (c={int_adhp_cost}, w={int_adhp_weight})"
+                    discrepancies.append(err)
+                else:
+                    verified_optimal += 1
+
+        elif status == IlpStatus.INFEASIBLE:
+            if int_adhp_status != "Infeasible":
+                err = f"Integer Instance {inst_id} ({family}): ILP proved Infeasible, but IntAdhpSolver returned {int_adhp_status}"
+                discrepancies.append(err)
+            else:
+                verified_infeasible += 1
+
+        elif status in (IlpStatus.TIMEOUT, IlpStatus.NUMERICAL_ERROR, IlpStatus.UNKNOWN):
+            inconclusive_count += 1
+            print(f"  [INCONCLUSIVE] Integer Instance {inst_id} ({family}): ILP status={status.value}. Excluded from verified count.")
+
+        elif status == IlpStatus.UNBOUNDED:
+            err = f"Integer Instance {inst_id} ({family}): ILP reported Unbounded, which is invalid for non-negative CSPP."
+            discrepancies.append(err)
+
+    return {
+        "total_evaluated": len(instances),
+        "verified_optimal": verified_optimal,
+        "verified_infeasible": verified_infeasible,
+        "inconclusive": inconclusive_count,
+        "discrepancies": discrepancies,
+    }
 
 
 def main():
     print("=== ADHP-CSPP: Ground-Truth Verification against Independent HiGHS ILP Oracle ===")
 
-    instance_path = "results/raw/verification_instances.json"
-    if not os.path.exists(instance_path):
-        print(f"Error: {instance_path} does not exist.")
-        print("Please run `cargo run --bin verify_oracle --release` first.")
-        sys.exit(1)
+    float_instance_path = "results/raw/verification_instances.json"
+    int_instance_path = "results/raw/integer_verification_instances.json"
 
-    with open(instance_path, "r") as f:
-        instances = json.load(f)
+    if not os.path.exists(float_instance_path) or not os.path.exists(int_instance_path):
+        print("Verification artifacts missing. Executing `cargo run --bin verify_oracle --release`...")
+        import subprocess
+        subprocess.run(["cargo", "run", "--bin", "verify_oracle", "--release"], check=True)
 
-    print(f"Loaded {len(instances)} full problem instances from Rust verification suite.")
-    results = verify_instances_against_ilp(instances)
+    with open(float_instance_path, "r") as f:
+        float_instances = json.load(f)
+    with open(int_instance_path, "r") as f:
+        int_instances = json.load(f)
 
-    # Also run direct integer checks
-    verify_integer_instances_direct()
+    print(f"Loaded {len(float_instances)} floating-point instances and {len(int_instances)} exact integer instances.")
+
+    print("\n--- Verifying Floating-Point Instances (AdhpSolver vs HiGHS ILP) ---")
+    results_float = verify_instances_against_ilp(float_instances)
+
+    print("\n--- Verifying Exact Integer Instances (IntAdhpSolver vs HiGHS ILP) ---")
+    results_int = verify_integer_instances_against_ilp(int_instances)
+
+    total_evaluated = results_float["total_evaluated"] + results_int["total_evaluated"]
+    total_optimal = results_float["verified_optimal"] + results_int["verified_optimal"]
+    total_infeasible = results_float["verified_infeasible"] + results_int["verified_infeasible"]
+    total_verified = total_optimal + total_infeasible
+    total_inconclusive = results_float["inconclusive"] + results_int["inconclusive"]
+    all_discrepancies = results_float["discrepancies"] + results_int["discrepancies"]
 
     print("\n================ VERIFICATION SUMMARY ================")
-    print(f"Total instances evaluated: {results['total_evaluated']}")
-    print(f"Exact optimal matches:      {results['verified_optimal']}")
-    print(f"Exact infeasible matches:   {results['verified_infeasible']}")
-    print(f"Inconclusive checks:        {results['inconclusive']}")
-    print(f"Total discrepancies:        {len(results['discrepancies'])}")
+    print(f"Total instances evaluated: {total_evaluated}")
+    print(f"  - Floating-point instances: {results_float['total_evaluated']} ({results_float['verified_optimal']} opt, {results_float['verified_infeasible']} inf)")
+    print(f"  - Exact integer instances:  {results_int['total_evaluated']} ({results_int['verified_optimal']} opt, {results_int['verified_infeasible']} inf)")
+    print(f"Total verified matches:     {total_verified} / {total_evaluated}")
+    print(f"Inconclusive checks:        {total_inconclusive}")
+    print(f"Total discrepancies:        {len(all_discrepancies)}")
     print("======================================================")
 
-    if results["discrepancies"]:
-        print(f"FAILED: {len(results['discrepancies'])} discrepancies detected between ADHP and HiGHS ILP.")
-        for d in results["discrepancies"]:
+    if all_discrepancies:
+        print(f"\nFAILED: {len(all_discrepancies)} discrepancies detected between ADHP and HiGHS ILP:")
+        for d in all_discrepancies:
             print(f"  - {d}")
         sys.exit(1)
-    else:
-        print(f"SUCCESS: All {results['total_evaluated']}/{results['total_evaluated']} instances verified against HiGHS ILP oracle with 0 discrepancies.")
-        sys.exit(0)
+
+    if total_inconclusive > 0:
+        print(f"\nFAILED: Verification incomplete due to {total_inconclusive} inconclusive ILP status(es).")
+        sys.exit(1)
+
+    if total_verified < total_evaluated:
+        print(f"\nFAILED: Unresolved evaluations ({total_verified}/{total_evaluated} verified).")
+        sys.exit(1)
+
+    print(f"\nSUCCESS: All {total_verified}/{total_evaluated} instances (100 float + 50 integer) verified against HiGHS ILP oracle with 0 discrepancies and 0 inconclusive checks.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
     main()
+

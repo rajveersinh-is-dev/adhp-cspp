@@ -1,0 +1,6495 @@
+[
+  {
+    "instance_id": "int_anticorr_n8_s1",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 8,
+    "source": 0,
+    "target": 7,
+    "budget": 35,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 24,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 21,
+        "weight": 19
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 16,
+        "weight": 24
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 11,
+        "weight": 29
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 6,
+        "weight": 34
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 33,
+        "weight": 17
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n10_s2",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 10,
+    "source": 0,
+    "target": 9,
+    "budget": 40,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 7,
+        "weight": 33
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 28,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 14,
+        "weight": 26
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 21,
+        "weight": 19
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 16,
+        "weight": 24
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 7,
+        "weight": 33
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 14,
+        "weight": 36
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 4,
+        "weight": 46
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 22,
+        "weight": 28
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 9,
+        "cost": 10,
+        "weight": 40
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 3,
+        "weight": 47
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 7,
+        "weight": 43
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 29,
+        "weight": 21
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 15,
+        "weight": 35
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n12_s3",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 45,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 4,
+        "weight": 36
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 5,
+        "weight": 35
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 14,
+        "weight": 26
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 9,
+        "weight": 31
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 2,
+        "weight": 38
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 27,
+        "weight": 38
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 16,
+        "weight": 24
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 24,
+        "weight": 16
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 1,
+        "weight": 39
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 30,
+        "weight": 35
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 32,
+        "weight": 18
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 0,
+        "to": 10,
+        "cost": 14,
+        "weight": 36
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 1,
+        "to": 8,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 10,
+        "cost": 23,
+        "weight": 27
+      },
+      {
+        "from": 2,
+        "to": 7,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 29,
+        "weight": 21
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 26,
+        "weight": 24
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 5,
+        "weight": 45
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 3,
+        "to": 11,
+        "cost": 23,
+        "weight": 27
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 9,
+        "weight": 41
+      },
+      {
+        "from": 4,
+        "to": 10,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 4,
+        "to": 11,
+        "cost": 14,
+        "weight": 36
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 5,
+        "to": 11,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 6,
+        "to": 11,
+        "cost": 3,
+        "weight": 47
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 1,
+        "weight": 49
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 8,
+        "to": 10,
+        "cost": 36,
+        "weight": 49
+      },
+      {
+        "from": 8,
+        "to": 11,
+        "cost": 2,
+        "weight": 48
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 55,
+    "int_adhp_weight": 45,
+    "int_adhp_path": [
+      0,
+      3,
+      11
+    ],
+    "int_adhp_edge_path": [
+      13,
+      25
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n6_s4",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 6,
+    "source": 0,
+    "target": 5,
+    "budget": 50,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 17,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 26,
+        "weight": 39
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 13,
+        "weight": 27
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 16,
+        "weight": 24
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 11,
+        "weight": 39
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 1,
+        "weight": 49
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 29,
+        "weight": 21
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 31,
+        "weight": 19
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 29,
+    "int_adhp_weight": 21,
+    "int_adhp_path": [
+      0,
+      5
+    ],
+    "int_adhp_edge_path": [
+      7
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n8_s5",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 8,
+    "source": 0,
+    "target": 7,
+    "budget": 55,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 14,
+        "weight": 26
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 3,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 23,
+        "weight": 17
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 28,
+        "weight": 37
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 9,
+        "weight": 31
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 22,
+        "weight": 18
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 18,
+        "weight": 32
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 26,
+        "weight": 24
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 4,
+        "weight": 46
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 39,
+        "weight": 46
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 17,
+        "weight": 33
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 40,
+    "int_adhp_weight": 45,
+    "int_adhp_path": [
+      0,
+      7
+    ],
+    "int_adhp_edge_path": [
+      11
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n10_s6",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 10,
+    "source": 0,
+    "target": 9,
+    "budget": 60,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 27,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 11,
+        "weight": 29
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 14,
+        "weight": 26
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 11,
+        "weight": 29
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 8,
+        "weight": 32
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 17,
+        "weight": 23
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 1,
+        "weight": 39
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 17,
+        "weight": 33
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 26,
+        "weight": 24
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 37,
+        "weight": 48
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 18,
+        "weight": 32
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 3,
+        "weight": 47
+      },
+      {
+        "from": 7,
+        "to": 9,
+        "cost": 37,
+        "weight": 48
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n12_s7",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 65,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 17,
+        "weight": 23
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 21,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 24,
+        "weight": 16
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 21,
+        "weight": 19
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 29,
+        "weight": 36
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 11,
+        "weight": 29
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 0,
+        "to": 9,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 0,
+        "to": 11,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 36,
+        "weight": 49
+      },
+      {
+        "from": 1,
+        "to": 11,
+        "cost": 6,
+        "weight": 44
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 7,
+        "weight": 43
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 2,
+        "to": 11,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 30,
+        "weight": 20
+      },
+      {
+        "from": 3,
+        "to": 10,
+        "cost": 31,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 6,
+        "weight": 44
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 30,
+        "weight": 20
+      },
+      {
+        "from": 4,
+        "to": 11,
+        "cost": 17,
+        "weight": 33
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 23,
+        "weight": 27
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 21,
+        "weight": 29
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 4,
+        "weight": 46
+      },
+      {
+        "from": 5,
+        "to": 11,
+        "cost": 39,
+        "weight": 46
+      },
+      {
+        "from": 6,
+        "to": 11,
+        "cost": 33,
+        "weight": 17
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 35,
+        "weight": 50
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 12,
+    "int_adhp_weight": 38,
+    "int_adhp_path": [
+      0,
+      11
+    ],
+    "int_adhp_edge_path": [
+      13
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n6_s8",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 6,
+    "source": 0,
+    "target": 5,
+    "budget": 30,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 7,
+        "weight": 33
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 24,
+        "weight": 16
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 9,
+        "weight": 31
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 7,
+        "weight": 33
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 32,
+        "weight": 18
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 3,
+        "weight": 47
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 9,
+        "weight": 41
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n8_s9",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 8,
+    "source": 0,
+    "target": 7,
+    "budget": 35,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 1,
+        "weight": 39
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 8,
+        "weight": 32
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 18,
+        "weight": 32
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 7,
+        "weight": 43
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 22,
+        "weight": 28
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 33,
+        "weight": 17
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 23,
+        "weight": 27
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 9,
+        "weight": 41
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 5,
+        "weight": 45
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 18,
+        "weight": 32
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 8,
+        "weight": 42
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n10_s10",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 10,
+    "source": 0,
+    "target": 9,
+    "budget": 40,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 17,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 8,
+        "weight": 32
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 7,
+        "weight": 33
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 26,
+        "weight": 39
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 3,
+        "weight": 37
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 2,
+        "weight": 38
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 13,
+        "weight": 27
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 22,
+        "weight": 18
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 25,
+        "weight": 40
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 17,
+        "weight": 33
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 11,
+        "weight": 39
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 31,
+        "weight": 19
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 30,
+        "weight": 20
+      },
+      {
+        "from": 2,
+        "to": 8,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 18,
+        "weight": 32
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 4,
+        "weight": 46
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 31,
+        "weight": 19
+      },
+      {
+        "from": 7,
+        "to": 9,
+        "cost": 18,
+        "weight": 32
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n12_s11",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 45,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 30,
+        "weight": 35
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 6,
+        "weight": 34
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 17,
+        "weight": 23
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 16,
+        "weight": 24
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 1,
+        "weight": 39
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 8,
+        "weight": 32
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 25,
+        "weight": 40
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 5,
+        "weight": 35
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 6,
+        "weight": 34
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 25,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 0,
+        "to": 11,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 1,
+        "to": 10,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 36,
+        "weight": 49
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 17,
+        "weight": 33
+      },
+      {
+        "from": 3,
+        "to": 10,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 3,
+        "to": 11,
+        "cost": 36,
+        "weight": 49
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 4,
+        "to": 10,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 11,
+        "weight": 39
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 6,
+        "to": 11,
+        "cost": 17,
+        "weight": 33
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 23,
+        "weight": 27
+      },
+      {
+        "from": 7,
+        "to": 10,
+        "cost": 14,
+        "weight": 36
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 33,
+        "weight": 17
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 5,
+        "weight": 45
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 16,
+    "int_adhp_weight": 34,
+    "int_adhp_path": [
+      0,
+      11
+    ],
+    "int_adhp_edge_path": [
+      13
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n6_s12",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 6,
+    "source": 0,
+    "target": 5,
+    "budget": 50,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 13,
+        "weight": 27
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 22,
+        "weight": 18
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 35
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 24,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 29,
+        "weight": 36
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 7,
+        "weight": 43
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 27,
+        "weight": 23
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 1,
+        "weight": 49
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n8_s13",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 8,
+    "source": 0,
+    "target": 7,
+    "budget": 55,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 29,
+        "weight": 36
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 4,
+        "weight": 36
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 12,
+        "weight": 28
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 13,
+        "weight": 27
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 14,
+        "weight": 26
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 21,
+        "weight": 29
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 24,
+        "weight": 26
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 38,
+        "weight": 47
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 10,
+        "weight": 40
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 7,
+        "cost": 12,
+        "weight": 38
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 29,
+        "weight": 21
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 8,
+        "weight": 42
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 14,
+        "weight": 36
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n10_s14",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 10,
+    "source": 0,
+    "target": 9,
+    "budget": 60,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 23,
+        "weight": 17
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 6,
+        "weight": 34
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 3,
+        "weight": 37
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 22,
+        "weight": 18
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 25,
+        "weight": 40
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 26,
+        "weight": 39
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 9,
+        "weight": 31
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 28,
+        "weight": 22
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 8,
+        "weight": 42
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 1,
+        "weight": 49
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 31,
+        "weight": 19
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 4,
+        "weight": 46
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 1,
+        "weight": 49
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 8,
+        "weight": 42
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 11,
+        "weight": 39
+      },
+      {
+        "from": 7,
+        "to": 9,
+        "cost": 33,
+        "weight": 17
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 23,
+        "weight": 27
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 61,
+    "int_adhp_weight": 39,
+    "int_adhp_path": [
+      0,
+      7,
+      9
+    ],
+    "int_adhp_edge_path": [
+      10,
+      22
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_anticorr_n12_s15",
+    "family": "Integer Anti-Correlated",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 65,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 13,
+        "weight": 27
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 2,
+        "weight": 38
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 29,
+        "weight": 36
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 8,
+        "weight": 32
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 25,
+        "weight": 40
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 4,
+        "weight": 36
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 5,
+        "weight": 35
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 6,
+        "weight": 34
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 15,
+        "weight": 25
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 10,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 37,
+        "weight": 48
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 2,
+        "weight": 48
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 19,
+        "weight": 31
+      },
+      {
+        "from": 0,
+        "to": 9,
+        "cost": 25,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 10,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 1,
+        "to": 9,
+        "cost": 6,
+        "weight": 44
+      },
+      {
+        "from": 1,
+        "to": 10,
+        "cost": 36,
+        "weight": 49
+      },
+      {
+        "from": 1,
+        "to": 11,
+        "cost": 34,
+        "weight": 16
+      },
+      {
+        "from": 2,
+        "to": 10,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 14,
+        "weight": 36
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 15,
+        "weight": 35
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 5,
+        "weight": 45
+      },
+      {
+        "from": 3,
+        "to": 10,
+        "cost": 35,
+        "weight": 50
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 31,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 29,
+        "weight": 21
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 16,
+        "weight": 34
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 11,
+        "weight": 39
+      },
+      {
+        "from": 6,
+        "to": 8,
+        "cost": 13,
+        "weight": 37
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 20,
+        "weight": 30
+      },
+      {
+        "from": 6,
+        "to": 11,
+        "cost": 26,
+        "weight": 24
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 40,
+        "weight": 45
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 33,
+        "weight": 17
+      },
+      {
+        "from": 8,
+        "to": 11,
+        "cost": 24,
+        "weight": 26
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 25,
+    "int_adhp_weight": 65,
+    "int_adhp_path": [
+      0,
+      10,
+      11
+    ],
+    "int_adhp_edge_path": [
+      17,
+      10
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x3_s1",
+    "family": "Integer Grid 3x3",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 29,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 23,
+        "weight": 12
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 6,
+        "weight": 10
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 7,
+        "weight": 14
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 25,
+        "weight": 3
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 25,
+        "weight": 5
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 13,
+        "weight": 8
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 18,
+        "weight": 2
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 25,
+        "weight": 11
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 5,
+        "weight": 25
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 18,
+        "weight": 13
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 22,
+        "weight": 3
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 1,
+        "weight": 24
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x4_s2",
+    "family": "Integer Grid 3x4",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 33,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 5,
+        "weight": 8
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 7,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 1,
+        "weight": 6
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 5,
+        "weight": 18
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 1,
+        "weight": 8
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 5,
+        "weight": 17
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 17,
+        "weight": 3
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 16,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 1,
+        "weight": 14
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 21,
+        "weight": 9
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 13,
+        "weight": 3
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 4,
+        "weight": 15
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 18,
+        "weight": 22
+      },
+      {
+        "from": 7,
+        "to": 11,
+        "cost": 18,
+        "weight": 7
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 11,
+        "weight": 2
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 7,
+        "weight": 14
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 12,
+        "weight": 8
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 42,
+    "int_adhp_weight": 32,
+    "int_adhp_path": [
+      0,
+      1,
+      2,
+      3,
+      7,
+      11
+    ],
+    "int_adhp_edge_path": [
+      0,
+      2,
+      4,
+      6,
+      13
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x3_s3",
+    "family": "Integer Grid 3x3",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 37,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 12,
+        "weight": 4
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 17,
+        "weight": 2
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 4,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 19,
+        "weight": 17
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 11,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 6,
+        "weight": 10
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 7,
+        "weight": 4
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 16,
+        "weight": 2
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 6,
+        "weight": 3
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 24,
+        "weight": 5
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 4,
+        "weight": 3
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 16,
+        "weight": 6
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 44,
+    "int_adhp_weight": 15,
+    "int_adhp_path": [
+      0,
+      3,
+      6,
+      7,
+      8
+    ],
+    "int_adhp_edge_path": [
+      1,
+      6,
+      10,
+      11
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x4_s4",
+    "family": "Integer Grid 3x4",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 41,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 19,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 2,
+        "weight": 15
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 23,
+        "weight": 15
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 24,
+        "weight": 7
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 12,
+        "weight": 5
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 7,
+        "weight": 19
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 22,
+        "weight": 14
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 16,
+        "weight": 10
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 11,
+        "weight": 8
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 2,
+        "weight": 1
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 20,
+        "weight": 3
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 19,
+        "weight": 22
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 6,
+        "weight": 9
+      },
+      {
+        "from": 7,
+        "to": 11,
+        "cost": 22,
+        "weight": 6
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 19,
+        "weight": 22
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 2,
+        "weight": 9
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 2,
+        "weight": 24
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x3_s5",
+    "family": "Integer Grid 3x3",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 45,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 1,
+        "weight": 21
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 3,
+        "weight": 19
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 17,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 4,
+        "weight": 22
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 13,
+        "weight": 8
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 8,
+        "weight": 12
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 21,
+        "weight": 15
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 7,
+        "weight": 18
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 7,
+        "weight": 22
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 5,
+        "weight": 22
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 11,
+        "weight": 3
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 22,
+        "weight": 13
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x4_s6",
+    "family": "Integer Grid 3x4",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 49,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 8,
+        "weight": 17
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 13,
+        "weight": 7
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 20,
+        "weight": 8
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 18,
+        "weight": 12
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 14,
+        "weight": 2
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 25,
+        "weight": 21
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 11,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 7,
+        "weight": 1
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 12,
+        "weight": 11
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 8,
+        "weight": 18
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 2,
+        "weight": 12
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 25,
+        "weight": 4
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 19,
+        "weight": 21
+      },
+      {
+        "from": 7,
+        "to": 11,
+        "cost": 10,
+        "weight": 5
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 2,
+        "weight": 17
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 6,
+        "weight": 4
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 1,
+        "weight": 24
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 29,
+    "int_adhp_weight": 48,
+    "int_adhp_path": [
+      0,
+      4,
+      5,
+      9,
+      10,
+      11
+    ],
+    "int_adhp_edge_path": [
+      1,
+      7,
+      10,
+      15,
+      16
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x3_s7",
+    "family": "Integer Grid 3x3",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 53,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 6,
+        "weight": 13
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 14,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 14,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 23,
+        "weight": 11
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 15,
+        "weight": 5
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 1,
+        "weight": 14
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 1,
+        "weight": 17
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 7,
+        "weight": 9
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 17,
+        "weight": 16
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 11,
+        "weight": 14
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 18,
+        "weight": 12
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 12,
+        "weight": 20
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 47,
+    "int_adhp_weight": 47,
+    "int_adhp_path": [
+      0,
+      1,
+      4,
+      5,
+      8
+    ],
+    "int_adhp_edge_path": [
+      0,
+      3,
+      7,
+      9
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x4_s8",
+    "family": "Integer Grid 3x4",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 57,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 13,
+        "weight": 9
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 24,
+        "weight": 24
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 8,
+        "weight": 17
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 12,
+        "weight": 1
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 25,
+        "weight": 8
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 2,
+        "weight": 23
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 25,
+        "weight": 18
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 7,
+        "weight": 8
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 22,
+        "weight": 5
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 14,
+        "weight": 10
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 9,
+        "weight": 12
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 15,
+        "weight": 11
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 23,
+        "weight": 17
+      },
+      {
+        "from": 7,
+        "to": 11,
+        "cost": 23,
+        "weight": 13
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 10,
+        "weight": 21
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 1,
+        "weight": 8
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 25,
+        "weight": 24
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 60,
+    "int_adhp_weight": 54,
+    "int_adhp_path": [
+      0,
+      1,
+      5,
+      9,
+      10,
+      11
+    ],
+    "int_adhp_edge_path": [
+      0,
+      3,
+      10,
+      15,
+      16
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x3_s9",
+    "family": "Integer Grid 3x3",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 26,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 20,
+        "weight": 5
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 9,
+        "weight": 12
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 11,
+        "weight": 9
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 17,
+        "weight": 16
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 1,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 3,
+        "weight": 16
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 15,
+        "weight": 3
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 23,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 18,
+        "weight": 19
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 17,
+        "weight": 6
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 25,
+        "weight": 12
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 18,
+        "weight": 2
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 49,
+    "int_adhp_weight": 22,
+    "int_adhp_path": [
+      0,
+      1,
+      2,
+      5,
+      8
+    ],
+    "int_adhp_edge_path": [
+      0,
+      2,
+      4,
+      9
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_grid_3x4_s10",
+    "family": "Integer Grid 3x4",
+    "num_nodes": 12,
+    "source": 0,
+    "target": 11,
+    "budget": 30,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 2,
+        "weight": 1
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 10,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 5,
+        "weight": 1
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 22,
+        "weight": 15
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 2,
+        "weight": 5
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 20,
+        "weight": 25
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 14,
+        "weight": 4
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 23,
+        "weight": 24
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 23,
+        "weight": 24
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 20,
+        "weight": 2
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 16,
+        "weight": 12
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 5,
+        "weight": 18
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 11,
+        "weight": 4
+      },
+      {
+        "from": 7,
+        "to": 11,
+        "cost": 2,
+        "weight": 12
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 18,
+        "weight": 16
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 21,
+        "weight": 3
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 15,
+        "weight": 24
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 25,
+    "int_adhp_weight": 23,
+    "int_adhp_path": [
+      0,
+      1,
+      2,
+      3,
+      7,
+      11
+    ],
+    "int_adhp_edge_path": [
+      0,
+      2,
+      4,
+      6,
+      13
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n9_s1",
+    "family": "Integer Random",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 41,
+    "edges": [
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 6,
+        "weight": 35
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 3,
+        "weight": 36
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 5,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 12,
+        "weight": 1
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 19,
+        "weight": 12
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 24,
+        "weight": 13
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 17,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "cost": 40,
+        "weight": 13
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 12,
+        "weight": 1
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "cost": 20,
+        "weight": 33
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 32,
+        "weight": 37
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 19,
+        "weight": 20
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 24,
+        "weight": 29
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "cost": 3,
+        "weight": 28
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "cost": 15,
+        "weight": 8
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "cost": 3,
+        "weight": 28
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 16,
+        "weight": 21
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 3,
+        "weight": 12
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 24,
+        "weight": 5
+      },
+      {
+        "from": 6,
+        "to": 4,
+        "cost": 3,
+        "weight": 36
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 23,
+        "weight": 40
+      },
+      {
+        "from": 7,
+        "to": 6,
+        "cost": 21,
+        "weight": 30
+      },
+      {
+        "from": 8,
+        "to": 0,
+        "cost": 25,
+        "weight": 2
+      },
+      {
+        "from": 8,
+        "to": 1,
+        "cost": 40,
+        "weight": 13
+      },
+      {
+        "from": 8,
+        "to": 2,
+        "cost": 11,
+        "weight": 36
+      },
+      {
+        "from": 8,
+        "to": 5,
+        "cost": 16,
+        "weight": 29
+      },
+      {
+        "from": 8,
+        "to": 7,
+        "cost": 12,
+        "weight": 17
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n11_s2",
+    "family": "Integer Random",
+    "num_nodes": 11,
+    "source": 0,
+    "target": 10,
+    "budget": 47,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 22,
+        "weight": 35
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 1,
+        "weight": 10
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 32,
+        "weight": 5
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 27,
+        "weight": 28
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 26,
+        "weight": 7
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 21,
+        "weight": 38
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 9,
+        "weight": 18
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 8,
+        "weight": 21
+      },
+      {
+        "from": 1,
+        "to": 10,
+        "cost": 9,
+        "weight": 26
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 22,
+        "weight": 3
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 23,
+        "weight": 16
+      },
+      {
+        "from": 2,
+        "to": 7,
+        "cost": 6,
+        "weight": 11
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 16,
+        "weight": 5
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "cost": 12,
+        "weight": 33
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 23,
+        "weight": 32
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 27,
+        "weight": 36
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 18,
+        "weight": 7
+      },
+      {
+        "from": 4,
+        "to": 10,
+        "cost": 25,
+        "weight": 2
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "cost": 30,
+        "weight": 11
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "cost": 1,
+        "weight": 10
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "cost": 32,
+        "weight": 5
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 11,
+        "weight": 20
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 34,
+        "weight": 7
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 21,
+        "weight": 14
+      },
+      {
+        "from": 5,
+        "to": 10,
+        "cost": 25,
+        "weight": 34
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "cost": 36,
+        "weight": 1
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 23,
+        "weight": 24
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 12,
+        "weight": 17
+      },
+      {
+        "from": 6,
+        "to": 8,
+        "cost": 15,
+        "weight": 16
+      },
+      {
+        "from": 6,
+        "to": 9,
+        "cost": 30,
+        "weight": 27
+      },
+      {
+        "from": 7,
+        "to": 0,
+        "cost": 2,
+        "weight": 15
+      },
+      {
+        "from": 7,
+        "to": 1,
+        "cost": 13,
+        "weight": 6
+      },
+      {
+        "from": 7,
+        "to": 3,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 8,
+        "to": 0,
+        "cost": 18,
+        "weight": 31
+      },
+      {
+        "from": 8,
+        "to": 10,
+        "cost": 37,
+        "weight": 22
+      },
+      {
+        "from": 9,
+        "to": 3,
+        "cost": 31,
+        "weight": 16
+      },
+      {
+        "from": 9,
+        "to": 6,
+        "cost": 28,
+        "weight": 9
+      },
+      {
+        "from": 9,
+        "to": 8,
+        "cost": 16,
+        "weight": 21
+      },
+      {
+        "from": 10,
+        "to": 0,
+        "cost": 36,
+        "weight": 17
+      },
+      {
+        "from": 10,
+        "to": 1,
+        "cost": 39,
+        "weight": 24
+      },
+      {
+        "from": 10,
+        "to": 3,
+        "cost": 35,
+        "weight": 20
+      },
+      {
+        "from": 10,
+        "to": 7,
+        "cost": 37,
+        "weight": 22
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 51,
+    "int_adhp_weight": 41,
+    "int_adhp_path": [
+      0,
+      5,
+      10
+    ],
+    "int_adhp_edge_path": [
+      4,
+      24
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n13_s3",
+    "family": "Integer Random",
+    "num_nodes": 13,
+    "source": 0,
+    "target": 12,
+    "budget": 53,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 15,
+        "weight": 40
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 33,
+        "weight": 34
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 37,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 12,
+        "weight": 1
+      },
+      {
+        "from": 0,
+        "to": 9,
+        "cost": 31,
+        "weight": 8
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 31,
+        "weight": 16
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 22,
+        "weight": 19
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 25,
+        "weight": 34
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 40,
+        "weight": 29
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 11,
+        "weight": 36
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "cost": 12,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 21,
+        "weight": 22
+      },
+      {
+        "from": 2,
+        "to": 8,
+        "cost": 34,
+        "weight": 23
+      },
+      {
+        "from": 2,
+        "to": 10,
+        "cost": 22,
+        "weight": 3
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 15,
+        "weight": 16
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "cost": 3,
+        "weight": 20
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 32,
+        "weight": 29
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 11,
+        "weight": 36
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 23,
+        "weight": 8
+      },
+      {
+        "from": 3,
+        "to": 10,
+        "cost": 38,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "cost": 39,
+        "weight": 32
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "cost": 30,
+        "weight": 11
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "cost": 17,
+        "weight": 26
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 16,
+        "weight": 29
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 7,
+        "weight": 16
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 4,
+        "weight": 17
+      },
+      {
+        "from": 6,
+        "to": 4,
+        "cost": 39,
+        "weight": 8
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 26,
+        "weight": 15
+      },
+      {
+        "from": 6,
+        "to": 12,
+        "cost": 14,
+        "weight": 27
+      },
+      {
+        "from": 7,
+        "to": 0,
+        "cost": 9,
+        "weight": 10
+      },
+      {
+        "from": 7,
+        "to": 2,
+        "cost": 29,
+        "weight": 6
+      },
+      {
+        "from": 7,
+        "to": 3,
+        "cost": 12,
+        "weight": 17
+      },
+      {
+        "from": 7,
+        "to": 4,
+        "cost": 7,
+        "weight": 24
+      },
+      {
+        "from": 7,
+        "to": 5,
+        "cost": 38,
+        "weight": 11
+      },
+      {
+        "from": 7,
+        "to": 6,
+        "cost": 17,
+        "weight": 10
+      },
+      {
+        "from": 7,
+        "to": 10,
+        "cost": 22,
+        "weight": 35
+      },
+      {
+        "from": 7,
+        "to": 12,
+        "cost": 10,
+        "weight": 39
+      },
+      {
+        "from": 8,
+        "to": 4,
+        "cost": 9,
+        "weight": 10
+      },
+      {
+        "from": 8,
+        "to": 11,
+        "cost": 25,
+        "weight": 10
+      },
+      {
+        "from": 8,
+        "to": 12,
+        "cost": 32,
+        "weight": 37
+      },
+      {
+        "from": 9,
+        "to": 4,
+        "cost": 39,
+        "weight": 16
+      },
+      {
+        "from": 9,
+        "to": 7,
+        "cost": 28,
+        "weight": 9
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 9,
+        "to": 11,
+        "cost": 19,
+        "weight": 36
+      },
+      {
+        "from": 10,
+        "to": 2,
+        "cost": 5,
+        "weight": 38
+      },
+      {
+        "from": 10,
+        "to": 3,
+        "cost": 28,
+        "weight": 17
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "cost": 25,
+        "weight": 34
+      },
+      {
+        "from": 10,
+        "to": 12,
+        "cost": 32,
+        "weight": 29
+      },
+      {
+        "from": 11,
+        "to": 0,
+        "cost": 3,
+        "weight": 20
+      },
+      {
+        "from": 11,
+        "to": 4,
+        "cost": 21,
+        "weight": 6
+      },
+      {
+        "from": 11,
+        "to": 6,
+        "cost": 9,
+        "weight": 18
+      },
+      {
+        "from": 11,
+        "to": 10,
+        "cost": 11,
+        "weight": 4
+      },
+      {
+        "from": 12,
+        "to": 1,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 12,
+        "to": 6,
+        "cost": 31,
+        "weight": 16
+      },
+      {
+        "from": 12,
+        "to": 8,
+        "cost": 35,
+        "weight": 20
+      },
+      {
+        "from": 12,
+        "to": 11,
+        "cost": 40,
+        "weight": 13
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 44,
+    "int_adhp_weight": 38,
+    "int_adhp_path": [
+      0,
+      8,
+      12
+    ],
+    "int_adhp_edge_path": [
+      3,
+      39
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n7_s4",
+    "family": "Integer Random",
+    "num_nodes": 7,
+    "source": 0,
+    "target": 6,
+    "budget": 59,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 24,
+        "weight": 29
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 1,
+        "weight": 10
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 35,
+        "weight": 4
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 15,
+        "weight": 24
+      },
+      {
+        "from": 2,
+        "to": 0,
+        "cost": 4,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 29,
+        "weight": 38
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 25,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 24,
+        "weight": 13
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 25,
+        "weight": 10
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 16,
+        "weight": 29
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 11,
+        "weight": 36
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "cost": 31,
+        "weight": 16
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 17,
+        "weight": 18
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 8,
+        "weight": 29
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 9,
+        "weight": 18
+      },
+      {
+        "from": 6,
+        "to": 4,
+        "cost": 32,
+        "weight": 29
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 34,
+    "int_adhp_weight": 28,
+    "int_adhp_path": [
+      0,
+      4,
+      6
+    ],
+    "int_adhp_edge_path": [
+      1,
+      12
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n9_s5",
+    "family": "Integer Random",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 65,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 40,
+        "weight": 21
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 12,
+        "weight": 33
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 40,
+        "weight": 13
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 17,
+        "weight": 34
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 8,
+        "weight": 13
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 12,
+        "weight": 9
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 32,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "cost": 26,
+        "weight": 39
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 6,
+        "weight": 3
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 10,
+        "weight": 23
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 2,
+        "weight": 31
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 14,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 25,
+        "weight": 18
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "cost": 5,
+        "weight": 22
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "cost": 25,
+        "weight": 26
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 19,
+        "weight": 36
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 31,
+        "weight": 40
+      },
+      {
+        "from": 6,
+        "to": 1,
+        "cost": 6,
+        "weight": 19
+      },
+      {
+        "from": 6,
+        "to": 4,
+        "cost": 15,
+        "weight": 24
+      },
+      {
+        "from": 7,
+        "to": 0,
+        "cost": 9,
+        "weight": 26
+      },
+      {
+        "from": 7,
+        "to": 1,
+        "cost": 16,
+        "weight": 21
+      },
+      {
+        "from": 7,
+        "to": 5,
+        "cost": 10,
+        "weight": 15
+      },
+      {
+        "from": 8,
+        "to": 2,
+        "cost": 1,
+        "weight": 26
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n11_s6",
+    "family": "Integer Random",
+    "num_nodes": 11,
+    "source": 0,
+    "target": 10,
+    "budget": 36,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 2,
+        "weight": 7
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 11,
+        "weight": 28
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 10,
+        "weight": 31
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 27,
+        "weight": 36
+      },
+      {
+        "from": 0,
+        "to": 9,
+        "cost": 10,
+        "weight": 39
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 22,
+        "weight": 11
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 17,
+        "weight": 18
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 40,
+        "weight": 29
+      },
+      {
+        "from": 1,
+        "to": 5,
+        "cost": 36,
+        "weight": 17
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 15,
+        "weight": 24
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "cost": 30,
+        "weight": 35
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 1,
+        "weight": 2
+      },
+      {
+        "from": 2,
+        "to": 7,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 8,
+        "cost": 27,
+        "weight": 4
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 26,
+        "weight": 7
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 38,
+        "weight": 35
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 4,
+        "weight": 1
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 23,
+        "weight": 8
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "cost": 12,
+        "weight": 1
+      },
+      {
+        "from": 4,
+        "to": 1,
+        "cost": 15,
+        "weight": 8
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "cost": 14,
+        "weight": 27
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 1,
+        "weight": 18
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 3,
+        "weight": 36
+      },
+      {
+        "from": 4,
+        "to": 9,
+        "cost": 34,
+        "weight": 31
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "cost": 30,
+        "weight": 19
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "cost": 7,
+        "weight": 24
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 19,
+        "weight": 36
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 2,
+        "weight": 15
+      },
+      {
+        "from": 5,
+        "to": 9,
+        "cost": 30,
+        "weight": 11
+      },
+      {
+        "from": 6,
+        "to": 8,
+        "cost": 17,
+        "weight": 26
+      },
+      {
+        "from": 6,
+        "to": 10,
+        "cost": 21,
+        "weight": 22
+      },
+      {
+        "from": 7,
+        "to": 5,
+        "cost": 5,
+        "weight": 14
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 1,
+        "weight": 26
+      },
+      {
+        "from": 7,
+        "to": 10,
+        "cost": 21,
+        "weight": 14
+      },
+      {
+        "from": 8,
+        "to": 0,
+        "cost": 12,
+        "weight": 33
+      },
+      {
+        "from": 8,
+        "to": 1,
+        "cost": 39,
+        "weight": 24
+      },
+      {
+        "from": 8,
+        "to": 3,
+        "cost": 35,
+        "weight": 28
+      },
+      {
+        "from": 8,
+        "to": 4,
+        "cost": 2,
+        "weight": 23
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "cost": 20,
+        "weight": 1
+      },
+      {
+        "from": 9,
+        "to": 1,
+        "cost": 21,
+        "weight": 22
+      },
+      {
+        "from": 9,
+        "to": 4,
+        "cost": 10,
+        "weight": 23
+      },
+      {
+        "from": 9,
+        "to": 5,
+        "cost": 5,
+        "weight": 38
+      },
+      {
+        "from": 9,
+        "to": 8,
+        "cost": 26,
+        "weight": 23
+      },
+      {
+        "from": 10,
+        "to": 0,
+        "cost": 38,
+        "weight": 11
+      },
+      {
+        "from": 10,
+        "to": 6,
+        "cost": 22,
+        "weight": 11
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n13_s7",
+    "family": "Integer Random",
+    "num_nodes": 13,
+    "source": 0,
+    "target": 12,
+    "budget": 42,
+    "edges": [
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 36,
+        "weight": 17
+      },
+      {
+        "from": 0,
+        "to": 5,
+        "cost": 5,
+        "weight": 30
+      },
+      {
+        "from": 0,
+        "to": 9,
+        "cost": 31,
+        "weight": 32
+      },
+      {
+        "from": 0,
+        "to": 11,
+        "cost": 27,
+        "weight": 4
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 31,
+        "weight": 40
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 38,
+        "weight": 27
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 26,
+        "weight": 15
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 14,
+        "weight": 35
+      },
+      {
+        "from": 1,
+        "to": 8,
+        "cost": 10,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 11,
+        "cost": 3,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 12,
+        "cost": 10,
+        "weight": 15
+      },
+      {
+        "from": 2,
+        "to": 8,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 2,
+        "to": 9,
+        "cost": 19,
+        "weight": 28
+      },
+      {
+        "from": 2,
+        "to": 10,
+        "cost": 26,
+        "weight": 31
+      },
+      {
+        "from": 2,
+        "to": 12,
+        "cost": 30,
+        "weight": 11
+      },
+      {
+        "from": 3,
+        "to": 0,
+        "cost": 25,
+        "weight": 10
+      },
+      {
+        "from": 3,
+        "to": 1,
+        "cost": 8,
+        "weight": 5
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "cost": 35,
+        "weight": 20
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 39,
+        "weight": 24
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 6,
+        "weight": 3
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 25,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 29,
+        "weight": 14
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 6,
+        "weight": 19
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 17,
+        "weight": 10
+      },
+      {
+        "from": 4,
+        "to": 7,
+        "cost": 37,
+        "weight": 22
+      },
+      {
+        "from": 4,
+        "to": 11,
+        "cost": 31,
+        "weight": 8
+      },
+      {
+        "from": 4,
+        "to": 12,
+        "cost": 30,
+        "weight": 3
+      },
+      {
+        "from": 5,
+        "to": 2,
+        "cost": 15,
+        "weight": 8
+      },
+      {
+        "from": 5,
+        "to": 3,
+        "cost": 30,
+        "weight": 19
+      },
+      {
+        "from": 5,
+        "to": 4,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 5,
+        "to": 10,
+        "cost": 12,
+        "weight": 17
+      },
+      {
+        "from": 5,
+        "to": 11,
+        "cost": 31,
+        "weight": 24
+      },
+      {
+        "from": 6,
+        "to": 1,
+        "cost": 4,
+        "weight": 25
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "cost": 7,
+        "weight": 16
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 33,
+        "weight": 26
+      },
+      {
+        "from": 6,
+        "to": 12,
+        "cost": 4,
+        "weight": 25
+      },
+      {
+        "from": 7,
+        "to": 0,
+        "cost": 7,
+        "weight": 32
+      },
+      {
+        "from": 7,
+        "to": 2,
+        "cost": 35,
+        "weight": 36
+      },
+      {
+        "from": 7,
+        "to": 4,
+        "cost": 39,
+        "weight": 16
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 4,
+        "weight": 25
+      },
+      {
+        "from": 8,
+        "to": 2,
+        "cost": 1,
+        "weight": 18
+      },
+      {
+        "from": 8,
+        "to": 3,
+        "cost": 16,
+        "weight": 29
+      },
+      {
+        "from": 8,
+        "to": 4,
+        "cost": 35,
+        "weight": 20
+      },
+      {
+        "from": 8,
+        "to": 7,
+        "cost": 8,
+        "weight": 5
+      },
+      {
+        "from": 8,
+        "to": 11,
+        "cost": 9,
+        "weight": 34
+      },
+      {
+        "from": 8,
+        "to": 12,
+        "cost": 32,
+        "weight": 21
+      },
+      {
+        "from": 9,
+        "to": 0,
+        "cost": 35,
+        "weight": 36
+      },
+      {
+        "from": 9,
+        "to": 1,
+        "cost": 18,
+        "weight": 15
+      },
+      {
+        "from": 9,
+        "to": 3,
+        "cost": 22,
+        "weight": 11
+      },
+      {
+        "from": 9,
+        "to": 4,
+        "cost": 33,
+        "weight": 10
+      },
+      {
+        "from": 9,
+        "to": 5,
+        "cost": 8,
+        "weight": 29
+      },
+      {
+        "from": 9,
+        "to": 6,
+        "cost": 3,
+        "weight": 28
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 8,
+        "weight": 37
+      },
+      {
+        "from": 10,
+        "to": 0,
+        "cost": 1,
+        "weight": 34
+      },
+      {
+        "from": 10,
+        "to": 2,
+        "cost": 29,
+        "weight": 14
+      },
+      {
+        "from": 10,
+        "to": 3,
+        "cost": 36,
+        "weight": 25
+      },
+      {
+        "from": 10,
+        "to": 4,
+        "cost": 23,
+        "weight": 8
+      },
+      {
+        "from": 10,
+        "to": 5,
+        "cost": 38,
+        "weight": 27
+      },
+      {
+        "from": 10,
+        "to": 7,
+        "cost": 10,
+        "weight": 39
+      },
+      {
+        "from": 10,
+        "to": 8,
+        "cost": 5,
+        "weight": 6
+      },
+      {
+        "from": 10,
+        "to": 12,
+        "cost": 18,
+        "weight": 39
+      },
+      {
+        "from": 11,
+        "to": 1,
+        "cost": 38,
+        "weight": 11
+      },
+      {
+        "from": 11,
+        "to": 3,
+        "cost": 10,
+        "weight": 23
+      },
+      {
+        "from": 11,
+        "to": 5,
+        "cost": 22,
+        "weight": 35
+      },
+      {
+        "from": 11,
+        "to": 6,
+        "cost": 17,
+        "weight": 18
+      },
+      {
+        "from": 11,
+        "to": 9,
+        "cost": 22,
+        "weight": 19
+      },
+      {
+        "from": 11,
+        "to": 10,
+        "cost": 17,
+        "weight": 26
+      },
+      {
+        "from": 12,
+        "to": 1,
+        "cost": 30,
+        "weight": 19
+      },
+      {
+        "from": 12,
+        "to": 5,
+        "cost": 40,
+        "weight": 37
+      },
+      {
+        "from": 12,
+        "to": 6,
+        "cost": 3,
+        "weight": 36
+      },
+      {
+        "from": 12,
+        "to": 8,
+        "cost": 7,
+        "weight": 8
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 66,
+    "int_adhp_weight": 28,
+    "int_adhp_path": [
+      0,
+      2,
+      12
+    ],
+    "int_adhp_edge_path": [
+      0,
+      14
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n7_s8",
+    "family": "Integer Random",
+    "num_nodes": 7,
+    "source": 0,
+    "target": 6,
+    "budget": 48,
+    "edges": [
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 39,
+        "weight": 8
+      },
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 35,
+        "weight": 36
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 2,
+        "weight": 15
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "cost": 35,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 7,
+        "weight": 40
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "cost": 19,
+        "weight": 20
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 2,
+        "weight": 39
+      },
+      {
+        "from": 2,
+        "to": 6,
+        "cost": 27,
+        "weight": 4
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "cost": 19,
+        "weight": 12
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 29,
+        "weight": 30
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "cost": 12,
+        "weight": 25
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 23,
+        "weight": 8
+      },
+      {
+        "from": 6,
+        "to": 0,
+        "cost": 40,
+        "weight": 29
+      },
+      {
+        "from": 6,
+        "to": 1,
+        "cost": 3,
+        "weight": 4
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 39,
+        "weight": 16
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 35,
+    "int_adhp_weight": 36,
+    "int_adhp_path": [
+      0,
+      6
+    ],
+    "int_adhp_edge_path": [
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n9_s9",
+    "family": "Integer Random",
+    "num_nodes": 9,
+    "source": 0,
+    "target": 8,
+    "budget": 54,
+    "edges": [
+      {
+        "from": 0,
+        "to": 6,
+        "cost": 26,
+        "weight": 23
+      },
+      {
+        "from": 0,
+        "to": 7,
+        "cost": 29,
+        "weight": 38
+      },
+      {
+        "from": 0,
+        "to": 8,
+        "cost": 20,
+        "weight": 9
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 15,
+        "weight": 40
+      },
+      {
+        "from": 1,
+        "to": 6,
+        "cost": 26,
+        "weight": 39
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "cost": 36,
+        "weight": 33
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 7,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 2,
+        "cost": 21,
+        "weight": 6
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 20,
+        "weight": 9
+      },
+      {
+        "from": 3,
+        "to": 5,
+        "cost": 39,
+        "weight": 32
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 12,
+        "weight": 17
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "cost": 23,
+        "weight": 40
+      },
+      {
+        "from": 4,
+        "to": 3,
+        "cost": 28,
+        "weight": 33
+      },
+      {
+        "from": 5,
+        "to": 1,
+        "cost": 4,
+        "weight": 17
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 20,
+        "weight": 9
+      },
+      {
+        "from": 6,
+        "to": 1,
+        "cost": 40,
+        "weight": 21
+      },
+      {
+        "from": 6,
+        "to": 2,
+        "cost": 35,
+        "weight": 28
+      },
+      {
+        "from": 6,
+        "to": 3,
+        "cost": 2,
+        "weight": 23
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "cost": 27,
+        "weight": 12
+      },
+      {
+        "from": 7,
+        "to": 4,
+        "cost": 11,
+        "weight": 20
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 32,
+        "weight": 13
+      },
+      {
+        "from": 8,
+        "to": 0,
+        "cost": 19,
+        "weight": 28
+      },
+      {
+        "from": 8,
+        "to": 2,
+        "cost": 31,
+        "weight": 24
+      },
+      {
+        "from": 8,
+        "to": 4,
+        "cost": 27,
+        "weight": 12
+      },
+      {
+        "from": 8,
+        "to": 7,
+        "cost": 40,
+        "weight": 37
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 9,
+    "int_adhp_path": [
+      0,
+      8
+    ],
+    "int_adhp_edge_path": [
+      2
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_random_n11_s10",
+    "family": "Integer Random",
+    "num_nodes": 11,
+    "source": 0,
+    "target": 10,
+    "budget": 60,
+    "edges": [
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 28,
+        "weight": 33
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "cost": 31,
+        "weight": 40
+      },
+      {
+        "from": 0,
+        "to": 10,
+        "cost": 7,
+        "weight": 8
+      },
+      {
+        "from": 1,
+        "to": 0,
+        "cost": 6,
+        "weight": 19
+      },
+      {
+        "from": 1,
+        "to": 7,
+        "cost": 38,
+        "weight": 19
+      },
+      {
+        "from": 1,
+        "to": 8,
+        "cost": 33,
+        "weight": 10
+      },
+      {
+        "from": 1,
+        "to": 9,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 1,
+        "to": 10,
+        "cost": 27,
+        "weight": 36
+      },
+      {
+        "from": 2,
+        "to": 8,
+        "cost": 9,
+        "weight": 34
+      },
+      {
+        "from": 2,
+        "to": 10,
+        "cost": 13,
+        "weight": 38
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "cost": 22,
+        "weight": 19
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "cost": 17,
+        "weight": 2
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "cost": 16,
+        "weight": 29
+      },
+      {
+        "from": 4,
+        "to": 0,
+        "cost": 4,
+        "weight": 33
+      },
+      {
+        "from": 4,
+        "to": 2,
+        "cost": 32,
+        "weight": 37
+      },
+      {
+        "from": 4,
+        "to": 6,
+        "cost": 17,
+        "weight": 26
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "cost": 5,
+        "weight": 30
+      },
+      {
+        "from": 5,
+        "to": 0,
+        "cost": 2,
+        "weight": 23
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "cost": 17,
+        "weight": 10
+      },
+      {
+        "from": 5,
+        "to": 7,
+        "cost": 24,
+        "weight": 37
+      },
+      {
+        "from": 5,
+        "to": 8,
+        "cost": 27,
+        "weight": 36
+      },
+      {
+        "from": 5,
+        "to": 10,
+        "cost": 7,
+        "weight": 16
+      },
+      {
+        "from": 6,
+        "to": 8,
+        "cost": 5,
+        "weight": 30
+      },
+      {
+        "from": 6,
+        "to": 9,
+        "cost": 12,
+        "weight": 33
+      },
+      {
+        "from": 7,
+        "to": 0,
+        "cost": 24,
+        "weight": 5
+      },
+      {
+        "from": 7,
+        "to": 2,
+        "cost": 36,
+        "weight": 9
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "cost": 19,
+        "weight": 20
+      },
+      {
+        "from": 7,
+        "to": 9,
+        "cost": 26,
+        "weight": 31
+      },
+      {
+        "from": 8,
+        "to": 0,
+        "cost": 14,
+        "weight": 19
+      },
+      {
+        "from": 8,
+        "to": 1,
+        "cost": 17,
+        "weight": 34
+      },
+      {
+        "from": 8,
+        "to": 2,
+        "cost": 40,
+        "weight": 37
+      },
+      {
+        "from": 8,
+        "to": 6,
+        "cost": 26,
+        "weight": 31
+      },
+      {
+        "from": 8,
+        "to": 7,
+        "cost": 13,
+        "weight": 22
+      },
+      {
+        "from": 9,
+        "to": 1,
+        "cost": 7,
+        "weight": 8
+      },
+      {
+        "from": 9,
+        "to": 2,
+        "cost": 6,
+        "weight": 11
+      },
+      {
+        "from": 9,
+        "to": 4,
+        "cost": 26,
+        "weight": 15
+      },
+      {
+        "from": 9,
+        "to": 8,
+        "cost": 28,
+        "weight": 33
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "cost": 23,
+        "weight": 32
+      },
+      {
+        "from": 10,
+        "to": 0,
+        "cost": 38,
+        "weight": 11
+      },
+      {
+        "from": 10,
+        "to": 1,
+        "cost": 33,
+        "weight": 18
+      },
+      {
+        "from": 10,
+        "to": 3,
+        "cost": 13,
+        "weight": 22
+      },
+      {
+        "from": 10,
+        "to": 4,
+        "cost": 4,
+        "weight": 25
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 7,
+    "int_adhp_weight": 8,
+    "int_adhp_path": [
+      0,
+      10
+    ],
+    "int_adhp_edge_path": [
+      2
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_infeasible_s1",
+    "family": "Integer Strictly Infeasible",
+    "num_nodes": 5,
+    "source": 0,
+    "target": 4,
+    "budget": 2,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_infeasible_s2",
+    "family": "Integer Strictly Infeasible",
+    "num_nodes": 5,
+    "source": 0,
+    "target": 4,
+    "budget": 4,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_infeasible_s3",
+    "family": "Integer Strictly Infeasible",
+    "num_nodes": 5,
+    "source": 0,
+    "target": 4,
+    "budget": 6,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_infeasible_s4",
+    "family": "Integer Strictly Infeasible",
+    "num_nodes": 5,
+    "source": 0,
+    "target": 4,
+    "budget": 8,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_infeasible_s5",
+    "family": "Integer Strictly Infeasible",
+    "num_nodes": 5,
+    "source": 0,
+    "target": 4,
+    "budget": 10,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 2,
+        "to": 4,
+        "cost": 10,
+        "weight": 25
+      },
+      {
+        "from": 0,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Infeasible",
+    "int_adhp_cost": null,
+    "int_adhp_weight": null,
+    "int_adhp_path": [],
+    "int_adhp_edge_path": [],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_boundary_s1",
+    "family": "Integer Exact Boundary",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 20,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 10
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 10,
+        "weight": 10
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 5,
+        "weight": 30
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 30
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 20,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_boundary_s2",
+    "family": "Integer Exact Boundary",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 25,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 12
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 10,
+        "weight": 13
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 5,
+        "weight": 35
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 35
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 25,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_boundary_s3",
+    "family": "Integer Exact Boundary",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 30,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 15
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 10,
+        "weight": 15
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 5,
+        "weight": 40
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 40
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 30,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_boundary_s4",
+    "family": "Integer Exact Boundary",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 35,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 17
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 10,
+        "weight": 18
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 5,
+        "weight": 45
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 45
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 35,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_boundary_s5",
+    "family": "Integer Exact Boundary",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 40,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 10,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 10,
+        "weight": 20
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 5,
+        "weight": 50
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 5,
+        "weight": 50
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 20,
+    "int_adhp_weight": 40,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_multi_opt_s1",
+    "family": "Integer Multiple Optima",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 27,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 14,
+        "weight": 11
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 14,
+        "weight": 11
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 14,
+        "weight": 11
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 14,
+        "weight": 11
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 28,
+    "int_adhp_weight": 22,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_multi_opt_s2",
+    "family": "Integer Multiple Optima",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 33,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 16,
+        "weight": 14
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 16,
+        "weight": 14
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 16,
+        "weight": 14
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 16,
+        "weight": 14
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 32,
+    "int_adhp_weight": 28,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_multi_opt_s3",
+    "family": "Integer Multiple Optima",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 39,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 18,
+        "weight": 17
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 18,
+        "weight": 17
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 18,
+        "weight": 17
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 18,
+        "weight": 17
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 36,
+    "int_adhp_weight": 34,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_multi_opt_s4",
+    "family": "Integer Multiple Optima",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 45,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 20,
+        "weight": 20
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 20,
+        "weight": 20
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 40,
+    "int_adhp_weight": 40,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  },
+  {
+    "instance_id": "int_multi_opt_s5",
+    "family": "Integer Multiple Optima",
+    "num_nodes": 4,
+    "source": 0,
+    "target": 3,
+    "budget": 51,
+    "edges": [
+      {
+        "from": 0,
+        "to": 1,
+        "cost": 22,
+        "weight": 23
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "cost": 22,
+        "weight": 23
+      },
+      {
+        "from": 0,
+        "to": 2,
+        "cost": 22,
+        "weight": 23
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "cost": 22,
+        "weight": 23
+      }
+    ],
+    "int_adhp_status": "Optimal",
+    "int_adhp_cost": 44,
+    "int_adhp_weight": 46,
+    "int_adhp_path": [
+      0,
+      1,
+      3
+    ],
+    "int_adhp_edge_path": [
+      0,
+      1
+    ],
+    "oracle_verified": true
+  }
+]

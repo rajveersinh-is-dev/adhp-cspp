@@ -140,7 +140,19 @@ impl CsppSolver for HybridAdhpSolver {
         let n = instance.graph.num_nodes();
         let m = instance.graph.num_edges();
 
-        if !budget.is_finite() || budget < 0.0 || s >= n || t >= n {
+        if s >= n || t >= n || budget.is_nan() {
+            stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+            return CsppSolution {
+                status: SolutionStatus::UnsupportedInput,
+                path: Vec::new(),
+                edge_path: Vec::new(),
+                cost: f64::INFINITY,
+                weight: f64::INFINITY,
+                stats,
+            };
+        }
+
+        if budget < 0.0 {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::Infeasible,
