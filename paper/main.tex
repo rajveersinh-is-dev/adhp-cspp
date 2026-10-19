@@ -100,11 +100,11 @@ Let $d_c(u, t) = d_{\lambda_1}(u, t)$ (with $\lambda_1 = 0$) and $d_w(u, t)$ be 
 For integer graphs with $c(e), w(e) \in \mathbb{N}_0$, rational dual multipliers $\lambda = p/q$, ceiling bounds $\lceil \cdot \rceil$, and zero tolerance, ADHP guarantees 100\% mathematically exact global optimality. In floating-point arithmetic with relative tolerances $(\varepsilon_{\text{feas}}, \varepsilon_{\text{prune}})$, ADHP guarantees $(\varepsilon_{\text{feas}}, \varepsilon_{\text{prune}})$-admissibility, preventing premature pruning of optimal prefixes under Higham summation roundoff.
 \end{theorem}
 
-\begin{theorem}[Instance-Adaptive Bounding Optimality]
+\begin{proposition}[Instance-Adaptive Dual Bounding Policy]
 Let $\rho = |E| / |V|$, $\gamma = (c(P_w) - c(P_c)) / \max(c(P_w), 1)$, and $\alpha = (W - w(P_w)) / \max(w(P_c) - w(P_w), 1)$. The adaptive policy:
 $$\sigma(\mathcal{I}) = \begin{cases} 1 & \text{if } \gamma < 0.04 \lor \alpha \ge 0.85 \lor (\rho \ge 3.5 \land |V| \le 200) \\ 5 & \text{if } \rho \le 2.5 \land \gamma \ge 0.15 \land \alpha \le 0.70 \\ 2 & \text{otherwise} \end{cases}$$
-preserves 100\% exact admissibility while restricting preprocessing complexity to $2 \cdot (|E| + |V| \log |V|)$ on dense networks.
-\end{theorem}
+preserves exact admissibility while bounding the preprocessing complexity to at most $2 \cdot (|E| + |V| \log |V|)$ single-source shortest path passes on dense networks.
+\end{proposition}
 
 \section{Empirical Evaluation Across 25 Configurations}
 All solvers were implemented in Rust 2021 (\texttt{opt-level=3}) and evaluated across 25 configurations comprising 250 configuration-instance evaluations across 200 distinct generated graphs (190 distinct graphs in Suites 1--4, and 10 controlled repeated graphs in Suite 5), preceded by 5 discarded warmup runs:
@@ -120,7 +120,7 @@ All solvers were implemented in Rust 2021 (\texttt{opt-level=3}) and evaluated a
 \begin{table}[ht]
 \centering
 \small
-\caption{2D Mesh Grid Scaling: Mean Total Runtime ($\mu$s) and Candidate Labels Generated}
+\caption{2D Directed Acyclic Mesh Grid Scaling (DAG with right, down, diagonal transitions): Mean Total Runtime ($\mu$s) and Candidate Labels Generated}
 \begin{tabular}{cr rrrrrr r}
 \toprule
 Grid & Nodes & \textbf{Hybrid} & ADHP & CW & DB & Pulse & Martins & \textbf{Hybrid Labels} \\

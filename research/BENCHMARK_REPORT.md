@@ -58,7 +58,7 @@ Across **25 systematic configurations comprising 250 configuration-instance eval
 
 ---
 
-#### B. 2D Mesh Grid Scaling (Planar Topologies, 10 Instances per Dimension)
+#### B. 2D Mesh Grid Scaling (Planar Directed Acyclic Graph Topologies: right, down, diagonal transitions; 10 Instances per Dimension)
 
 | Dimensions | Vertices ($n$) | Adaptive Hybrid ADHP | ADHP ($K=5$) | Carlyle-Wood | Dumitrescu-Boland | Pulse | Martins |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|

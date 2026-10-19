@@ -5,6 +5,7 @@
 //! measured in constant time before search, preserving exact optimality while
 //! eliminating dual preprocessing overhead on dense networks and loose-budget instances.
 
+use crate::adhp::{is_weight_feasible, is_weight_infeasible, PRUNE_EPSILON};
 use crate::dijkstra::dijkstra_backward_tree;
 use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
@@ -26,16 +27,11 @@ impl Eq for SearchLabel {}
 
 impl Ord for SearchLabel {
     fn cmp(&self, other: &Self) -> Ordering {
+        // Min-heap ordering: invert comparison using IEEE 754 total ordering. Break ties by smaller weight.
         other
             .key
-            .partial_cmp(&self.key)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                other
-                    .weight
-                    .partial_cmp(&self.weight)
-                    .unwrap_or(Ordering::Equal)
-            })
+            .total_cmp(&self.key)
+            .then_with(|| other.weight.total_cmp(&self.weight))
     }
 }
 
@@ -180,7 +176,7 @@ impl CsppSolver for HybridAdhpSolver {
 
         // Step 1: Backward Weight Preprocessing
         let tree_w = dijkstra_backward_tree(&instance.graph, t, 0.0, true);
-        if tree_w.distances[s] > budget + 1e-9 || tree_w.distances[s].is_infinite() {
+        if is_weight_infeasible(tree_w.distances[s], budget) || tree_w.distances[s].is_infinite() {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
@@ -228,7 +224,7 @@ impl CsppSolver for HybridAdhpSolver {
             };
 
         // If unconstrained minimum cost path is feasible, it is globally optimal
-        if weight_c <= budget + 1e-9 {
+        if is_weight_feasible(weight_c, budget) {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return CsppSolution {
@@ -295,7 +291,7 @@ impl CsppSolver for HybridAdhpSolver {
                 if let Some((p_mid, ep_mid, c_mid, w_mid)) =
                     tree_mid.reconstruct_path_with_metrics(s, t)
                 {
-                    if w_mid <= budget + 1e-9 && c_mid < best_cost {
+                    if is_weight_feasible(w_mid, budget) && c_mid < best_cost {
                         best_cost = c_mid;
                         best_weight = w_mid;
                         best_path = p_mid;
@@ -349,7 +345,7 @@ impl CsppSolver for HybridAdhpSolver {
             let w_u = label.weight;
 
             if u == t {
-                if w_u <= budget + 1e-9 && c_u < best_cost {
+                if is_weight_feasible(w_u, budget) && c_u < best_cost {
                     best_cost = c_u;
                     best_weight = w_u;
                     let (p, ep) = Self::reconstruct_path(&pool, label.pool_idx);
@@ -359,9 +355,10 @@ impl CsppSolver for HybridAdhpSolver {
                 continue;
             }
 
-            let rem_w_u = (budget - w_u).max(0.0);
-            let lb_u = Self::eval_dual_bound(u, rem_w_u, &lambdas, &dist_dual);
-            if c_u + lb_u > best_cost + 1e-9 {
+            let prune_tol = best_cost.abs().max(1.0) * PRUNE_EPSILON;
+
+            let lb_u = Self::eval_dual_bound(u, budget - w_u, &lambdas, &dist_dual);
+            if c_u + lb_u > best_cost + prune_tol {
                 stats.labels_pruned_dual_bound += 1;
                 continue;
             }
@@ -373,15 +370,14 @@ impl CsppSolver for HybridAdhpSolver {
                 let new_w = w_u + edge.weight;
 
                 // Filter 1: Resource feasibility
-                if dist_weight[v].is_infinite() || new_w + dist_weight[v] > budget + 1e-9 {
+                if is_weight_infeasible(new_w + dist_weight[v], budget) {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
 
                 // Filter 2: Dual envelope bounding
-                let rem_w_v = (budget - new_w).max(0.0);
-                let lb_v = Self::eval_dual_bound(v, rem_w_v, &lambdas, &dist_dual);
-                if new_c + lb_v > best_cost + 1e-9 {
+                let lb_v = Self::eval_dual_bound(v, budget - new_w, &lambdas, &dist_dual);
+                if new_c + lb_v > best_cost + prune_tol {
                     stats.labels_pruned_dual_bound += 1;
                     continue;
                 }
@@ -414,6 +410,12 @@ impl CsppSolver for HybridAdhpSolver {
                 stats.peak_queue_size = heap.len();
             }
         }
+
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = (dist_dual.len() + 1) * n * std::mem::size_of::<f64>();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<PoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<SearchLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + pool_bytes + heap_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

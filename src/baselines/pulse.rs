@@ -1,4 +1,4 @@
-use crate::dijkstra::dijkstra_backward;
+use crate::dijkstra::{dijkstra_backward, dijkstra_backward_tree};
 use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::time::Instant;
@@ -167,7 +167,8 @@ impl CsppSolver for PulseSolver {
         let weight_tol = budget.abs().max(1.0) * 1e-9;
         let prep_start = Instant::now();
         let dist_cost = dijkstra_backward(&instance.graph, t, 0.0, false);
-        let dist_weight = dijkstra_backward(&instance.graph, t, 0.0, true);
+        let tree_w = dijkstra_backward_tree(&instance.graph, t, 0.0, true);
+        let dist_weight = tree_w.distances.clone();
         stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
 
         if dist_weight[s] > budget + weight_tol || dist_cost[s].is_infinite() {
@@ -182,14 +183,21 @@ impl CsppSolver for PulseSolver {
             };
         }
 
+        let (mut best_cost, mut best_weight, mut best_path, mut best_edge_path) =
+            if let Some((p, ep, c, w)) = tree_w.reconstruct_path_with_metrics(s, t) {
+                if w <= budget + weight_tol {
+                    (c, w, p, ep)
+                } else {
+                    (f64::INFINITY, f64::INFINITY, Vec::new(), Vec::new())
+                }
+            } else {
+                (f64::INFINITY, f64::INFINITY, Vec::new(), Vec::new())
+            };
+
         let mut memory = vec![VertexFrontier::default(); n];
         let mut visited = vec![false; n];
         let mut current_path = vec![s];
         let mut current_edges = Vec::new();
-        let mut best_cost = f64::INFINITY;
-        let mut best_weight = f64::INFINITY;
-        let mut best_path = Vec::new();
-        let mut best_edge_path = Vec::new();
 
         Self::pulse_dfs(
             s,
@@ -210,6 +218,13 @@ impl CsppSolver for PulseSolver {
             &mut best_edge_path,
             &mut stats,
         );
+
+        let frontiers_bytes: usize = memory.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = 2 * n * std::mem::size_of::<f64>();
+        let path_bytes = current_path.capacity() * std::mem::size_of::<usize>()
+            + current_edges.capacity() * std::mem::size_of::<usize>();
+        let visited_bytes = visited.len() * std::mem::size_of::<bool>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + path_bytes + visited_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

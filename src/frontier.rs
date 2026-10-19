@@ -54,7 +54,13 @@ impl VertexFrontier {
         &self.points
     }
 
-    /// Checks if a candidate label `(new_c, new_w)` is weakly dominated by any existing point.
+    /// Returns the total heap and inline memory allocated by this frontier in bytes.
+    #[inline(always)]
+    pub fn capacity_bytes(&self) -> usize {
+        std::mem::size_of::<Self>() + self.points.capacity() * std::mem::size_of::<ParetoPoint>()
+    }
+
+    /// Checks if a candidate label `(new_c, new_w)` is weakly dominated by any existing point in $O(\log |F|)$ time.
     ///
     /// Mathematical definition: Point $p$ weakly dominates candidate $q$ if:
     /// $$c_p \le c_q \quad \land \quad w_p \le w_q$$
@@ -75,18 +81,18 @@ impl VertexFrontier {
         false
     }
 
-    /// Prunes any existing points in the frontier that are weakly dominated by `(new_c, new_w)`
-    /// and inserts the new non-dominated point in sorted order.
+    /// Prunes any existing points in the frontier weakly dominated by `(new_c, new_w)`
+    /// and inserts the new non-dominated point in sorted order in $O(|F|)$ time.
     #[inline(always)]
     pub fn insert_and_prune(&mut self, new_c: f64, new_w: f64) {
-        // Remove existing points weakly dominated by the new point:
-        // pt is dominated by new if new_c <= pt.cost && new_w <= pt.weight
+        // Linear scan O(|F|) to remove points dominated by the new point
         self.points
             .retain(|pt| !(new_c <= pt.cost && new_w <= pt.weight));
 
         // Binary search insertion position maintaining sorted order by weight ascending
         let pos = self.points.partition_point(|pt| pt.weight < new_w);
 
+        // Vector insertion shifts remaining elements in O(|F|)
         self.points.insert(
             pos,
             ParetoPoint {

@@ -20,16 +20,11 @@ impl Eq for CwLabel {}
 
 impl Ord for CwLabel {
     fn cmp(&self, other: &Self) -> Ordering {
+        // Min-heap ordering on Lagrangian lower bound using IEEE 754 total ordering
         other
             .key
-            .partial_cmp(&self.key)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                other
-                    .weight
-                    .partial_cmp(&self.weight)
-                    .unwrap_or(Ordering::Equal)
-            })
+            .total_cmp(&self.key)
+            .then_with(|| other.weight.total_cmp(&self.weight))
     }
 }
 
@@ -327,6 +322,12 @@ impl CsppSolver for CarlyleWoodSolver {
                 }
             }
         }
+
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = 2 * n * std::mem::size_of::<f64>();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<PoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<CwLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + pool_bytes + heap_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

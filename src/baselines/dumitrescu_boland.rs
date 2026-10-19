@@ -1,6 +1,6 @@
 //! Dumitrescu & Boland (2003) 1D-bounded label setting algorithm.
 
-use crate::dijkstra::dijkstra_backward;
+use crate::dijkstra::{dijkstra_backward, dijkstra_backward_tree};
 use crate::frontier::VertexFrontier;
 use crate::{CsppInstance, CsppSolution, CsppSolver, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
@@ -20,17 +20,11 @@ impl Eq for DbLabel {}
 
 impl Ord for DbLabel {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Min-heap ordering on cost lower bound
+        // Min-heap ordering on cost lower bound using IEEE 754 total ordering
         other
             .key
-            .partial_cmp(&self.key)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                other
-                    .weight
-                    .partial_cmp(&self.weight)
-                    .unwrap_or(Ordering::Equal)
-            })
+            .total_cmp(&self.key)
+            .then_with(|| other.weight.total_cmp(&self.weight))
     }
 }
 
@@ -128,9 +122,10 @@ impl CsppSolver for DumitrescuBolandSolver {
         let weight_tol = budget.abs().max(1.0) * 1e-9;
 
         let prep_start = Instant::now();
-        // Compute 1D reverse shortest path trees: d_c and d_w
+        // Compute 1D reverse shortest path trees: d_c and d_w (reconstructing P_w for initial upper bound per Dumitrescu & Boland 2003)
         let dist_cost = dijkstra_backward(&instance.graph, t, 0.0, false);
-        let dist_weight = dijkstra_backward(&instance.graph, t, 0.0, true);
+        let tree_w = dijkstra_backward_tree(&instance.graph, t, 0.0, true);
+        let dist_weight = tree_w.distances.clone();
         stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
 
         if dist_weight[s] > budget + weight_tol || dist_cost[s].is_infinite() {
@@ -144,6 +139,17 @@ impl CsppSolver for DumitrescuBolandSolver {
                 stats,
             };
         }
+
+        let (mut best_cost, mut best_weight, mut best_path, mut best_edge_path) =
+            if let Some((p, ep, c, w)) = tree_w.reconstruct_path_with_metrics(s, t) {
+                if w <= budget + weight_tol {
+                    (c, w, p, ep)
+                } else {
+                    (f64::INFINITY, f64::INFINITY, Vec::new(), Vec::new())
+                }
+            } else {
+                (f64::INFINITY, f64::INFINITY, Vec::new(), Vec::new())
+            };
 
         let mut heap = BinaryHeap::new();
         let mut pool: Vec<PoolNode> = Vec::with_capacity(1024);
@@ -165,11 +171,6 @@ impl CsppSolver for DumitrescuBolandSolver {
         });
 
         stats.labels_generated += 1;
-
-        let mut best_cost = f64::INFINITY;
-        let mut best_weight = f64::INFINITY;
-        let mut best_path = Vec::new();
-        let mut best_edge_path = Vec::new();
 
         while let Some(label) = heap.pop() {
             stats.labels_explored += 1;
@@ -238,6 +239,12 @@ impl CsppSolver for DumitrescuBolandSolver {
                 stats.peak_queue_size = heap.len();
             }
         }
+
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = 2 * n * std::mem::size_of::<f64>();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<PoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<DbLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + pool_bytes + heap_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

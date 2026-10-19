@@ -155,13 +155,8 @@ impl CsppInstance {
                 .iter()
                 .min_by(|a, b| {
                     a.cost
-                        .partial_cmp(&b.cost)
-                        .unwrap_or(std::cmp::Ordering::Equal)
-                        .then_with(|| {
-                            a.weight
-                                .partial_cmp(&b.weight)
-                                .unwrap_or(std::cmp::Ordering::Equal)
-                        })
+                        .total_cmp(&b.cost)
+                        .then_with(|| a.weight.total_cmp(&b.weight))
                 })
                 .copied()?;
 
@@ -216,4 +211,5 @@ pub use baselines::martins::MartinsSolver;
 pub use baselines::pulse::PulseSolver;
 pub use exact::{IntAdhpSolver, IntCsppInstance, IntCsppSolution, IntDirectedGraph};
 pub use frontier::{ParetoPoint, VertexFrontier};
+pub use graph::DirectedGraph;
 pub use hybrid::{AdaptiveSelectionStrategy, HybridAdhpSolver};

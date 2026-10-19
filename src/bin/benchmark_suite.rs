@@ -194,7 +194,7 @@ fn evaluate_solver_across_instances(
     let std_dev = variance.sqrt();
 
     let mut sorted_runtimes = runtimes.clone();
-    sorted_runtimes.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    sorted_runtimes.sort_by(|a, b| a.total_cmp(b));
     let median_time = sorted_runtimes[sorted_runtimes.len() / 2];
 
     let mut sorted_labels = labels_gen.clone();

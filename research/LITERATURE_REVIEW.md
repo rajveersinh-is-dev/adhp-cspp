@@ -46,14 +46,14 @@ To ensure complete scientific integrity, this ledger records:
    - Integrated preprocessing and label-setting with 1-dimensional lower bounds: $d_c(u, t)$ (cost distance) and $d_w(u, t)$ (weight distance).
    - Labels at $u$ with $w + d_w(u, t) > W$ are pruned by feasibility; labels with $c + d_c(u, t) \ge C_{UB}$ are pruned by cost.
    - Bottleneck: Because $d_c$ minimizes cost ignoring weight, and $d_w$ minimizes weight ignoring cost, neither bound captures the cost-weight trade-off along the constrained Pareto frontier.
-5. **Carlyle, W. M., & Wood, R. K. (2008)**. *Lagrangian relaxation and enumeration for solving constrained shortest-path problems*. INFORMS Journal on Computing, 20(3):418–429.
+6. **Carlyle, W. M., & Wood, R. K. (2008)**. *Lagrangian relaxation and enumeration for solving constrained shortest-path problems*. INFORMS Journal on Computing, 20(3):418–429.
    - Solves the global Lagrangian dual to find a single optimal multiplier $\lambda^*$ at the root $(s, t)$.
    - Then enumerates near-shortest paths with respect to the composite metric $c + \lambda^* w$ until a feasible path is found or the enumeration lower bound reaches the upper bound.
    - Bottleneck: Degenerates severely when the duality gap is wide or when the density of paths near the Lagrangian lower bound is high, requiring the enumeration of millions of candidate paths.
-6. **Lozano, L., & Medaglia, A. L. (2013)**. *On an exact pulse algorithm for the constrained shortest path problem*. Computers & Operations Research, 40(1):378–388.
+7. **Lozano, L., & Medaglia, A. L. (2013)**. *On an exact pulse algorithm for the constrained shortest path problem*. Computers & Operations Research, 40(1):378–388.
    - Developed the **Pulse Algorithm**: a recursive Depth-First Search with pruning based on shortest distance and minimum resource bounds, using localized pruning.
    - Known as one of the fastest exact algorithms on road networks, but relies primarily on 1D cost and resource bounds, making it vulnerable on dense graphs with wide resource budgets.
-7. **Recent Works (2024–2025)**:
+8. **Recent Works (2024–2025)**:
    - Bidirectional $A^*$ label-setting with lazy dominance checks (Zhang et al. 2024, arXiv).
    - Negative-Weight Resource-Constrained $A^*$ (NWRCA*, Dagstuhl 2024).
 
@@ -73,7 +73,7 @@ In all existing label-setting and branch-and-bound methods:
     $$\mathcal{L}_u^*(\Delta w) = \sup_{\lambda \ge 0} \{ d_\lambda(u, t) - \lambda \Delta w \}$$
     where $d_\lambda(u, t)$ is the shortest path distance from $u$ to $t$ under edge weights $c_e + \lambda w_e$.
   - As a function of $\Delta w$, $\mathcal{L}_u^*(\Delta w)$ is a **convex, non-increasing, piecewise-linear curve**!
-  - No existing algorithm in the literature constructs an explicit **Adaptive Multi-Faceted Dual Lower-Bound Envelope** across all vertices simultaneously and uses it for sublinear-time dominance filtering during label generation.
+  - While multi-objective heuristic search (e.g., Stewart & White 1991; Mandow & Pérez de la Cruz 2005; Sourd & Spanjaard 2008) explored sets of bounding vectors in multiobjective spaces, standard exact CSPP solvers have relied on scalar 1D bounds ($d_c, d_w$) or a single root-derived Lagrangian multiplier $\lambda^*$. ADHP specifically uses an explicit **Adaptive Multi-Faceted Dual Lower-Bound Envelope** across all vertices simultaneously, constructed via backward-centric tree duality under dynamically bisected Lagrangian multipliers.
 
 ---
 
@@ -94,9 +94,9 @@ In all existing label-setting and branch-and-bound methods:
 
 ### 4. Unresolved Novelty Questions
 
-1. *Has any paper computed a multi-point parametric Lagrangian envelope simultaneously for all vertices $u \in V$ via reverse Dijkstra trees?*
-   - Investigation: Prior literature computes either a single global $\lambda^*$ (LARAC / Carlyle-Wood) or uses 1D bounds $d_c(u, t), d_w(u, t)$ (Dumitrescu-Boland, Pulse). Precomputing a $K$-facet lower bound envelope across all vertices is unstudied in standard CSPP solvers.
+1. *Has any paper computed a multi-point parametric Lagrangian envelope simultaneously for all vertices $u \in V$ via reverse Dijkstra trees for CSPP?*
+   - Investigation: Prior CSPP literature computes either a single global $\lambda^*$ (LARAC / Carlyle-Wood) or uses 1D bounds $d_c(u, t), d_w(u, t)$ (Dumitrescu-Boland, Pulse). Precomputing a $K$-facet lower bound envelope across all vertices via reverse trees is unstudied in standard CSPP solvers.
 2. *Can the $K$ supporting multipliers be chosen adaptively to maximize the lower bound volume with minimal tree solves?*
    - Investigation: We formulate an exact **Adaptive Dual Hull (ADH)** algorithm that uses recursive bisection of the Lagrangian duality gap to select the most informative multipliers.
 3. *What is the exact asymptotic overhead versus practical label reduction ratio?*
-   - Investigation: Preprocessing requires $K$ single-source shortest path calls ($O(K(m + n \log n))$). For small $K \in \{3, 5, 8\}$, this takes milliseconds, while filtering out 90%+ of non-dominated labels in the search phase.
+   - Investigation: Preprocessing requires $K$ single-source shortest path calls ($O(K(m + n \log n))$). For small $K \in \{1, 2, 5\}$, this takes microseconds to milliseconds, while filtering out up to 95%+ of candidate labels on structured graphs.

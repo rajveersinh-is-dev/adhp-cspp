@@ -106,7 +106,7 @@ All solvers were implemented in Rust 2021 (`opt-level=3`) and evaluated across 2
   [8x8], [64], [16.48 µs], [25.38 µs], [34.73 µs], [*16.00 µs*], [42.76 µs], [55.89 µs],
   [10x10], [100], [*33.74 µs*], [38.96 µs], [54.82 µs], [46.40 µs], [189.17 µs], [242.01 µs]
 )
-#align(center)[_Table 2: 2D Mesh Grid Scaling: Mean Total Runtime (µs). On 10x10, Hybrid generates 136 labels and ADHP generates 105 labels vs 3111 for Martins._]
+#align(center)[_Table 2: 2D Directed Acyclic Mesh Grid Scaling (DAG with right, down, diagonal transitions): Mean Total Runtime (µs). On 10x10, Hybrid generates 136 labels and ADHP generates 105 labels vs 3111 for Martins._]
 
 #v(0.3em)
 #table(
@@ -138,8 +138,8 @@ All solvers were implemented in Rust 2021 (`opt-level=3`) and evaluated across 2
 #align(center)[_Table 4: Budget Sensitivity ($n=50$ Anti-Correlated Graph): Mean Total Runtime (µs)._]
 
 == 6. Honest Performance Analysis & Limitations
-1. *Planar Grid Domination*:
-   On combinatorial planar grids ($10 times 10$), Adaptive Hybrid ADHP achieves the fastest total wall-clock runtime ($33.74$ µs) and ADHP ($K=5$) achieves $38.96$ µs, outperforming Dumitrescu-Boland ($46.40$ µs), Carlyle-Wood ($54.82$ µs), Pulse ($189.17$ µs, a $5.6 times$ speedup), and Martins ($242.01$ µs, a $7.2 times$ speedup). In this structured branching regime, the $95.6%$–$96.6%$ reduction in candidate label generation overwhelmingly amortizes the backward Dijkstra preprocessing passes.
+1. *Planar Directed Acyclic Grid Domination*:
+   On combinatorial 2D directed acyclic grids ($10 times 10$, DAG with right, down, diagonal transitions), Adaptive Hybrid ADHP achieves the fastest total wall-clock runtime ($33.74$ µs) and ADHP ($K=5$) achieves $38.96$ µs, outperforming Dumitrescu-Boland ($46.40$ µs), Carlyle-Wood ($54.82$ µs), Pulse ($189.17$ µs, a $5.6 times$ speedup), and Martins ($242.01$ µs, a $7.2 times$ speedup). In this structured branching regime, the $95.6%$–$96.6%$ reduction in candidate label generation overwhelmingly amortizes the backward Dijkstra preprocessing passes.
 2. *Dense Network Preprocessing Overhead & Mitigation*:
    On dense Anti-Correlated and Random ER graphs, fixed ADHP ($K=5$) evaluates 5 reverse trees ($70$–$85%$ of runtime). Adaptive Hybrid ADHP mitigates this by dynamically selecting $K=1$ or $K=2$ when density $rho >= 3.5$ or duality gap is small, achieving $76.92$ µs on Anti-Correlated $n=150$ (fastest overall) and $32.40$ µs on Random ER $n=90$ (fastest overall).
 3. *Regressions on Small Random Networks*:

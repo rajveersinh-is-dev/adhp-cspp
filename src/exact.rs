@@ -262,6 +262,12 @@ impl IntVertexFrontier {
         &self.points
     }
 
+    /// Returns the total heap and inline memory allocated by this integer frontier in bytes.
+    #[inline(always)]
+    pub fn capacity_bytes(&self) -> usize {
+        std::mem::size_of::<Self>() + self.points.capacity() * std::mem::size_of::<IntParetoPoint>()
+    }
+
     #[inline(always)]
     pub fn is_dominated(&self, new_c: u64, new_w: u64) -> bool {
         if self.points.is_empty() {
@@ -875,24 +881,30 @@ impl IntAdhpSolver {
             }
         }
 
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = (facets.len() + 1) * n * std::mem::size_of::<Option<u128>>();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<IntPoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<IntSearchLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + pool_bytes + heap_bytes;
+
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 
-        if !best_path.is_empty() {
-            IntCsppSolution {
-                status: SolutionStatus::Optimal,
-                path: best_path,
-                edge_path: best_edge_path,
-                cost: best_cost,
-                weight: best_weight,
-                stats,
-            }
-        } else if has_arithmetic_overflow {
+        if has_arithmetic_overflow {
             IntCsppSolution {
                 status: SolutionStatus::ArithmeticOverflow,
                 path: Vec::new(),
                 edge_path: Vec::new(),
                 cost: u64::MAX,
                 weight: u64::MAX,
+                stats,
+            }
+        } else if !best_path.is_empty() {
+            IntCsppSolution {
+                status: SolutionStatus::Optimal,
+                path: best_path,
+                edge_path: best_edge_path,
+                cost: best_cost,
+                weight: best_weight,
                 stats,
             }
         } else {

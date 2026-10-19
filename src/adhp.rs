@@ -27,17 +27,11 @@ impl Eq for SearchLabel {}
 
 impl Ord for SearchLabel {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Min-heap ordering: invert comparison. Break ties by smaller weight.
+        // Min-heap ordering: invert comparison using IEEE 754 total ordering. Break ties by smaller weight.
         other
             .key
-            .partial_cmp(&self.key)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                other
-                    .weight
-                    .partial_cmp(&self.weight)
-                    .unwrap_or(Ordering::Equal)
-            })
+            .total_cmp(&self.key)
+            .then_with(|| other.weight.total_cmp(&self.weight))
     }
 }
 
@@ -75,12 +69,12 @@ pub const PRUNE_EPSILON: f64 = 1e-9;
 pub const FEASIBILITY_EPSILON: f64 = 1e-9;
 
 #[inline(always)]
-fn is_weight_infeasible(w: f64, budget: f64) -> bool {
+pub fn is_weight_infeasible(w: f64, budget: f64) -> bool {
     w > budget + budget.abs().max(1.0) * FEASIBILITY_EPSILON
 }
 
 #[inline(always)]
-fn is_weight_feasible(w: f64, budget: f64) -> bool {
+pub fn is_weight_feasible(w: f64, budget: f64) -> bool {
     w <= budget + budget.abs().max(1.0) * FEASIBILITY_EPSILON
 }
 
@@ -415,6 +409,12 @@ impl CsppSolver for AdhpSolver {
                 stats.peak_queue_size = heap.len();
             }
         }
+
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let prep_bytes = (dist_dual.len() + 1) * n * std::mem::size_of::<f64>();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<PoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<SearchLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + prep_bytes + pool_bytes + heap_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

@@ -16,17 +16,11 @@ impl Eq for MartinsLabel {}
 
 impl Ord for MartinsLabel {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Min-heap ordering on cost, break ties on weight
+        // Min-heap ordering on cost using IEEE 754 total ordering, break ties on weight
         other
             .cost
-            .partial_cmp(&self.cost)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                other
-                    .weight
-                    .partial_cmp(&self.weight)
-                    .unwrap_or(Ordering::Equal)
-            })
+            .total_cmp(&self.cost)
+            .then_with(|| other.weight.total_cmp(&self.weight))
     }
 }
 
@@ -200,6 +194,11 @@ impl CsppSolver for MartinsSolver {
                 stats.peak_queue_size = heap.len();
             }
         }
+
+        let frontiers_bytes: usize = frontiers.iter().map(|f| f.capacity_bytes()).sum();
+        let pool_bytes = pool.capacity() * std::mem::size_of::<PoolNode>();
+        let heap_bytes = heap.capacity() * std::mem::size_of::<MartinsLabel>();
+        stats.peak_memory_bytes = frontiers_bytes + pool_bytes + heap_bytes;
 
         stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
 

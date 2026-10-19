@@ -922,3 +922,80 @@ fn test_legitimate_large_finite_distance_near_limit() {
     assert_eq!(sol.cost, c1 * 2);
     assert_eq!(sol.weight, w1 * 2);
 }
+
+#[test]
+fn test_search_overflow_with_existing_suboptimal_path_fails_closed() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let mut g = IntDirectedGraph::new(4);
+    // Path 1 (discovered in preprocessing as weight-minimizing):
+    // 0 -> 3: cost 100, weight 10
+    g.add_edge(0, 3, 100, 10);
+
+    // Path 2 (candidate during search with smaller weight, but cost overflows u64):
+    // 0 -> 1 -> 3: cost (u64::MAX - 5) + 20, weight 5
+    g.add_edge(0, 1, u64::MAX - 5, 2);
+    g.add_edge(1, 3, 20, 3);
+
+    let budget = 15;
+    let inst = IntCsppInstance::new(g, 0, 3, budget);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    // Regression test for [BUG-01]: When an arithmetic overflow occurs during search,
+    // the solver must NOT falsely certify Path 1 as Optimal! It must fail closed with ArithmeticOverflow.
+    assert_eq!(sol.status, SolutionStatus::ArithmeticOverflow);
+    assert!(sol.path.is_empty());
+    assert_eq!(sol.cost, u64::MAX);
+}
+
+#[test]
+fn test_directed_graph_validate_integrity() {
+    use adhp_cspp::DirectedGraph;
+
+    let mut g = DirectedGraph::new(3);
+    assert!(g.add_edge(0, 1, 10.0, 5.0));
+    assert!(g.add_edge(1, 2, 20.0, 10.0));
+    assert!(g.validate().is_ok());
+
+    // Invalid graph constructed via bypass: negative cost or non-finite
+    let mut g_invalid = DirectedGraph::new(2);
+    assert!(!g_invalid.add_edge(0, 1, -5.0, 10.0));
+    assert!(!g_invalid.add_edge(0, 1, f64::NAN, 10.0));
+    assert!(!g_invalid.add_edge(0, 5, 10.0, 10.0));
+    assert!(g_invalid.validate().is_ok());
+}
+
+#[test]
+fn test_dumitrescu_and_pulse_initial_upper_bound_pruning() {
+    use adhp_cspp::{CsppInstance, CsppSolver, DirectedGraph, DumitrescuBolandSolver, PulseSolver, SolutionStatus};
+
+    let mut g = DirectedGraph::new(4);
+    // Path 1 (Weight minimizing, feasible): 0 -> 3, cost 50, weight 5
+    assert!(g.add_edge(0, 3, 50.0, 5.0));
+    // Path 2 (Lower cost, feasible): 0 -> 1 -> 3, cost 20, weight 8
+    assert!(g.add_edge(0, 1, 10.0, 4.0));
+    assert!(g.add_edge(1, 3, 10.0, 4.0));
+    // Path 3 (Expensive, feasible): 0 -> 2 -> 3, cost 100, weight 6
+    assert!(g.add_edge(0, 2, 50.0, 3.0));
+    assert!(g.add_edge(2, 3, 50.0, 3.0));
+
+    let budget = 10.0;
+    let inst = CsppInstance::new(g, 0, 3, budget);
+
+    let db = DumitrescuBolandSolver::new();
+    let sol_db = db.solve(&inst);
+    assert_eq!(sol_db.status, SolutionStatus::Optimal);
+    assert_eq!(sol_db.cost, 20.0);
+    assert_eq!(sol_db.weight, 8.0);
+    assert_eq!(sol_db.path, vec![0, 1, 3]);
+    assert!(sol_db.stats.peak_memory_bytes > 0);
+
+    let pulse = PulseSolver::new();
+    let sol_pulse = pulse.solve(&inst);
+    assert_eq!(sol_pulse.status, SolutionStatus::Optimal);
+    assert_eq!(sol_pulse.cost, 20.0);
+    assert_eq!(sol_pulse.weight, 8.0);
+    assert_eq!(sol_pulse.path, vec![0, 1, 3]);
+    assert!(sol_pulse.stats.peak_memory_bytes > 0);
+}
+

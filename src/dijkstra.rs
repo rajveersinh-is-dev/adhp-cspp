@@ -15,11 +15,8 @@ impl Eq for HeapItem {}
 
 impl Ord for HeapItem {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Min-heap ordering: invert comparison. Handle NaNs safely.
-        other
-            .dist
-            .partial_cmp(&self.dist)
-            .unwrap_or(Ordering::Equal)
+        // Strict IEEE 754 total ordering: invert comparison for min-heap
+        other.dist.total_cmp(&self.dist)
     }
 }
 
@@ -69,7 +66,14 @@ impl ShortestPathTree {
         let mut total_cost = 0.0;
         let mut total_weight = 0.0;
 
+        let max_steps = self.distances.len();
+        let mut steps = 0;
+
         while curr != source {
+            steps += 1;
+            if steps > max_steps {
+                return None;
+            }
             let pred = self.predecessors[curr]?;
             let (c, w) = self.predecessor_edges[curr]?;
             if let Some(e_id) = self.predecessor_edge_ids[curr] {

@@ -107,6 +107,65 @@ impl DirectedGraph {
         true
     }
 
+    /// Validates internal structural and metric invariants of the graph.
+    ///
+    /// Guarantees that:
+    /// - Adjacency lists match `node_count`.
+    /// - All edge endpoints are in bounds.
+    /// - All edge costs and weights are non-negative and finite.
+    /// - HalfEdge indices and weights match their corresponding Edge records.
+    pub fn validate(&self) -> Result<(), &'static str> {
+        if self.forward_adj.len() != self.node_count || self.reverse_adj.len() != self.node_count {
+            return Err("Adjacency list length does not match node_count");
+        }
+        for (i, edge) in self.edges.iter().enumerate() {
+            if edge.id != i {
+                return Err("Edge id mismatch with position");
+            }
+            if edge.from >= self.node_count || edge.to >= self.node_count {
+                return Err("Edge endpoint out of bounds");
+            }
+            if edge.cost < 0.0 || !edge.cost.is_finite() || edge.weight < 0.0 || !edge.weight.is_finite() {
+                return Err("Edge cost or weight is negative or non-finite");
+            }
+        }
+        for (u, adj) in self.forward_adj.iter().enumerate() {
+            for he in adj {
+                if he.target >= self.node_count {
+                    return Err("Forward half-edge target out of bounds");
+                }
+                let edge = match self.edges.get(he.edge_id) {
+                    Some(e) => e,
+                    None => return Err("Forward half-edge references invalid edge_id"),
+                };
+                if edge.from != u || edge.to != he.target {
+                    return Err("Forward half-edge does not match underlying edge endpoints");
+                }
+                if edge.cost != he.cost || edge.weight != he.weight {
+                    return Err("Forward half-edge metrics do not match underlying edge");
+                }
+            }
+        }
+        for (v, adj) in self.reverse_adj.iter().enumerate() {
+            for he in adj {
+                if he.target >= self.node_count {
+                    return Err("Reverse half-edge target out of bounds");
+                }
+                let edge = match self.edges.get(he.edge_id) {
+                    Some(e) => e,
+                    None => return Err("Reverse half-edge references invalid edge_id"),
+                };
+                if edge.to != v || edge.from != he.target {
+                    return Err("Reverse half-edge does not match underlying edge endpoints");
+                }
+                if edge.cost != he.cost || edge.weight != he.weight {
+                    return Err("Reverse half-edge metrics do not match underlying edge");
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Outgoing edges from vertex `u`.
     pub fn outgoing_edges(&self, u: usize) -> &[HalfEdge] {
         if u < self.node_count {
