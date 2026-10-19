@@ -10,6 +10,7 @@ pub mod dijkstra;
 pub mod exact;
 pub mod frontier;
 pub mod graph;
+pub mod hybrid;
 pub mod instance_generator;
 
 use serde::{Deserialize, Serialize};
@@ -211,3 +212,4 @@ pub use baselines::martins::MartinsSolver;
 pub use baselines::pulse::PulseSolver;
 pub use exact::{IntAdhpSolver, IntCsppInstance, IntCsppSolution, IntDirectedGraph};
 pub use frontier::{ParetoPoint, VertexFrontier};
+pub use hybrid::{AdaptiveSelectionStrategy, HybridAdhpSolver};
