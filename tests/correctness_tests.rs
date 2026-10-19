@@ -783,3 +783,105 @@ fn test_combinatorial_exhaustive_dfs_oracle() {
         }
     }
 }
+
+#[test]
+fn test_unsupported_input_out_of_bounds() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let g = IntDirectedGraph::new(3);
+    let solver = IntAdhpSolver::new(3);
+
+    // Source out of bounds
+    let inst_bad_source = IntCsppInstance::new(g.clone(), 5, 2, 10);
+    let sol1 = solver.solve(&inst_bad_source);
+    assert_eq!(sol1.status, SolutionStatus::UnsupportedInput);
+
+    // Target out of bounds
+    let inst_bad_target = IntCsppInstance::new(g, 0, 5, 10);
+    let sol2 = solver.solve(&inst_bad_target);
+    assert_eq!(sol2.status, SolutionStatus::UnsupportedInput);
+}
+
+#[test]
+fn test_truly_unreachable_vertex() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let mut g = IntDirectedGraph::new(4);
+    // 0 -> 1, 2 -> 3 (disconnected components)
+    g.add_edge(0, 1, 10, 5);
+    g.add_edge(2, 3, 10, 5);
+
+    let inst = IntCsppInstance::new(g, 0, 3, 100);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Infeasible);
+    assert!(sol.path.is_empty());
+    assert_eq!(sol.cost, u64::MAX);
+    assert_eq!(sol.weight, u64::MAX);
+}
+
+#[test]
+fn test_feasible_optimal_path_with_irrelevant_overflowing_path() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let mut g = IntDirectedGraph::new(4);
+    // Path 1 (feasible & optimal): 0 -> 1 -> 3, cost 20, weight 10
+    g.add_edge(0, 1, 10, 5);
+    g.add_edge(1, 3, 10, 5);
+
+    // Path 2 (irrelevant route whose edge cost would overflow u64 if relaxed): 0 -> 2 -> 3
+    g.add_edge(0, 2, u64::MAX - 2, 5);
+    g.add_edge(2, 3, 10, 5);
+
+    let budget = 15;
+    let inst = IntCsppInstance::new(g, 0, 3, budget);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 3]);
+    assert_eq!(sol.cost, 20);
+    assert_eq!(sol.weight, 10);
+}
+
+#[test]
+fn test_search_overflow_when_no_feasible_path_exists() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let mut g = IntDirectedGraph::new(3);
+    // The ONLY path from 0 to 2 is 0 -> 1 -> 2, but its accumulated cost overflows u64
+    g.add_edge(0, 1, u64::MAX - 5, 10);
+    g.add_edge(1, 2, 20, 10);
+
+    let budget = 100;
+    let inst = IntCsppInstance::new(g, 0, 2, budget);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    // Because the only path had an arithmetic overflow, the solver must NOT falsely claim Infeasible!
+    assert_eq!(sol.status, SolutionStatus::ArithmeticOverflow);
+    assert!(sol.path.is_empty());
+    assert_eq!(sol.cost, u64::MAX);
+}
+
+#[test]
+fn test_legitimate_large_finite_distance_near_limit() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    let mut g = IntDirectedGraph::new(4);
+    // Large edge weights around 10^17 (well within the documented 10^18 supported domain)
+    let c1 = 100_000_000_000_000_000u64; // 1e17
+    let w1 = 50_000_000_000_000_000u64; // 5e16
+    g.add_edge(0, 1, c1, w1);
+    g.add_edge(1, 3, c1, w1);
+
+    // Alternate path with higher cost
+    g.add_edge(0, 2, c1 * 2, w1);
+    g.add_edge(2, 3, c1 * 2, w1);
+
+    let budget = w1 * 2; // Exactly permits path 0 -> 1 -> 3
+    let inst = IntCsppInstance::new(g, 0, 3, budget);
+    let solver = IntAdhpSolver::new(3);
+    let sol = solver.solve(&inst);
+
+    assert_eq!(sol.status, SolutionStatus::Optimal);
+    assert_eq!(sol.path, vec![0, 1, 3]);
+    assert_eq!(sol.cost, c1 * 2);
+    assert_eq!(sol.weight, w1 * 2);
+}

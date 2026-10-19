@@ -22,6 +22,10 @@ pub enum SolutionStatus {
     Optimal,
     /// Proved that no path from source to target satisfies the resource budget.
     Infeasible,
+    /// Arithmetic overflow occurred during path accumulation, distance relaxation, or bounding.
+    ArithmeticOverflow,
+    /// Input problem violates supported domain invariants (e.g. invalid node indices, non-finite values).
+    UnsupportedInput,
 }
 
 /// Statistics gathered during the execution of a CSPP solver.

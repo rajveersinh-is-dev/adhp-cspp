@@ -3,6 +3,25 @@
 //! Provides zero-tolerance, exact integer arithmetic optimization for the
 //! Weight-Constrained Shortest Path Problem without floating-point representation
 //! artifacts, rounding errors, or tolerance-based pruning ambiguities.
+//!
+//! # Supported Domain & Exact Optimality Guarantees
+//!
+//! - **Graph & Metric Types**: Directed graphs with non-negative edge costs $c(e) \in \mathbb{N}_0$
+//!   and non-negative resource weights $w(e) \in \mathbb{N}_0$ represented as `u64`.
+//! - **Supported Domain**: Individual edge costs and weights satisfy $c(e), w(e) \le 10^{18}$,
+//!   guaranteeing that dual composite metrics $(c(e) \cdot \Delta w + w(e) \cdot \Delta c)$ and
+//!   Dijkstra distance accumulations fit without overflow in exact 128-bit unsigned integers
+//!   (`u128::MAX` $\approx 3.402 \times 10^{38}$).
+//! - **Path Accumulation**: Feasible path costs and weights must be representable within `u64`.
+//! - **Exactness Guarantee**: 100% mathematically exact zero-tolerance optimality. The solver
+//!   uses ceiling integer division $\lceil \cdot \rceil$ for rational dual bounds $\lambda = \Delta c / \Delta w$,
+//!   exact integer Pareto dominance, and strict budget inequalities $w(P) \le W$.
+//! - **Explicit Failure States**:
+//!   - `SolutionStatus::Optimal`: Certified globally optimal feasible path.
+//!   - `SolutionStatus::Infeasible`: Mathematically proven that no path satisfies $w(P) \le W$.
+//!   - `SolutionStatus::ArithmeticOverflow`: Distance or composite metric exceeded representation
+//!     limits; terminated safely without false pruning, silent edge dropping, or false infeasibility.
+//!   - `SolutionStatus::UnsupportedInput`: Source or target vertex index outside graph bounds.
 
 use crate::{CsppInstance, SolutionStatus, SolverStats};
 use std::cmp::Ordering;
@@ -288,10 +307,11 @@ impl PartialOrd for IntHeapItem {
     }
 }
 
-/// Backward tree with exact 128-bit integer metrics to eliminate overflow.
+/// Backward tree with unambiguous `Option<u128>` distance representation.
+/// `None` indicates strictly unreachable vertices, preventing sentinel collision with `u128::MAX`.
 #[derive(Debug, Clone)]
 pub struct IntBackwardTree {
-    pub distances: Vec<u128>,
+    pub distances: Vec<Option<u128>>,
     pub successors: Vec<Option<usize>>,
     pub successor_edges: Vec<Option<(u64, u64)>>,
     pub successor_edge_ids: Vec<Option<usize>>,
@@ -303,7 +323,7 @@ impl IntBackwardTree {
         source: usize,
         target: usize,
     ) -> Option<(Vec<usize>, Vec<usize>, u64, u64)> {
-        if source >= self.distances.len() || self.distances[source] == u128::MAX {
+        if source >= self.distances.len() || self.distances[source].is_none() {
             return None;
         }
         if source == target {
@@ -344,7 +364,8 @@ impl IntBackwardTree {
 /// if `use_weight_only`: $w_e$
 /// else: $c_e \cdot \text{den} + w_e \cdot \text{num}$
 ///
-/// Returns `None` if composite metric calculation exceeds `u128::MAX` (preventing silent edge drops).
+/// Returns `None` if composite metric calculation or path distance accumulation
+/// exceeds `u128::MAX`, safely failing closed to prevent silent edge drops or false pruning.
 pub fn dijkstra_backward_tree_int(
     graph: &IntDirectedGraph,
     target: usize,
@@ -353,7 +374,7 @@ pub fn dijkstra_backward_tree_int(
     use_weight_only: bool,
 ) -> Option<IntBackwardTree> {
     let n = graph.num_nodes();
-    let mut distances = vec![u128::MAX; n];
+    let mut distances = vec![None; n];
     let mut successors = vec![None; n];
     let mut successor_edges = vec![None; n];
     let mut successor_edge_ids = vec![None; n];
@@ -369,7 +390,7 @@ pub fn dijkstra_backward_tree_int(
     }
 
     let mut heap = BinaryHeap::new();
-    distances[target] = 0;
+    distances[target] = Some(0);
     heap.push(IntHeapItem {
         vertex: target,
         dist: 0,
@@ -381,8 +402,10 @@ pub fn dijkstra_backward_tree_int(
         }
         visited[u] = true;
 
-        if d > distances[u] {
-            continue;
+        if let Some(cur_d) = distances[u] {
+            if d > cur_d {
+                continue;
+            }
         }
 
         for edge in graph.incoming_edges(u) {
@@ -395,17 +418,24 @@ pub fn dijkstra_backward_tree_int(
                 c_term.checked_add(w_term)?
             };
 
-            if let Some(new_dist) = d.checked_add(edge_len) {
-                if new_dist < distances[v] {
-                    distances[v] = new_dist;
-                    successors[v] = Some(u);
-                    successor_edges[v] = Some((edge.cost, edge.weight));
-                    successor_edge_ids[v] = Some(edge.edge_id);
-                    heap.push(IntHeapItem {
-                        vertex: v,
-                        dist: new_dist,
-                    });
-                }
+            // Using `?` ensures that if path distance overflows u128, Dijkstra
+            // fails closed by returning None rather than silently dropping edges.
+            let new_dist = d.checked_add(edge_len)?;
+
+            let is_shorter = match distances[v] {
+                Some(existing_d) => new_dist < existing_d,
+                None => true,
+            };
+
+            if is_shorter {
+                distances[v] = Some(new_dist);
+                successors[v] = Some(u);
+                successor_edges[v] = Some((edge.cost, edge.weight));
+                successor_edge_ids[v] = Some(edge.edge_id);
+                heap.push(IntHeapItem {
+                    vertex: v,
+                    dist: new_dist,
+                });
             }
         }
     }
@@ -423,30 +453,29 @@ pub fn dijkstra_backward_tree_int(
 pub struct IntDualFacet {
     pub num: u64,
     pub den: u64,
-    pub distances: Vec<u128>,
+    pub distances: Vec<Option<u128>>,
 }
 
 impl IntDualFacet {
     /// Computes $\lceil \max(0, d_\lambda(u, t) - \lambda \cdot \Delta w) \rceil$ with exact 128-bit integer arithmetic.
+    ///
+    /// Returns `None` if vertex `u` cannot reach `t` under this facet's metric.
     #[inline(always)]
-    pub fn eval_lb(&self, u: usize, rem_w: u64) -> u64 {
-        let d = self.distances[u];
-        if d == u128::MAX {
-            return u64::MAX;
-        }
+    pub fn eval_lb(&self, u: usize, rem_w: u64) -> Option<u64> {
+        let d = self.distances[u]?;
         let subtrahend = match (rem_w as u128).checked_mul(self.num as u128) {
             Some(s) => s,
-            None => return 0,
+            None => return Some(0),
         };
         if d <= subtrahend {
-            return 0;
+            return Some(0);
         }
         let numerator = d - subtrahend;
         let lb = numerator.div_ceil(self.den as u128);
         if lb > u64::MAX as u128 {
-            u64::MAX
+            Some(u64::MAX)
         } else {
-            lb as u64
+            Some(lb as u64)
         }
     }
 }
@@ -499,9 +528,10 @@ impl IntAdhpSolver {
     fn eval_envelope(u: usize, rem_w: u64, facets: &[IntDualFacet]) -> u64 {
         let mut max_lb = 0;
         for facet in facets {
-            let val = facet.eval_lb(u, rem_w);
-            if val > max_lb {
-                max_lb = val;
+            if let Some(val) = facet.eval_lb(u, rem_w) {
+                if val > max_lb {
+                    max_lb = val;
+                }
             }
         }
         max_lb
@@ -538,7 +568,7 @@ impl IntAdhpSolver {
         if s >= n || t >= n {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return IntCsppSolution {
-                status: SolutionStatus::Infeasible,
+                status: SolutionStatus::UnsupportedInput,
                 path: Vec::new(),
                 edge_path: Vec::new(),
                 cost: u64::MAX,
@@ -566,8 +596,9 @@ impl IntAdhpSolver {
             Some(tree) => tree,
             None => {
                 stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
                 return IntCsppSolution {
-                    status: SolutionStatus::Infeasible,
+                    status: SolutionStatus::ArithmeticOverflow,
                     path: Vec::new(),
                     edge_path: Vec::new(),
                     cost: u64::MAX,
@@ -577,17 +608,34 @@ impl IntAdhpSolver {
             }
         };
 
-        if tree_w.distances[s] > budget as u128 || tree_w.distances[s] == u128::MAX {
-            stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
-            stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
-            return IntCsppSolution {
-                status: SolutionStatus::Infeasible,
-                path: Vec::new(),
-                edge_path: Vec::new(),
-                cost: u64::MAX,
-                weight: u64::MAX,
-                stats,
-            };
+        match tree_w.distances[s] {
+            None => {
+                // Target is strictly unreachable from source
+                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
+                return IntCsppSolution {
+                    status: SolutionStatus::Infeasible,
+                    path: Vec::new(),
+                    edge_path: Vec::new(),
+                    cost: u64::MAX,
+                    weight: u64::MAX,
+                    stats,
+                };
+            }
+            Some(min_w) if min_w > budget as u128 => {
+                // Minimum resource consumption exceeds budget
+                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
+                return IntCsppSolution {
+                    status: SolutionStatus::Infeasible,
+                    path: Vec::new(),
+                    edge_path: Vec::new(),
+                    cost: u64::MAX,
+                    weight: u64::MAX,
+                    stats,
+                };
+            }
+            Some(_) => {}
         }
 
         let (path_w, edge_path_w, cost_w, weight_w) =
@@ -595,8 +643,9 @@ impl IntAdhpSolver {
                 Some(res) => res,
                 None => {
                     stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
                     return IntCsppSolution {
-                        status: SolutionStatus::Infeasible,
+                        status: SolutionStatus::ArithmeticOverflow,
                         path: Vec::new(),
                         edge_path: Vec::new(),
                         cost: u64::MAX,
@@ -611,8 +660,9 @@ impl IntAdhpSolver {
             Some(tree) => tree,
             None => {
                 stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
                 return IntCsppSolution {
-                    status: SolutionStatus::Infeasible,
+                    status: SolutionStatus::ArithmeticOverflow,
                     path: Vec::new(),
                     edge_path: Vec::new(),
                     cost: u64::MAX,
@@ -627,8 +677,9 @@ impl IntAdhpSolver {
                 Some(res) => res,
                 None => {
                     stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                    stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
                     return IntCsppSolution {
-                        status: SolutionStatus::Infeasible,
+                        status: SolutionStatus::ArithmeticOverflow,
                         path: Vec::new(),
                         edge_path: Vec::new(),
                         cost: u64::MAX,
@@ -711,6 +762,7 @@ impl IntAdhpSolver {
         let mut heap: BinaryHeap<IntSearchLabel> = BinaryHeap::new();
         let mut frontiers: Vec<IntVertexFrontier> = vec![IntVertexFrontier::default(); n];
         let mut pool: Vec<IntPoolNode> = Vec::with_capacity(1024);
+        let mut has_arithmetic_overflow = false;
 
         pool.push(IntPoolNode {
             vertex: s,
@@ -759,19 +811,31 @@ impl IntAdhpSolver {
                 let v = edge.target;
                 let new_c = match c_u.checked_add(edge.cost) {
                     Some(c) => c,
-                    None => continue,
+                    None => {
+                        has_arithmetic_overflow = true;
+                        continue;
+                    }
                 };
                 let new_w = match w_u.checked_add(edge.weight) {
                     Some(w) => w,
-                    None => continue,
+                    None => {
+                        has_arithmetic_overflow = true;
+                        continue;
+                    }
                 };
 
                 // Filter 1: Resource feasibility
-                if dist_weight[v] == u128::MAX
-                    || (new_w as u128).saturating_add(dist_weight[v]) > budget as u128
-                {
-                    stats.labels_pruned_resource += 1;
-                    continue;
+                match dist_weight[v] {
+                    None => {
+                        stats.labels_pruned_resource += 1;
+                        continue;
+                    }
+                    Some(min_w) => {
+                        if (new_w as u128).saturating_add(min_w) > budget as u128 {
+                            stats.labels_pruned_resource += 1;
+                            continue;
+                        }
+                    }
                 }
 
                 // Filter 2: Dual Hull Pruning (Strict integer bound)
@@ -820,6 +884,15 @@ impl IntAdhpSolver {
                 edge_path: best_edge_path,
                 cost: best_cost,
                 weight: best_weight,
+                stats,
+            }
+        } else if has_arithmetic_overflow {
+            IntCsppSolution {
+                status: SolutionStatus::ArithmeticOverflow,
+                path: Vec::new(),
+                edge_path: Vec::new(),
+                cost: u64::MAX,
+                weight: u64::MAX,
                 stats,
             }
         } else {

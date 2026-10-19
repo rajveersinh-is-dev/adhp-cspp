@@ -57,5 +57,11 @@ fn main() {
         SolutionStatus::Infeasible => {
             println!("\nCertified: No path satisfies the resource budget.");
         }
+        SolutionStatus::ArithmeticOverflow => {
+            println!("\nArithmetic overflow occurred during path computation.");
+        }
+        SolutionStatus::UnsupportedInput => {
+            println!("\nInput graph or budget violates solver domain invariants.");
+        }
     }
 }
