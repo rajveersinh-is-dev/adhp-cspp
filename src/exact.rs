@@ -273,7 +273,7 @@ impl IntVertexFrontier {
 #[derive(Copy, Clone, PartialEq, Eq)]
 struct IntHeapItem {
     vertex: usize,
-    dist: u64,
+    dist: u128,
 }
 
 impl Ord for IntHeapItem {
@@ -288,10 +288,10 @@ impl PartialOrd for IntHeapItem {
     }
 }
 
-/// Backward tree with integer metrics.
+/// Backward tree with exact 128-bit integer metrics to eliminate overflow.
 #[derive(Debug, Clone)]
 pub struct IntBackwardTree {
-    pub distances: Vec<u64>,
+    pub distances: Vec<u128>,
     pub successors: Vec<Option<usize>>,
     pub successor_edges: Vec<Option<(u64, u64)>>,
     pub successor_edge_ids: Vec<Option<usize>>,
@@ -303,7 +303,7 @@ impl IntBackwardTree {
         source: usize,
         target: usize,
     ) -> Option<(Vec<usize>, Vec<usize>, u64, u64)> {
-        if source >= self.distances.len() || self.distances[source] == u64::MAX {
+        if source >= self.distances.len() || self.distances[source] == u128::MAX {
             return None;
         }
         if source == target {
@@ -340,30 +340,32 @@ impl IntBackwardTree {
     }
 }
 
-/// Runs reverse Dijkstra from `target` with integer metric:
+/// Runs reverse Dijkstra from `target` with exact 128-bit integer metric:
 /// if `use_weight_only`: $w_e$
 /// else: $c_e \cdot \text{den} + w_e \cdot \text{num}$
+///
+/// Returns `None` if composite metric calculation exceeds `u128::MAX` (preventing silent edge drops).
 pub fn dijkstra_backward_tree_int(
     graph: &IntDirectedGraph,
     target: usize,
     num: u64,
     den: u64,
     use_weight_only: bool,
-) -> IntBackwardTree {
+) -> Option<IntBackwardTree> {
     let n = graph.num_nodes();
-    let mut distances = vec![u64::MAX; n];
+    let mut distances = vec![u128::MAX; n];
     let mut successors = vec![None; n];
     let mut successor_edges = vec![None; n];
     let mut successor_edge_ids = vec![None; n];
     let mut visited = vec![false; n];
 
     if target >= n {
-        return IntBackwardTree {
+        return Some(IntBackwardTree {
             distances,
             successors,
             successor_edges,
             successor_edge_ids,
-        };
+        });
     }
 
     let mut heap = BinaryHeap::new();
@@ -385,22 +387,13 @@ pub fn dijkstra_backward_tree_int(
 
         for edge in graph.incoming_edges(u) {
             let v = edge.target;
-            let edge_len = if use_weight_only {
-                edge.weight
+            let edge_len: u128 = if use_weight_only {
+                edge.weight as u128
             } else {
-                edge.cost
-                    .checked_mul(den)
-                    .and_then(|c_part| {
-                        edge.weight
-                            .checked_mul(num)
-                            .and_then(|w_part| c_part.checked_add(w_part))
-                    })
-                    .unwrap_or(u64::MAX)
+                let c_term = (edge.cost as u128).checked_mul(den as u128)?;
+                let w_term = (edge.weight as u128).checked_mul(num as u128)?;
+                c_term.checked_add(w_term)?
             };
-
-            if edge_len == u64::MAX {
-                continue;
-            }
 
             if let Some(new_dist) = d.checked_add(edge_len) {
                 if new_dist < distances[v] {
@@ -417,31 +410,31 @@ pub fn dijkstra_backward_tree_int(
         }
     }
 
-    IntBackwardTree {
+    Some(IntBackwardTree {
         distances,
         successors,
         successor_edges,
         successor_edge_ids,
-    }
+    })
 }
 
 /// Dual facet for exact integer lower bounding.
 #[derive(Clone, Debug)]
-struct IntDualFacet {
-    num: u64,
-    den: u64,
-    distances: Vec<u64>,
+pub struct IntDualFacet {
+    pub num: u64,
+    pub den: u64,
+    pub distances: Vec<u128>,
 }
 
 impl IntDualFacet {
-    /// Computes $\lceil \max(0, d_\lambda(u, t) - \lambda \cdot \Delta w) \rceil$ with exact integer arithmetic.
+    /// Computes $\lceil \max(0, d_\lambda(u, t) - \lambda \cdot \Delta w) \rceil$ with exact 128-bit integer arithmetic.
     #[inline(always)]
-    fn eval_lb(&self, u: usize, rem_w: u64) -> u64 {
+    pub fn eval_lb(&self, u: usize, rem_w: u64) -> u64 {
         let d = self.distances[u];
-        if d == u64::MAX {
+        if d == u128::MAX {
             return u64::MAX;
         }
-        let subtrahend = match rem_w.checked_mul(self.num) {
+        let subtrahend = match (rem_w as u128).checked_mul(self.num as u128) {
             Some(s) => s,
             None => return 0,
         };
@@ -449,7 +442,12 @@ impl IntDualFacet {
             return 0;
         }
         let numerator = d - subtrahend;
-        numerator.div_ceil(self.den)
+        let lb = numerator.div_ceil(self.den as u128);
+        if lb > u64::MAX as u128 {
+            u64::MAX
+        } else {
+            lb as u64
+        }
     }
 }
 
@@ -564,8 +562,22 @@ impl IntAdhpSolver {
         let prep_start = Instant::now();
 
         // 1. Backward tree with pure weight
-        let tree_w = dijkstra_backward_tree_int(&instance.graph, t, 1, 0, true);
-        if tree_w.distances[s] > budget || tree_w.distances[s] == u64::MAX {
+        let tree_w = match dijkstra_backward_tree_int(&instance.graph, t, 1, 0, true) {
+            Some(tree) => tree,
+            None => {
+                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                return IntCsppSolution {
+                    status: SolutionStatus::Infeasible,
+                    path: Vec::new(),
+                    edge_path: Vec::new(),
+                    cost: u64::MAX,
+                    weight: u64::MAX,
+                    stats,
+                };
+            }
+        };
+
+        if tree_w.distances[s] > budget as u128 || tree_w.distances[s] == u128::MAX {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             stats.preprocessing_nanos = prep_start.elapsed().as_nanos() as u64;
             return IntCsppSolution {
@@ -595,7 +607,21 @@ impl IntAdhpSolver {
             };
 
         // 2. Backward tree with pure cost (lambda = 0, num = 0, den = 1)
-        let tree_c = dijkstra_backward_tree_int(&instance.graph, t, 0, 1, false);
+        let tree_c = match dijkstra_backward_tree_int(&instance.graph, t, 0, 1, false) {
+            Some(tree) => tree,
+            None => {
+                stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
+                return IntCsppSolution {
+                    status: SolutionStatus::Infeasible,
+                    path: Vec::new(),
+                    edge_path: Vec::new(),
+                    cost: u64::MAX,
+                    weight: u64::MAX,
+                    stats,
+                };
+            }
+        };
+
         let (path_c, edge_path_c, cost_c, weight_c) =
             match tree_c.reconstruct_path_with_metrics(s, t) {
                 Some(res) => res,
@@ -650,28 +676,30 @@ impl IntAdhpSolver {
             let dc = c_r - c_l;
 
             // Rational multiplier lambda = dc / dw
-            let tree_mid = dijkstra_backward_tree_int(&instance.graph, t, dc, dw, false);
-            if let Some((p_mid, ep_mid, c_mid, w_mid)) =
-                tree_mid.reconstruct_path_with_metrics(s, t)
-            {
-                if w_mid <= budget && c_mid < best_cost {
-                    best_cost = c_mid;
-                    best_weight = w_mid;
-                    best_path = p_mid;
-                    best_edge_path = ep_mid;
-                }
+            let maybe_tree_mid = dijkstra_backward_tree_int(&instance.graph, t, dc, dw, false);
+            if let Some(tree_mid) = maybe_tree_mid {
+                if let Some((p_mid, ep_mid, c_mid, w_mid)) =
+                    tree_mid.reconstruct_path_with_metrics(s, t)
+                {
+                    if w_mid <= budget && c_mid < best_cost {
+                        best_cost = c_mid;
+                        best_weight = w_mid;
+                        best_path = p_mid;
+                        best_edge_path = ep_mid;
+                    }
 
-                facets.push(IntDualFacet {
-                    num: dc,
-                    den: dw,
-                    distances: tree_mid.distances,
-                });
+                    facets.push(IntDualFacet {
+                        num: dc,
+                        den: dw,
+                        distances: tree_mid.distances,
+                    });
 
-                if w_l > w_mid && c_mid > c_l {
-                    seg_queue.push((c_l, w_l, c_mid, w_mid));
-                }
-                if w_mid > w_r && c_r > c_mid {
-                    seg_queue.push((c_mid, w_mid, c_r, w_r));
+                    if w_l > w_mid && c_mid > c_l {
+                        seg_queue.push((c_l, w_l, c_mid, w_mid));
+                    }
+                    if w_mid > w_r && c_r > c_mid {
+                        seg_queue.push((c_mid, w_mid, c_r, w_r));
+                    }
                 }
             }
         }
@@ -739,7 +767,9 @@ impl IntAdhpSolver {
                 };
 
                 // Filter 1: Resource feasibility
-                if dist_weight[v] == u64::MAX || new_w.saturating_add(dist_weight[v]) > budget {
+                if dist_weight[v] == u128::MAX
+                    || (new_w as u128).saturating_add(dist_weight[v]) > budget as u128
+                {
                     stats.labels_pruned_resource += 1;
                     continue;
                 }
