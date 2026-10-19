@@ -1,21 +1,22 @@
-# INDEPENDENT HOSTILE PEER REVIEW REPORT
-## Adversarial Audit of ADHP-CSPP: Mathematical, Empirical, and Referee Critique
+# INTERNAL ADVERSARIAL REVIEW REPORT
+## Rigorous Internal Multi-Persona Stress Test & Audit of ADHP-CSPP
 
 **Author / Maintainer**: Rajveersinh Vishal Pardeshi  
 **Date**: October 2026  
 **Document**: `docs/REVIEW_REPORT.md`  
-**Repository**: [https://github.com/rajveersinh-is-dev/adhp-cspp](https://github.com/rajveersinh-is-dev/adhp-cspp)
+**Repository**: [https://github.com/rajveersinh-is-dev/adhp-cspp](https://github.com/rajveersinh-is-dev/adhp-cspp)  
+**Review Status**: **Internal Adversarial Audit**. This document records an internally authored, multi-persona adversarial stress test and verification audit. It MUST NOT be presented or construed as independent third-party external peer review or journal endorsement.
 
 ---
 
 ### Executive Review Summary
 
-This report documents a comprehensive, three-perspective adversarial audit of the ADHP-CSPP repository, conducted by:
-- **Reviewer A**: Mathematical Algorithms & Proof Verification Specialist
+This report documents a comprehensive internal adversarial audit of the ADHP-CSPP repository, conducted using three rigorous evaluation personas:
+- **Reviewer A**: Mathematical Algorithms & Numerical Analysis Specialist
 - **Reviewer B**: Systems Benchmarking & Empirical Reproducibility Auditor
 - **Reviewer C**: Skeptical Operations Research Journal Referee
 
-All identified concerns were classified into severity categories, audited against the codebase and raw experimental data, and resolved with concrete engineering and theoretical fixes.
+The objective is total computational and empirical trustworthiness: mathematical correctness takes precedence over speed, benchmark numbers, or feature count.
 
 ---
 
@@ -79,4 +80,48 @@ All identified concerns were classified into severity categories, audited agains
 | **C.1** | Reviewer C | Novelty Concern | Distinguishing from classical parametric bisection | **FIXED** (`RELATED_WORK.md` matrix) |
 | **C.2** | Reviewer C | Empirical Reporting | Suppressed negative results and diminishing returns | **FIXED** (`KNOWN_LIMITATIONS.md` added) |
 
-All 8 identified defects and gaps have been rigorously resolved.
+---
+
+### 5. Corrective Actions & Hardening Implemented in This Iteration
+
+The latest adversarial audit identified five concrete correctness and verification risks. All five have been repaired and verified:
+
+1. **Elimination of Silent Dijkstra Preprocessing Overflow (`src/exact.rs`)**:
+   - *Problem*: In reverse Dijkstra relaxation, `if let Some(new_dist) = d.checked_add(edge_len)` silently skipped relaxation on overflow. This left reachable vertices marked as unreachable (`u128::MAX`), which inflated lower bounds to `u64::MAX` and falsely pruned feasible optimal routes.
+   - *Fix*: Replaced silent omission with `let new_dist = d.checked_add(edge_len)?;`. On overflow, Dijkstra fails closed by returning `None`, and the exact solver safely returns `SolutionStatus::ArithmeticOverflow` rather than pruning.
+
+2. **Elimination of Sentinel Collision (`src/exact.rs`)**:
+   - *Problem*: `u128::MAX` was used simultaneously as a valid numeric distance and an unreachable sentinel, creating collision vulnerabilities on large graphs.
+   - *Fix*: Refactored `IntBackwardTree` and `IntDualFacet` to use `Vec<Option<u128>>`. `None` unambiguously represents unreachable vertices, with zero collision risk.
+
+3. **Explicit Supported Domain & Error Contracts (`src/lib.rs`, `src/exact.rs`)**:
+   - Added `SolutionStatus::ArithmeticOverflow` and `SolutionStatus::UnsupportedInput`.
+   - Documented exact solver domain: $c(e), w(e) \le 10^{18}$ with feasible path costs $\le u64::MAX$.
+   - Tested out-of-bounds nodes, search overflow, and large finite instances in `tests/correctness_tests.rs`.
+
+4. **Rigorous External ILP Oracle Status Handling (`scripts/verify_against_ilp.py`)**:
+   - *Problem*: Inconclusive SciPy `milp` results (time limits, solver errors) were conflated with proven infeasibility.
+   - *Fix*: Implemented `classify_milp_result` mapping SciPy statuses: 0 = Optimal, 2 = Infeasible, 1 = Timeout (Inconclusive), 4 = Numerical Error (Inconclusive). Inconclusive checks are explicitly isolated and never increment verified agreement counts. Verified with 7 unit tests in `tests/test_ilp_oracle_status.py`.
+
+5. **Substantive Benchmark Verification & Instance Accounting (`scripts/verify_benchmarks.py`)**:
+   - *Problem*: Script was previously non-assertive and did not exit with nonzero status on error.
+   - *Fix*: Transformed `scripts/verify_benchmarks.py` into a rigorous verifier with 19 schema checks, exit code 1 on mismatch, and unit tests in `tests/test_verify_benchmarks.py`. Corrected accounting: 25 configurations with 250 configuration-instance evaluations across 200 distinct graphs.
+
+---
+
+### 6. Remaining Limitations and Unresolved Risks
+
+To ensure total transparency, the following technical and theoretical boundaries remain:
+
+1. **Floating-Point Resolution Limit**:
+   `AdhpSolver` uses relative tolerance $\epsilon = 10^{-9}$. Paths whose costs differ by less than $10^{-9} \cdot C_{UB}$ cannot be distinguished under IEEE 754 floating-point arithmetic. For absolute zero-tolerance guarantees, `IntAdhpSolver` must be used.
+
+2. **Integer Solver Domain Bound**:
+   `IntAdhpSolver` operates on `u64` edge weights and `u128` composite metrics. Graphs where the unconstrained shortest path cost exceeds $u64::MAX$ or composite metrics exceed $u128::MAX$ produce `SolutionStatus::ArithmeticOverflow`. Arbitrary-precision BigInt arithmetic is not implemented.
+
+3. **Topology-Specific Performance Regressions**:
+   On small dense random graphs ($n \le 60$), standard Martins Dijkstra is faster than both ADHP and Hybrid ADHP because label collision is rare, rendering preprocessing overhead unamortized. ADHP is advantageous on graphs with long topological paths (grids) or severe cost-weight conflicts (anti-correlated).
+
+4. **External Solver Environment Dependencies**:
+   Independent ILP verification relies on Python 3 with `scipy.optimize.milp` (HiGHS backend). On environments lacking SciPy, the standalone Rust oracle (`ExactDfsOracle`) serves as the primary verification oracle.
+

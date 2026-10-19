@@ -65,8 +65,9 @@ Cost ^
 - **Theorem 3 (Convexity & Monotonicity)**:
   The discrete envelope $\Delta w \mapsto \mathcal{L}_u^\Lambda(\Delta w)$ is continuous, convex, and monotonically non-increasing on $[0, \infty)$.
 
-- **Theorem 4 (Exact Global Optimality, Exhaustiveness & Termination)**:
-  Filtering candidate labels with relative tolerance preserves exact global optimality, protects against floating-point roundoff, and guarantees finite termination even on graphs containing zero-cost and zero-weight cycles.
+- **Theorem 4 (Exact Integer Optimality vs. Finite-Precision Tolerances)**:
+  - **Discrete Exact Solver (`IntAdhpSolver`)**: Under exact integer arithmetic with rational dual multipliers $\lambda = p/q$, ceiling integer bounds $\lceil \cdot \rceil$, and zero tolerances, ADHP guarantees 100% mathematically exact global optimality without false pruning or sentinel ambiguity.
+  - **Floating-Point Solver (`AdhpSolver`)**: Under IEEE 754 arithmetic with relative tolerances $(\epsilon_{\text{feas}} = 10^{-9}, \epsilon_{\text{prune}} = 10^{-9})$, ADHP certifies $(\epsilon_{\text{feas}}, \epsilon_{\text{prune}})$-admissibility, preventing premature pruning of optimal paths due to summation roundoff while ensuring finite termination.
 
 Full proofs are documented in [`docs/MATHEMATICAL_FOUNDATIONS.md`](docs/MATHEMATICAL_FOUNDATIONS.md). Detailed architecture and pruning mechanics are presented in [`docs/ALGORITHM_DESIGN.md`](docs/ALGORITHM_DESIGN.md).
 
@@ -74,7 +75,7 @@ Full proofs are documented in [`docs/MATHEMATICAL_FOUNDATIONS.md`](docs/MATHEMAT
 
 ## 3. Empirical Benchmark Summary
 
-Evaluated on an **11th Gen Intel Core i5-11260H @ 2.60GHz** running Windows 11 with 16 GB RAM. Evaluated across **25 benchmark configurations** with **10 distinct random instances** per configuration (**250 distinct problem instances total**), with **5 discarded warmups** and **3 timed runs** per instance using in-process monotonic timing (`std::time::Instant`).
+Evaluated on an **11th Gen Intel Core i5-11260H @ 2.60GHz** running Windows 11 with 16 GB RAM. Evaluated across **25 benchmark configurations comprising 250 configuration-instance evaluations across 200 distinct generated graphs** (190 distinct graphs across Suites 1–4 plus 10 controlled repeated graphs in Suite 5), with **5 discarded warmups** and **3 timed runs** per instance using in-process monotonic timing (`std::time::Instant`).
 
 Complete raw datasets, scripts, and methodology are documented in [`docs/BENCHMARK_METHODOLOGY.md`](docs/BENCHMARK_METHODOLOGY.md) and [`research/BENCHMARK_REPORT.md`](research/BENCHMARK_REPORT.md).
 
@@ -137,7 +138,7 @@ Across all 25 benchmark configurations in `results/raw/benchmark_raw.csv`:
 
 ## 4. Algorithmic Trade-offs & Limitations
 
-Full details on operational boundaries and trade-offs are available in [`docs/KNOWN_LIMITATIONS.md`](docs/KNOWN_LIMITATIONS.md) and peer critique in [`docs/REVIEW_REPORT.md`](docs/REVIEW_REPORT.md).
+Full details on operational boundaries and trade-offs are available in [`docs/KNOWN_LIMITATIONS.md`](docs/KNOWN_LIMITATIONS.md) and internal adversarial audit findings in [`docs/REVIEW_REPORT.md`](docs/REVIEW_REPORT.md).
 
 1. **Preprocessing Break-Even Threshold**:
    ADHP requires $K$ backward Dijkstra runs ($O(K(m + n \log n))$). For small graphs ($n \le 40$) or networks with small Pareto frontiers, unguided search terminates faster in total wall-clock time. `HybridAdhpSolver` mitigates this via dynamic $K$ selection.
@@ -170,7 +171,7 @@ python scripts/verify_against_ilp.py
 # 3. Verify automated consistency of raw benchmark data
 python scripts/verify_benchmarks.py
 
-# 4. Run full multi-instance empirical benchmark suite (250 problem instances)
+# 4. Run full multi-instance empirical benchmark suite (250 configuration-instance evaluations)
 cargo run --bin benchmark_suite --release
 ```
 
@@ -210,6 +211,9 @@ fn main() {
         }
         SolutionStatus::Infeasible => {
             println!("No path satisfies budget.");
+        }
+        _ => {
+            println!("Solver returned non-optimal status: {:?}", solution.status);
         }
     }
 }
