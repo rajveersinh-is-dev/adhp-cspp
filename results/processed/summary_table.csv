@@ -1,27 +1,31 @@
 Category,Solver,Avg Runtime (µs),Max Runtime (µs),Avg Labels Generated,Max Labels Generated
-Ablation K Facets,ADHP (K=1),28.95,28.95,146,146
-Ablation K Facets,ADHP (K=12),47.82,47.82,91,91
-Ablation K Facets,ADHP (K=2),36.12,36.12,91,91
-Ablation K Facets,ADHP (K=3),39.28,39.28,91,91
-Ablation K Facets,ADHP (K=5),48.25,48.25,91,91
-Ablation K Facets,ADHP (K=8),48.26,48.26,91,91
-Anti-Correlated Scaling,ADHP (Adaptive Dual Hull Pruning),80.4,190.11,221,964
-Anti-Correlated Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),109.79,305.68,111,335
-Anti-Correlated Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),53.15,141.58,329,1101
-Anti-Correlated Scaling,Martins (Standard Multi-Label Dijkstra),47.2,139.81,1986,6319
-Anti-Correlated Scaling,Pulse (Lozano & Medaglia 2013),64.04,196.74,2483,10801
-Budget Sensitivity,ADHP (Adaptive Dual Hull Pruning),31.65,48.19,52,75
-Budget Sensitivity,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),44.17,63.78,51,73
-Budget Sensitivity,Dumitrescu-Boland (1D-Bounded Label Setting),19.08,26.78,69,93
-Budget Sensitivity,Martins (Standard Multi-Label Dijkstra),12.34,25.54,471,563
-Budget Sensitivity,Pulse (Lozano & Medaglia 2013),20.45,26.61,420,732
-Grid Scaling,ADHP (Adaptive Dual Hull Pruning),31.45,57.11,54,105
-Grid Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),34.59,61.67,70,115
-Grid Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),30.0,72.82,249,662
-Grid Scaling,Martins (Standard Multi-Label Dijkstra),113.05,337.7,1148,3111
-Grid Scaling,Pulse (Lozano & Medaglia 2013),94.09,288.66,1535,4741
-Random ER Scaling,ADHP (Adaptive Dual Hull Pruning),60.16,111.29,119,190
-Random ER Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),86.32,160.27,91,139
-Random ER Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),31.92,64.7,167,303
-Random ER Scaling,Martins (Standard Multi-Label Dijkstra),22.85,41.05,1333,2320
-Random ER Scaling,Pulse (Lozano & Medaglia 2013),38.58,82.89,1090,2344
+Ablation K Facets,ADHP (K=1),15.66,15.66,146,146
+Ablation K Facets,ADHP (K=12),27.68,27.68,91,91
+Ablation K Facets,ADHP (K=2),20.1,20.1,91,91
+Ablation K Facets,ADHP (K=3),22.98,22.98,91,91
+Ablation K Facets,ADHP (K=5),28.07,28.07,91,91
+Ablation K Facets,ADHP (K=8),27.23,27.23,91,91
+Anti-Correlated Scaling,ADHP (Adaptive Dual Hull Pruning),45.54,98.67,221,964
+Anti-Correlated Scaling,Adaptive Hybrid ADHP,31.2,76.92,329,1101
+Anti-Correlated Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),60.05,160.42,111,335
+Anti-Correlated Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),31.48,97.87,329,1101
+Anti-Correlated Scaling,Martins (Standard Multi-Label Dijkstra),29.0,90.25,1986,6319
+Anti-Correlated Scaling,Pulse (Lozano & Medaglia 2013),40.11,141.58,2483,10801
+Budget Sensitivity,ADHP (Adaptive Dual Hull Pruning),16.24,27.24,52,75
+Budget Sensitivity,Adaptive Hybrid ADHP,10.29,12.72,69,93
+Budget Sensitivity,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),22.58,36.24,51,73
+Budget Sensitivity,Dumitrescu-Boland (1D-Bounded Label Setting),8.1,8.81,69,93
+Budget Sensitivity,Martins (Standard Multi-Label Dijkstra),6.14,7.62,471,563
+Budget Sensitivity,Pulse (Lozano & Medaglia 2013),11.09,15.8,420,732
+Grid Scaling,ADHP (Adaptive Dual Hull Pruning),22.74,38.96,54,105
+Grid Scaling,Adaptive Hybrid ADHP,20.09,33.74,61,136
+Grid Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),29.75,54.82,70,115
+Grid Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),23.3,46.4,249,662
+Grid Scaling,Martins (Standard Multi-Label Dijkstra),79.95,242.01,1148,3111
+Grid Scaling,Pulse (Lozano & Medaglia 2013),64.42,189.17,1535,4741
+Random ER Scaling,ADHP (Adaptive Dual Hull Pruning),38.8,62.12,119,190
+Random ER Scaling,Adaptive Hybrid ADHP,24.71,42.17,165,300
+Random ER Scaling,Carlyle-Wood (LARAC Single-Multiplier Lagrangian Bounding),60.86,88.48,91,139
+Random ER Scaling,Dumitrescu-Boland (1D-Bounded Label Setting),26.72,43.54,167,303
+Random ER Scaling,Martins (Standard Multi-Label Dijkstra),22.81,42.18,1333,2320
+Random ER Scaling,Pulse (Lozano & Medaglia 2013),29.92,50.59,1090,2344

@@ -14,8 +14,8 @@ use adhp_cspp::instance_generator::{
     generate_anticorrelated_instance, generate_grid_instance, generate_random_instance,
 };
 use adhp_cspp::{
-    AdhpSolver, CarlyleWoodSolver, CsppInstance, CsppSolver, DumitrescuBolandSolver, MartinsSolver,
-    PulseSolver,
+    AdhpSolver, CarlyleWoodSolver, CsppInstance, CsppSolver, DumitrescuBolandSolver,
+    HybridAdhpSolver, MartinsSolver, PulseSolver,
 };
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -76,8 +76,8 @@ fn evaluate_solver_across_instances(
     let mut peak_mems = Vec::with_capacity(instances.len());
 
     for inst in instances {
-        // Discarded warmup runs per instance
-        for _ in 0..3 {
+        // 5 discarded warmup runs per instance per computational integrity rules
+        for _ in 0..5 {
             let _ = solver.solve(inst);
         }
 
@@ -96,7 +96,10 @@ fn evaluate_solver_across_instances(
             last_sol = Some(sol);
         }
 
-        let sol = last_sol.unwrap();
+        let sol = match last_sol {
+            Some(s) => s,
+            None => continue,
+        };
         let avg_time = t_acc / (repeats as f64);
         let avg_prep = prep_acc / (repeats as f64);
         let avg_search = (avg_time - avg_prep).max(0.0);
@@ -156,13 +159,14 @@ fn main() {
     let mut records: Vec<BenchmarkRecord> = Vec::new();
 
     let adhp5 = AdhpSolver::new(5);
+    let hybrid = HybridAdhpSolver::new();
     let martins = MartinsSolver::new();
     let dumitrescu = DumitrescuBolandSolver::new();
     let carlyle = CarlyleWoodSolver::new();
     let pulse = PulseSolver::new();
 
     let competitive_solvers: Vec<&dyn CsppSolver> =
-        vec![&adhp5, &carlyle, &dumitrescu, &pulse, &martins];
+        vec![&adhp5, &hybrid, &carlyle, &dumitrescu, &pulse, &martins];
 
     // =========================================================================
     // SUITE 1: Scaling on Anti-Correlated Graphs (n = 20, 40, 60, 80, 100, 150)
