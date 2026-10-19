@@ -967,7 +967,10 @@ fn test_directed_graph_validate_integrity() {
 
 #[test]
 fn test_dumitrescu_and_pulse_initial_upper_bound_pruning() {
-    use adhp_cspp::{CsppInstance, CsppSolver, DirectedGraph, DumitrescuBolandSolver, PulseSolver, SolutionStatus};
+    use adhp_cspp::{
+        CsppInstance, CsppSolver, DirectedGraph, DumitrescuBolandSolver, PulseSolver,
+        SolutionStatus,
+    };
 
     let mut g = DirectedGraph::new(4);
     // Path 1 (Weight minimizing, feasible): 0 -> 3, cost 50, weight 5
@@ -998,4 +1001,3 @@ fn test_dumitrescu_and_pulse_initial_upper_bound_pruning() {
     assert_eq!(sol_pulse.path, vec![0, 1, 3]);
     assert!(sol_pulse.stats.peak_memory_bytes > 0);
 }
-

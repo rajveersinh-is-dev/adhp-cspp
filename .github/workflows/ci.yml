@@ -36,8 +36,14 @@ jobs:
           python-version: "3.11"
 
       - name: Install Python verification dependencies
-        run: pip install numpy scipy
+        run: pip install numpy scipy pandas
 
       - name: Run independent HiGHS ILP oracle verification
         run: python scripts/verify_against_ilp.py
+
+      - name: Run benchmark dataset and summary verifier
+        run: python scripts/verify_benchmarks.py
+
+      - name: Run all Python verification test suites
+        run: python -m unittest discover -s tests -p "test_*.py"
 

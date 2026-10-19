@@ -82,11 +82,44 @@ EXPECTED_ABLATION_SOLVERS = [
     'ADHP (K=5)', 'ADHP (K=8)', 'ADHP (K=12)'
 ]
 
+import hashlib
+
 EXPECTED_INSTANCE_KEYS = {
-    'evaluation_id', 'benchmark_category', 'configuration_name',
+    'schema_version', 'evaluation_id', 'benchmark_category', 'configuration_name',
     'instance_index', 'graph_id', 'nodes', 'edges', 'source',
-    'target', 'budget', 'seed'
+    'target', 'budget', 'budget_bits', 'seed', 'canonical_edges'
 }
+
+
+def recompute_canonical_graph_sha256(rec):
+    """
+    Independently reconstructs the bit-exact canonical serialization of a graph instance
+    under schema adhp-canonical-v1 and computes its standard FIPS 180-4 SHA-256 digest.
+    Asserts bit-exact parity between the record's graph_id and this recomputation.
+    """
+    schema = rec.get("schema_version", "adhp-canonical-v1")
+    nodes = rec["nodes"]
+    source = rec["source"]
+    target = rec["target"]
+    budget_bits = rec.get("budget_bits")
+    if not budget_bits:
+        import struct
+        budget_bits = f"{struct.unpack('>Q', struct.pack('>d', float(rec['budget'])))[0]:016x}"
+
+    edges = rec.get("canonical_edges", [])
+    sorted_edges = sorted(edges, key=lambda e: (e['from'], e['to'], e['cost_bits'], e['weight_bits']))
+    lines = [
+        f"{schema}\n",
+        f"nodes: {nodes}\n",
+        f"source: {source}\n",
+        f"target: {target}\n",
+        f"budget: {budget_bits}\n",
+        f"edges: {len(sorted_edges)}\n"
+    ]
+    for e in sorted_edges:
+        lines.append(f"{e['from']} {e['to']} {e['cost_bits']} {e['weight_bits']}\n")
+    payload = "".join(lines).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
@@ -142,65 +175,80 @@ def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
     total_evals = df.groupby(['benchmark_category', 'instance_name'])['num_instances'].first().sum()
     assert total_evals == 250, f"Expected 250 total instance evaluations, got {total_evals}"
 
-    # 3. Canonical Instance Identity and Distinct Graph Verification (No hard-coded count arithmetic!)
-    if instances_json_path and os.path.exists(instances_json_path):
-        with open(instances_json_path, 'r', encoding='utf-8') as f:
-            inst_records = json.load(f)
+    # 3. Canonical Instance Identity and Distinct Graph Verification (FIPS 180-4 SHA-256 independent recomputation)
+    if instances_json_path:
+        if isinstance(instances_json_path, list):
+            inst_records = instances_json_path
+        elif isinstance(instances_json_path, str) and os.path.exists(instances_json_path):
+            with open(instances_json_path, 'r', encoding='utf-8') as f:
+                inst_records = json.load(f)
+        else:
+            inst_records = None
 
-        assert isinstance(inst_records, list), "Instance registry must be a list of records"
-        assert len(inst_records) == 250, f"Expected 250 instance evaluations, found {len(inst_records)}"
+        if inst_records is not None:
+            assert isinstance(inst_records, list), "Instance registry must be a list of records"
+            assert len(inst_records) == 250, f"Expected 250 instance evaluations, found {len(inst_records)}"
 
-        config_counts = {}
-        distinct_graph_ids = set()
-        suite_graph_ids = set()
-        ablation_graph_ids_by_cfg = {}
+            config_counts = {}
+            distinct_graph_ids = set()
+            suite_graph_ids = set()
+            ablation_graph_ids_by_cfg = {}
 
-        for rec in inst_records:
-            missing_keys = EXPECTED_INSTANCE_KEYS - set(rec.keys())
-            assert not missing_keys, f"Instance record missing keys: {missing_keys}"
-            assert isinstance(rec['graph_id'], str) and len(rec['graph_id']) == 32, \
-                f"Invalid canonical graph_id: {rec.get('graph_id')}"
+            for rec in inst_records:
+                missing_keys = EXPECTED_INSTANCE_KEYS - set(rec.keys())
+                assert not missing_keys, f"Instance record missing keys: {missing_keys}"
+                assert isinstance(rec['graph_id'], str) and len(rec['graph_id']) == 64, \
+                    f"Invalid canonical graph_id length (expected 64-hex SHA-256): {rec.get('graph_id')}"
+                assert rec.get('schema_version') == 'adhp-canonical-v1', \
+                    f"Unsupported instance schema version: {rec.get('schema_version')}"
 
-            cfg = rec['configuration_name']
-            config_counts[cfg] = config_counts.get(cfg, 0) + 1
-            distinct_graph_ids.add(rec['graph_id'])
+                # Independent FIPS 180-4 SHA-256 recomputation from vertices, budget bits, and sorted edge payload
+                recomputed_hash = recompute_canonical_graph_sha256(rec)
+                assert recomputed_hash == rec['graph_id'], \
+                    f"Independent SHA-256 recomputation mismatch for evaluation {rec.get('evaluation_id')}: " \
+                    f"recomputed {recomputed_hash} != record {rec.get('graph_id')}"
 
-            cat = rec['benchmark_category']
-            if cat == 'Ablation K Facets':
-                ablation_graph_ids_by_cfg.setdefault(cfg, []).append(rec['graph_id'])
-            else:
-                suite_graph_ids.add(rec['graph_id'])
+                cfg = rec['configuration_name']
+                config_counts[cfg] = config_counts.get(cfg, 0) + 1
+                distinct_graph_ids.add(recomputed_hash)
 
-        # Check configuration counts
-        assert len(config_counts) == 25, \
-            f"Expected 25 distinct configurations in instance registry, found {len(config_counts)}"
-        for cfg, count in config_counts.items():
-            assert count == 10, f"Configuration {cfg} expected 10 instances, found {count}"
+                cat = rec['benchmark_category']
+                if cat == 'Ablation K Facets':
+                    ablation_graph_ids_by_cfg.setdefault(cfg, []).append(recomputed_hash)
+                else:
+                    suite_graph_ids.add(recomputed_hash)
 
-        # Check deduplication to 200 distinct graphs from actual graph identity
-        assert len(distinct_graph_ids) == 200, \
-            f"Deduplicated canonical graph IDs must equal 200, found {len(distinct_graph_ids)}"
+            # Check configuration counts
+            assert len(config_counts) == 25, \
+                f"Expected 25 distinct configurations in instance registry, found {len(config_counts)}"
+            for cfg, count in config_counts.items():
+                assert count == 10, f"Configuration {cfg} expected 10 instances, found {count}"
 
-        # Check that Suites 1-4 contain exactly 190 unique graphs
-        assert len(suite_graph_ids) == 190, \
-            f"Expected 190 unique graph IDs across Suites 1-4, found {len(suite_graph_ids)}"
+            # Check deduplication to 200 distinct graphs from actual graph identity
+            assert len(distinct_graph_ids) == 200, \
+                f"Deduplicated canonical graph IDs must equal 200, found {len(distinct_graph_ids)}"
 
-        # Check Suite 5 ablation: all 6 configurations evaluate the same 10 graphs
-        assert len(ablation_graph_ids_by_cfg) == 6, \
-            f"Expected 6 ablation configurations, found {len(ablation_graph_ids_by_cfg)}"
-        ablation_reference_ids = None
-        for cfg, ids in ablation_graph_ids_by_cfg.items():
-            assert len(ids) == 10, f"Ablation config {cfg} must have 10 instances, found {len(ids)}"
-            assert len(set(ids)) == 10, f"Ablation config {cfg} instances must be distinct, found {len(set(ids))}"
-            if ablation_reference_ids is None:
-                ablation_reference_ids = ids
-            else:
-                assert ids == ablation_reference_ids, \
-                    f"Ablation config {cfg} did not evaluate the same instance graphs as reference"
+            # Check that Suites 1-4 contain exactly 190 unique graphs
+            assert len(suite_graph_ids) == 190, \
+                f"Expected 190 unique graph IDs across Suites 1-4, found {len(suite_graph_ids)}"
 
-        # Check ablation graph IDs are disjoint from Suites 1-4
-        assert suite_graph_ids.isdisjoint(set(ablation_reference_ids)), \
-            "Ablation graph IDs must be disjoint from Suites 1-4"
+            # Check Suite 5 ablation: all 6 configurations evaluate the same 10 graphs
+            assert len(ablation_graph_ids_by_cfg) == 6, \
+                f"Expected 6 ablation configurations, found {len(ablation_graph_ids_by_cfg)}"
+            ablation_reference_ids = None
+            for cfg, ids in ablation_graph_ids_by_cfg.items():
+                assert len(ids) == 10, f"Ablation config {cfg} must have 10 instances, found {len(ids)}"
+                assert len(set(ids)) == 10, f"Ablation config {cfg} instances must be distinct, found {len(set(ids))}"
+                if ablation_reference_ids is None:
+                    ablation_reference_ids = ids
+                else:
+                    assert ids == ablation_reference_ids, \
+                        f"Ablation config {cfg} did not evaluate the same instance graphs as reference"
+
+            # Check ablation graph IDs are disjoint from Suites 1-4
+            assert suite_graph_ids.isdisjoint(set(ablation_reference_ids)), \
+                "Ablation graph IDs must be disjoint from Suites 1-4"
+
 
     # 4. Numerical & Physical Validity Checks
     assert (df['nodes'] > 0).all(), "Found non-positive node counts"
@@ -261,10 +309,20 @@ def verify_benchmarks(raw_csv_path="results/raw/benchmark_raw.csv",
     assert er30_adhp > er30_martins, \
         f"Empirical honesty check failed: ADHP ({er30_adhp} us) was expected to be slower than Martins ({er30_martins} us) on random_er_n30"
 
-    # 7. Published Headline Reconciliations
+    # 7. Published Headline Reconciliations across maintained documents
+    try:
+        from scripts.sync_published_claims import check_documents
+        check_documents(df)
+    except ImportError:
+        try:
+            import sync_published_claims
+            sync_published_claims.check_documents(df)
+        except Exception as e:
+            print(f"Warning: could not import sync_published_claims: {e}")
     verify_published_headlines(df)
 
     return True
+
 
 
 def generate_summary_table(raw_csv_path="results/raw/benchmark_raw.csv",

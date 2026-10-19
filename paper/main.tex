@@ -125,10 +125,10 @@ All solvers were implemented in Rust 2021 (\texttt{opt-level=3}) and evaluated a
 \toprule
 Grid & Nodes & \textbf{Hybrid} & ADHP & CW & DB & Pulse & Martins & \textbf{Hybrid Labels} \\
 \midrule
-$4 \times 4$   & 16  & 11.79 & 9.73          & 11.32 & 9.29  & 10.72 & \textbf{6.03}  & \textbf{16}  \\
-$6 \times 6$   & 36  & 18.36 & 16.89         & 18.15 & 21.49 & \textbf{15.03} & 15.88 & \textbf{35}  \\
-$8 \times 8$   & 64  & 16.48 & 25.38         & 34.73 & \textbf{16.00} & 42.76 & 55.89  & \textbf{59}  \\
-$10 \times 10$ & 100 & \textbf{33.74} & 38.96 & 54.82 & 46.40 & 189.17 & 242.01 & \textbf{136} \\
+$4 \times 4$   & 16  & 7.52 & 6.64 & 11.82 & 9.31 & 12.77 & \textbf{6.38} & \textbf{16} \\
+$6 \times 6$   & 36  & 17.81 & 20.21 & 22.58 & \textbf{10.16} & 15.43 & 14.23 & \textbf{35} \\
+$8 \times 8$   & 64  & 20.10 & 40.73 & 31.43 & \textbf{17.62} & 26.93 & 31.67 & \textbf{59} \\
+$10 \times 10$   & 100  & \textbf{19.97} & 38.24 & 43.07 & 32.22 & 124.91 & 163.82 & \textbf{136} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -141,12 +141,12 @@ $10 \times 10$ & 100 & \textbf{33.74} & 38.96 & 54.82 & 46.40 & 189.17 & 242.01 
 \toprule
 $n$ & \textbf{Hybrid} & ADHP & CW & DB & Pulse & Martins & \textbf{ADHP Labels} \\
 \midrule
-20  & 5.72  & 12.27 & 16.19 & \textbf{3.19}  & 3.65   & 3.94   & \textbf{18}  \\
-40  & 10.47 & 13.61 & 16.89 & 8.13  & \textbf{7.41}   & 7.50   & \textbf{38}  \\
-60  & 19.41 & 31.09 & 34.66 & 17.52 & 19.41  & \textbf{13.35}  & \textbf{87}  \\
-80  & 29.24 & 41.68 & 62.01 & 26.98 & 30.45  & \textbf{25.65}  & \textbf{140} \\
-100 & 45.41 & 75.89 & 70.13 & 35.21 & 38.15  & \textbf{33.34}  & \textbf{79}  \\
-150 & \textbf{76.92} & 98.67 & 160.42 & 97.87 & 141.58 & 90.25 & \textbf{964} \\
+20  & 6.18 & 10.92 & 15.33 & \textbf{3.39} & 3.89 & 3.50 & \textbf{18} \\
+40  & 9.81 & 13.52 & 14.09 & 10.84 & 11.80 & \textbf{6.87} & \textbf{38} \\
+60  & 17.35 & 30.80 & 35.99 & 19.91 & 20.30 & \textbf{11.88} & \textbf{87} \\
+80  & 27.22 & 35.33 & 45.92 & 21.80 & 21.45 & \textbf{16.15} & \textbf{140} \\
+100 & 32.80 & 64.08 & 77.75 & 32.55 & 32.52 & \textbf{25.67} & \textbf{79} \\
+150 & 74.23 & 114.03 & 162.91 & \textbf{69.13} & 87.92 & 73.51 & \textbf{964} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -159,10 +159,10 @@ $n$ & \textbf{Hybrid} & ADHP & CW & DB & Pulse & Martins & \textbf{ADHP Labels} 
 \toprule
 $n$ & \textbf{Hybrid} & ADHP & CW & DB & Pulse & Martins & \textbf{Hybrid Labels} \\
 \midrule
-30  & 8.61  & 11.17 & 20.84 & 7.67  & 10.90 & \textbf{5.74}  & \textbf{27}  \\
-60  & 15.66 & 31.11 & 46.62 & 18.76 & 20.37 & \textbf{13.92} & \textbf{102} \\
-90  & \textbf{32.40} & 50.80 & 87.48 & 36.90 & 37.82 & 42.18 & \textbf{234} \\
-120 & 42.17 & 62.12 & 88.48 & 43.54 & 50.59 & \textbf{29.39} & \textbf{300} \\
+30  & 5.70 & 12.38 & 11.23 & 5.48 & 6.09 & \textbf{3.89} & \textbf{27} \\
+60  & \textbf{15.41} & 24.85 & 32.30 & 16.43 & 17.20 & 84.56 & \textbf{102} \\
+90  & 28.47 & 45.08 & 66.83 & 39.14 & 37.85 & \textbf{26.44} & \textbf{234} \\
+120 & 50.92 & 79.41 & 115.58 & 50.91 & 53.21 & \textbf{21.50} & \textbf{300} \\
 \bottomrule
 \end{tabular}
 \end{table}

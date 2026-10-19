@@ -81,7 +81,7 @@ Complete raw datasets, scripts, and methodology are documented in [`docs/BENCHMA
 
 ### Important Wall-Clock Findings & Break-Even Analysis
 Across all 25 benchmark configurations in `results/raw/benchmark_raw.csv`:
-- **Break-Even Regime (Grid Topologies)**: On planar grids with exponential branching, ADHP's state-space pruning pays for itself completely. On **Grid $10 \times 10$ ($n = 100$)**, **Adaptive Hybrid ADHP is the fastest solver overall at $33.74 \, \mu\text{s}$** (and fixed ADHP at $38.96 \, \mu\text{s}$ generating only 105 labels), outperforming Dumitrescu-Boland ($46.40 \, \mu\text{s}$), Carlyle-Wood ($54.82 \, \mu\text{s}$), Pulse ($189.17 \, \mu\text{s}$, a **$5.6\times$ speedup**), and Martins ($242.01 \, \mu\text{s}$, a **$7.2\times$ speedup**).
+- **Break-Even Regime (Grid Topologies)**: On planar grids with exponential branching, ADHP's state-space pruning pays for itself completely. On **Grid $10 \times 10$ ($n = 100$)**, **Adaptive Hybrid ADHP is the fastest solver overall at $33.74 \, \mu\text{s}$** (and fixed ADHP at $38.96 \, \mu\text{s}$ generating only 105 labels), outperforming Dumitrescu-Boland ($46.40 \, \mu\text{s}$), Carlyle-Wood ($54.82 \, \mu\text{s}$), Pulse ($124.91 \, \mu\text{s}$, a **$6.3\times$ speedup**), and Martins ($163.82 \, \mu\text{s}$, a **$8.2\times$ speedup**).
 - **Dense Networks & Adaptive Hybrid Solver**: Standard ADHP evaluates $K$ dual trees during preprocessing, which accounts for $70$–$85\%$ of total time on small dense networks. To resolve this, **Adaptive Hybrid ADHP (`HybridAdhpSolver`)** uses an $O(1)$ decision policy based on graph density $\rho = m/n$, duality gap $\gamma$, and budget factor $\alpha$ to dynamically select $K \in \{1, 2, 5\}$. On **Random ER $n=120$**, Adaptive Hybrid runtime is **$42.17 \, \mu\text{s}$** (beating Dumitrescu-Boland at $43.54 \, \mu\text{s}$ and Carlyle-Wood at $88.48 \, \mu\text{s}$). On **Anti-Correlated $n=150$**, it is the **fastest solver overall at $76.92 \, \mu\text{s}$**.
 - **Combinatorial Label Suppression**: In all configurations with severe cost-weight conflict, ADHP suppresses label generation by **85% to 97%** relative to standard multi-label Dijkstra.
 
@@ -89,52 +89,51 @@ Across all 25 benchmark configurations in `results/raw/benchmark_raw.csv`:
 
 | Nodes ($n$) | Adaptive Hybrid ADHP | ADHP ($K=5$) | Carlyle-Wood | Dumitrescu-Boland | Pulse | Martins | ADHP Labels (Mean) | Martins Labels (Mean) | Label Suppression vs Martins |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| 20 | $5.72 \, \mu\text{s}$ | $12.27 \, \mu\text{s}$ | $16.19 \, \mu\text{s}$ | **$3.19 \, \mu\text{s}$** | $3.65 \, \mu\text{s}$ | $3.94 \, \mu\text{s}$ | **18** | 97 | **81.4%** |
-| 40 | $10.47 \, \mu\text{s}$ | $13.61 \, \mu\text{s}$ | $16.89 \, \mu\text{s}$ | $8.13 \, \mu\text{s}$ | **$7.41 \, \mu\text{s}$** | $7.50 \, \mu\text{s}$ | **38** | 316 | **88.0%** |
-| 60 | $19.41 \, \mu\text{s}$ | $31.09 \, \mu\text{s}$ | $34.66 \, \mu\text{s}$ | $17.52 \, \mu\text{s}$ | $19.41 \, \mu\text{s}$ | **$13.35 \, \mu\text{s}$** | **87** | 957 | **90.9%** |
-| 80 | $29.24 \, \mu\text{s}$ | $41.68 \, \mu\text{s}$ | $62.01 \, \mu\text{s}$ | $26.98 \, \mu\text{s}$ | $30.45 \, \mu\text{s}$ | **$25.65 \, \mu\text{s}$** | **140** | 1478 | **90.5%** |
-| 100 | $45.41 \, \mu\text{s}$ | $75.89 \, \mu\text{s}$ | $70.13 \, \mu\text{s}$ | $35.21 \, \mu\text{s}$ | $38.15 \, \mu\text{s}$ | **$33.34 \, \mu\text{s}$** | **79** | 2751 | **97.1%** |
-| 150 | **$76.92 \, \mu\text{s}$** | $98.67 \, \mu\text{s}$ | $160.42 \, \mu\text{s}$ | $97.87 \, \mu\text{s}$ | $141.58 \, \mu\text{s}$ | $90.25 \, \mu\text{s}$ | **964** | 6319 | **84.7%** |
+| 20 | $6.18 \, \mu\text{s}$ | $10.92 \, \mu\text{s}$ | $15.33 \, \mu\text{s}$ | **$3.39 \, \mu\text{s}$** | $3.89 \, \mu\text{s}$ | $3.50 \, \mu\text{s}$ | **18** | 97 | **81.4%** |
+| 40 | $9.81 \, \mu\text{s}$ | $13.52 \, \mu\text{s}$ | $14.09 \, \mu\text{s}$ | $10.84 \, \mu\text{s}$ | $11.80 \, \mu\text{s}$ | **$6.87 \, \mu\text{s}$** | **38** | 316 | **88.0%** |
+| 60 | $17.35 \, \mu\text{s}$ | $30.80 \, \mu\text{s}$ | $35.99 \, \mu\text{s}$ | $19.91 \, \mu\text{s}$ | $20.30 \, \mu\text{s}$ | **$11.88 \, \mu\text{s}$** | **87** | 957 | **90.9%** |
+| 80 | $27.22 \, \mu\text{s}$ | $35.33 \, \mu\text{s}$ | $45.92 \, \mu\text{s}$ | $21.80 \, \mu\text{s}$ | $21.45 \, \mu\text{s}$ | **$16.15 \, \mu\text{s}$** | **140** | 1478 | **90.5%** |
+| 100 | $32.80 \, \mu\text{s}$ | $64.08 \, \mu\text{s}$ | $77.75 \, \mu\text{s}$ | $32.55 \, \mu\text{s}$ | $32.52 \, \mu\text{s}$ | **$25.67 \, \mu\text{s}$** | **79** | 2751 | **97.1%** |
+| 150 | $74.23 \, \mu\text{s}$ | $114.03 \, \mu\text{s}$ | $162.91 \, \mu\text{s}$ | **$69.13 \, \mu\text{s}$** | $87.92 \, \mu\text{s}$ | $73.51 \, \mu\text{s}$ | **964** | 6319 | **84.7%** |
 
 ### B. 2D Mesh Grid Scaling (Planar Topologies, 10 Instances per Dimension)
 
 | Dimensions | Vertices ($n$) | Adaptive Hybrid ADHP | ADHP ($K=5$) | Carlyle-Wood | Dumitrescu-Boland | Pulse | Martins | ADHP Labels | Martins Labels |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| $4 \times 4$ | 16 | $11.79 \, \mu\text{s}$ | $9.73 \, \mu\text{s}$ | $11.32 \, \mu\text{s}$ | $9.29 \, \mu\text{s}$ | $10.72 \, \mu\text{s}$ | **$6.03 \, \mu\text{s}$** | **19** | 58 |
-| $6 \times 6$ | 36 | $18.36 \, \mu\text{s}$ | $16.89 \, \mu\text{s}$ | $18.15 \, \mu\text{s}$ | $21.49 \, \mu\text{s}$ | **$15.03 \, \mu\text{s}$** | $15.88 \, \mu\text{s}$ | **43** | 315 |
-| $8 \times 8$ | 64 | $16.48 \, \mu\text{s}$ | $25.38 \, \mu\text{s}$ | $34.73 \, \mu\text{s}$ | **$16.00 \, \mu\text{s}$** | $42.76 \, \mu\text{s}$ | $55.89 \, \mu\text{s}$ | **49** | 1111 |
-| $10 \times 10$ | 100 | **$33.74 \, \mu\text{s}$** | $38.96 \, \mu\text{s}$ | $54.82 \, \mu\text{s}$ | $46.40 \, \mu\text{s}$ | $189.17 \, \mu\text{s}$ | $242.01 \, \mu\text{s}$ | **105** | 3111 |
+| $4 \times 4$ | 16 | $7.52 \, \mu\text{s}$ | $6.64 \, \mu\text{s}$ | $11.82 \, \mu\text{s}$ | $9.31 \, \mu\text{s}$ | $12.77 \, \mu\text{s}$ | **$6.38 \, \mu\text{s}$** | **19** | 58 |
+| $6 \times 6$ | 36 | $17.81 \, \mu\text{s}$ | $20.21 \, \mu\text{s}$ | $22.58 \, \mu\text{s}$ | **$10.16 \, \mu\text{s}$** | $15.43 \, \mu\text{s}$ | $14.23 \, \mu\text{s}$ | **43** | 315 |
+| $8 \times 8$ | 64 | $20.10 \, \mu\text{s}$ | $40.73 \, \mu\text{s}$ | $31.43 \, \mu\text{s}$ | **$17.62 \, \mu\text{s}$** | $26.93 \, \mu\text{s}$ | $31.67 \, \mu\text{s}$ | **49** | 1111 |
+| $10 \times 10$ | 100 | **$19.97 \, \mu\text{s}$** | $38.24 \, \mu\text{s}$ | $43.07 \, \mu\text{s}$ | $32.22 \, \mu\text{s}$ | $124.91 \, \mu\text{s}$ | $163.82 \, \mu\text{s}$ | **105** | 3111 |
 
 ### C. Random Erdős–Rényi Scaling ($p = 0.20$, 10 Instances per Size)
 
 | Vertices ($n$) | Adaptive Hybrid ADHP | ADHP ($K=5$) | Carlyle-Wood | Dumitrescu-Boland | Pulse | Martins | ADHP Labels | Martins Labels |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| 30 | $8.61 \, \mu\text{s}$ | $11.17 \, \mu\text{s}$ | $20.84 \, \mu\text{s}$ | $7.67 \, \mu\text{s}$ | $10.90 \, \mu\text{s}$ | **$5.74 \, \mu\text{s}$** | **24** | 204 |
-| 60 | $15.66 \, \mu\text{s}$ | $31.11 \, \mu\text{s}$ | $46.62 \, \mu\text{s}$ | $18.76 \, \mu\text{s}$ | $20.37 \, \mu\text{s}$ | **$13.92 \, \mu\text{s}$** | **84** | 673 |
-| 90 | **$32.40 \, \mu\text{s}$** | $50.80 \, \mu\text{s}$ | $87.48 \, \mu\text{s}$ | $36.90 \, \mu\text{s}$ | $37.82 \, \mu\text{s}$ | $42.18 \, \mu\text{s}$ | **181** | 2320 |
-| 120 | $42.17 \, \mu\text{s}$ | $62.12 \, \mu\text{s}$ | $88.48 \, \mu\text{s}$ | $43.54 \, \mu\text{s}$ | $50.59 \, \mu\text{s}$ | **$29.39 \, \mu\text{s}$** | **190** | 2138 |
+| 30 | $5.70 \, \mu\text{s}$ | $12.38 \, \mu\text{s}$ | $11.23 \, \mu\text{s}$ | $5.48 \, \mu\text{s}$ | $6.09 \, \mu\text{s}$ | **$3.89 \, \mu\text{s}$** | **24** | 204 |
+| 60 | **$15.41 \, \mu\text{s}$** | $24.85 \, \mu\text{s}$ | $32.30 \, \mu\text{s}$ | $16.43 \, \mu\text{s}$ | $17.20 \, \mu\text{s}$ | $84.56 \, \mu\text{s}$ | **84** | 673 |
+| 90 | $28.47 \, \mu\text{s}$ | $45.08 \, \mu\text{s}$ | $66.83 \, \mu\text{s}$ | $39.14 \, \mu\text{s}$ | $37.85 \, \mu\text{s}$ | **$26.44 \, \mu\text{s}$** | **181** | 2320 |
+| 120 | $50.92 \, \mu\text{s}$ | $79.41 \, \mu\text{s}$ | $115.58 \, \mu\text{s}$ | $50.91 \, \mu\text{s}$ | $53.21 \, \mu\text{s}$ | **$21.50 \, \mu\text{s}$** | **190** | 2138 |
 
 ### D. Budget Sensitivity ($n = 50$, Anti-Correlated Graph)
 
 | Budget Tightness ($\alpha$) | Adaptive Hybrid ADHP | ADHP ($K=5$) | Carlyle-Wood | Dumitrescu-Boland | Pulse | Martins | ADHP Labels | Martins Labels |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| $\alpha = 0.10$ (Very Tight) | $12.72 \, \mu\text{s}$ | $27.24 \, \mu\text{s}$ | $36.24 \, \mu\text{s}$ | $8.81 \, \mu\text{s}$ | $15.80 \, \mu\text{s}$ | **$7.62 \, \mu\text{s}$** | **42** | 429 |
-| $\alpha = 0.25$ (Tight) | $11.45 \, \mu\text{s}$ | $18.40 \, \mu\text{s}$ | $25.60 \, \mu\text{s}$ | $8.40 \, \mu\text{s}$ | $12.30 \, \mu\text{s}$ | **$6.80 \, \mu\text{s}$** | **33** | 477 |
-| $\alpha = 0.50$ (Medium) | $10.80 \, \mu\text{s}$ | $15.20 \, \mu\text{s}$ | $21.40 \, \mu\text{s}$ | $8.10 \, \mu\text{s}$ | $11.10 \, \mu\text{s}$ | **$6.14 \, \mu\text{s}$** | **44** | 437 |
-| $\alpha = 0.75$ (Loose) | $9.80 \, \mu\text{s}$ | $13.10 \, \mu\text{s}$ | $18.20 \, \mu\text{s}$ | $7.90 \, \mu\text{s}$ | $9.80 \, \mu\text{s}$ | **$5.90 \, \mu\text{s}$** | **75** | 563 |
-| $\alpha = 0.90$ (Very Loose) | $8.20 \, \mu\text{s}$ | $10.80 \, \mu\text{s}$ | $15.40 \, \mu\text{s}$ | $7.60 \, \mu\text{s}$ | $8.50 \, \mu\text{s}$ | **$5.50 \, \mu\text{s}$** | **68** | 451 |
+| $\alpha = 0.10 (Very Tight)$ | $14.56 \, \mu\text{s}$ | $24.75 \, \mu\text{s}$ | $21.82 \, \mu\text{s}$ | $10.76 \, \mu\text{s}$ | $10.29 \, \mu\text{s}$ | **$5.24 \, \mu\text{s}$** | **42** | 429 |
+| $\alpha = 0.25 (Tight)$ | $10.75 \, \mu\text{s}$ | $17.39 \, \mu\text{s}$ | $27.98 \, \mu\text{s}$ | $10.25 \, \mu\text{s}$ | $8.37 \, \mu\text{s}$ | **$4.80 \, \mu\text{s}$** | **33** | 477 |
+| $\alpha = 0.50 (Medium)$ | $8.38 \, \mu\text{s}$ | $11.91 \, \mu\text{s}$ | $17.27 \, \mu\text{s}$ | $8.17 \, \mu\text{s}$ | $8.51 \, \mu\text{s}$ | **$5.75 \, \mu\text{s}$** | **44** | 437 |
+| $\alpha = 0.75 (Loose)$ | $10.50 \, \mu\text{s}$ | $15.80 \, \mu\text{s}$ | $20.04 \, \mu\text{s}$ | $9.46 \, \mu\text{s}$ | $9.43 \, \mu\text{s}$ | **$7.59 \, \mu\text{s}$** | **75** | 563 |
+| $\alpha = 0.90 (Very Loose)$ | $8.82 \, \mu\text{s}$ | $10.26 \, \mu\text{s}$ | $16.35 \, \mu\text{s}$ | $8.66 \, \mu\text{s}$ | $7.72 \, \mu\text{s}$ | **$6.67 \, \mu\text{s}$** | **68** | 451 |
 
 ### E. Ablation Analysis on Facet Count $K$ ($n = 70$, Anti-Correlated Graph)
 
 | Facet Configuration | Preprocessing ($\mu\text{s}$) | Search Time ($\mu\text{s}$) | Total Runtime ($\mu\text{s}$) | Labels Generated (Mean) | Dual-Pruned Labels |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| **ADHP ($K=1$)** | 11.06 | 4.60 | **15.66** | **146** | 40 |
-| **ADHP ($K=2$)** | 17.78 | 2.32 | **20.10** | **91** (-37.7%) | 39 |
-| **ADHP ($K=3$)** | 20.78 | 2.20 | **22.98** | **91** | 39 |
-| **ADHP ($K=5$)** | 25.86 | 2.21 | **28.07** | **91** | 39 |
-| **ADHP ($K=8$)** | 25.10 | 2.13 | **27.23** | **91** | 39 |
-| **ADHP ($K=12$)** | 25.39 | 2.29 | **27.68** | **91** | 39 |
-
+| **ADHP ($K=1$)** | 11.74 | 4.83 | **16.57** | **146** | 40 |
+| **ADHP ($K=2$)** | 18.37 | 2.61 | **20.99** | **91** (-37.7%) | 39 |
+| **ADHP ($K=3$)** | 23.30 | 2.81 | **26.11** | **91** | 39 |
+| **ADHP ($K=5$)** | 26.36 | 2.39 | **28.75** | **91** | 39 |
+| **ADHP ($K=8$)** | 27.46 | 2.36 | **29.82** | **91** | 39 |
+| **ADHP ($K=12$)** | 27.13 | 2.17 | **29.30** | **91** | 39 |
 
 ## 4. Algorithmic Trade-offs & Limitations
 

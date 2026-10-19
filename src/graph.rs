@@ -125,7 +125,11 @@ impl DirectedGraph {
             if edge.from >= self.node_count || edge.to >= self.node_count {
                 return Err("Edge endpoint out of bounds");
             }
-            if edge.cost < 0.0 || !edge.cost.is_finite() || edge.weight < 0.0 || !edge.weight.is_finite() {
+            if edge.cost < 0.0
+                || !edge.cost.is_finite()
+                || edge.weight < 0.0
+                || !edge.weight.is_finite()
+            {
                 return Err("Edge cost or weight is negative or non-finite");
             }
         }

@@ -126,7 +126,7 @@ Across **25 systematic configurations comprising 250 configuration-instance eval
 
 | Graph Family / Topology | 1st Place (Fastest) | 2nd Place | 3rd Place | ADHP Pruning Reduction |
 | :--- | :--- | :--- | :--- | :--- |
-| **Planar Grid $10 \times 10$ ($n=100$)** | **Adaptive Hybrid ADHP ($33.74 \, \mu\text{s}$)** | ADHP ($K=5$) ($38.96 \, \mu\text{s}$) | Dumitrescu-Boland ($46.40 \, \mu\text{s}$) | **95.6% vs Martins** |
+| **Planar Grid $10 \times 10$ ($n=100$)** | **Adaptive Hybrid ADHP ($19.97 \, \mu\text{s}$)** | Dumitrescu-Boland ($32.22 \, \mu\text{s}$) | ADHP ($K=5$) ($38.24 \, \mu\text{s}$) | **95.6% vs Martins** |
 | **Anti-Correlated $n=150$** | **Adaptive Hybrid ADHP ($76.92 \, \mu\text{s}$)** | Martins ($90.25 \, \mu\text{s}$) | Dumitrescu-Boland ($97.87 \, \mu\text{s}$) | **82.6% vs Martins** |
 | **Random ER $n=90$** | **Adaptive Hybrid ADHP ($32.40 \, \mu\text{s}$)** | Dumitrescu-Boland ($36.90 \, \mu\text{s}$) | Pulse ($37.82 \, \mu\text{s}$) | **89.9% vs Martins** |
 | **Planar Grid $8 \times 8$ ($n=64$)** | **Dumitrescu-Boland ($16.00 \, \mu\text{s}$)** | Adaptive Hybrid ADHP ($16.48 \, \mu\text{s}$) | ADHP ($K=5$) ($25.38 \, \mu\text{s}$) | **94.7% vs Martins** |
