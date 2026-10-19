@@ -86,9 +86,9 @@ def main():
         target = inst["target"]
         budget = inst["budget"]
 
-        adhp_status = inst["adhp_status"]
-        adhp_cost = inst["adhp_cost"]
-        adhp_weight = inst["adhp_weight"]
+        adhp_status = inst.get("adhp_status")
+        adhp_cost = float(inst["adhp_cost"]) if inst.get("adhp_cost") is not None else float("inf")
+        adhp_weight = float(inst["adhp_weight"]) if inst.get("adhp_weight") is not None else float("inf")
 
         # Solve independent 0-1 ILP using HiGHS
         chosen_edges, ilp_cost, ilp_weight = solve_cspp_ilp(n_nodes, edges, source, target, budget)
