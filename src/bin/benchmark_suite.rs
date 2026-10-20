@@ -250,6 +250,29 @@ pub fn compute_canonical_graph_sha256(instance: &CsppInstance, edges: &[Canonica
     s
 }
 
+pub fn compute_canonical_topology_sha256(
+    instance: &CsppInstance,
+    edges: &[CanonicalEdge],
+) -> String {
+    let mut buf = Vec::new();
+    buf.extend_from_slice(b"adhp-topology-v1\n");
+    buf.extend_from_slice(format!("nodes: {}\n", instance.graph.num_nodes()).as_bytes());
+    buf.extend_from_slice(format!("edges: {}\n", edges.len()).as_bytes());
+    let mut topo_edges: Vec<(usize, usize)> = edges.iter().map(|e| (e.from, e.to)).collect();
+    topo_edges.sort_unstable();
+    for (from, to) in topo_edges {
+        buf.extend_from_slice(format!("{} {}\n", from, to).as_bytes());
+    }
+    let mut hasher = Sha256::new();
+    hasher.update(&buf);
+    let digest = hasher.finalize();
+    let mut s = String::with_capacity(64);
+    for b in digest {
+        s.push_str(&format!("{:02x}", b));
+    }
+    s
+}
+
 pub fn create_instance_record(
     evaluation_id: String,
     benchmark_category: String,
@@ -836,6 +859,28 @@ mod tests {
 
     #[test]
     fn test_sha256_standard_vectors() {
+        // Empty string
+        let h_empty = Sha256::new().finalize();
+        let hex_empty: String = h_empty.iter().map(|b| format!("{:02x}", b)).collect();
+        assert_eq!(
+            hex_empty,
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
+
+        // "abc"
+        let mut h_abc = Sha256::new();
+        h_abc.update(b"abc");
+        let hex_abc: String = h_abc
+            .finalize()
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect();
+        assert_eq!(
+            hex_abc,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+
+        // "hello"
         let mut h = Sha256::new();
         h.update(b"hello");
         let digest = h.finalize();
@@ -844,5 +889,30 @@ mod tests {
             hex,
             "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
         );
+    }
+
+    #[test]
+    fn test_topology_vs_instance_digest() {
+        use adhp_cspp::graph::DirectedGraph;
+        let mut g = DirectedGraph::new(3);
+        assert!(g.add_edge(0, 1, 10.0, 5.0));
+        assert!(g.add_edge(1, 2, 20.0, 10.0));
+
+        let inst1 = CsppInstance::new(g.clone(), 0, 2, 50.0);
+        let inst2 = CsppInstance::new(g.clone(), 0, 2, 100.0); // Different budget
+
+        let edges1 = get_canonical_edges(&inst1);
+        let edges2 = get_canonical_edges(&inst2);
+
+        let inst1_hash = compute_canonical_graph_sha256(&inst1, &edges1);
+        let inst2_hash = compute_canonical_graph_sha256(&inst2, &edges2);
+
+        let topo1_hash = compute_canonical_topology_sha256(&inst1, &edges1);
+        let topo2_hash = compute_canonical_topology_sha256(&inst2, &edges2);
+
+        // Different problem instances
+        assert_ne!(inst1_hash, inst2_hash);
+        // Identical underlying graph topology
+        assert_eq!(topo1_hash, topo2_hash);
     }
 }

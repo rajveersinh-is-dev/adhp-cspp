@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
 """
-Unit tests for scripts/verify_benchmarks.py.
+Adversarial and Regression Unit Tests for scripts/verify_benchmarks.py.
 
 Validates that the benchmark verifier:
 1. Passes on genuine, untampered benchmark data and instance registry.
-2. Fails (raises AssertionError) when columns are missing.
-3. Fails when duplicate evaluations exist.
-4. Fails when a required configuration or solver is missing.
-5. Fails when negative runtimes or invalid decompositions are injected.
-6. Fails when summary table statistics diverge from raw data.
-7. Fails when empirical regressions are suppressed (honesty check).
-8. Fails when instance evaluation count is corrupted.
-9. Fails when instance graph_id is spoofed or tampered with.
-10. Fails when edge weights, costs, or budget bits are modified (SHA-256 integrity).
-11. Fails when instance schema version is unsupported.
-12. Fails when instance deduplication reveals graph collision across distinct instances.
-13. Fails when published headline assertions are violated.
+2. [A1] Fails closed on missing or empty raw CSV.
+3. [A2] Fails closed on missing or empty instance registry.
+4. [A3] Fails closed on missing or empty summary CSV.
+5. [A4] Fails closed when required claim validator cannot be imported.
+6. [A5] Propagates claim validator assertion or runtime errors as nonzero failures.
+7. [A6] Fails when numeric values disagree with IEEE-754 bit encodings (cost, weight, budget).
+8. [A6] Rejects non-finite values (NaN, infinity), negative zeros (-0.0), and malformed hex strings.
+9. [A7] Enforces graph structural schema: node bounds, vertex bounds, source/target, and edge counts.
+10. [A8] Separates Problem-Instance Digest (adhp-canonical-v1) from Graph Topology Digest (adhp-topology-v1).
+11. [A9] Guarantees deterministic serialization invariant under edge reordering.
+12. [A10] Reconciles published claims: detecting mutations in README, paper/main.tex, paper/main.typ,
+    and research/BENCHMARK_REPORT.md.
+13. Preserves empirical honesty (regressions on small random graphs).
 """
 
 import copy
 import json
 import os
+import random
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import pandas as pd
 
 # Add repository root to pythonpath
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, REPO_ROOT)
 
-from scripts.verify_benchmarks import verify_benchmarks
+from scripts.verify_benchmarks import (
+    verify_benchmarks,
+    recompute_canonical_graph_sha256,
+    recompute_canonical_topology_sha256,
+    validate_numeric_representation,
+)
 
 
 class TestBenchmarkVerifier(unittest.TestCase):
@@ -51,10 +59,291 @@ class TestBenchmarkVerifier(unittest.TestCase):
         self.instances_json = self.__class__.instances_json
         self.cached_instances = self.__class__.cached_instances
 
+    # --- Baseline Positive Test ---
     def test_genuine_data_passes(self):
-        """Genuine dataset passes all consistency assertions from file paths."""
+        """Genuine dataset passes all consistency and cryptographic assertions."""
         self.assertTrue(verify_benchmarks(self.raw_csv, self.summary_csv, self.instances_json))
 
+    # --- A1: Missing or Empty Raw CSV Tests ---
+    def test_missing_raw_csv_fails(self):
+        """[A1] Missing raw benchmark CSV must raise FileNotFoundError."""
+        with self.assertRaises(FileNotFoundError):
+            verify_benchmarks("results/raw/nonexistent_raw.csv", self.summary_csv, self.cached_instances)
+
+    def test_empty_raw_csv_fails(self):
+        """[A1] Empty raw benchmark CSV must raise ValueError."""
+        with tempfile.NamedTemporaryFile(suffix=".csv", mode="w", delete=False) as tf:
+            temp_path = tf.name
+        try:
+            with self.assertRaises(ValueError):
+                verify_benchmarks(temp_path, self.summary_csv, self.cached_instances)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    # --- A2: Missing or Empty Instance Registry Tests ---
+    def test_missing_instance_registry_fails(self):
+        """[A2] Missing benchmark instance registry must raise FileNotFoundError."""
+        with self.assertRaises(FileNotFoundError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, "results/raw/nonexistent_instances.json")
+
+    def test_empty_instance_registry_fails(self):
+        """[A2] Empty benchmark instance registry must raise ValueError."""
+        with tempfile.NamedTemporaryFile(suffix=".json", mode="w", delete=False) as tf:
+            temp_path = tf.name
+        try:
+            with self.assertRaises(ValueError):
+                verify_benchmarks(self.raw_csv, self.summary_csv, temp_path)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    # --- A3: Missing or Empty Summary CSV Tests ---
+    def test_missing_summary_csv_fails(self):
+        """[A3] Missing summary table CSV must raise FileNotFoundError."""
+        with self.assertRaises(FileNotFoundError):
+            verify_benchmarks(self.raw_csv, "results/processed/nonexistent_summary.csv", self.cached_instances)
+
+    def test_empty_summary_csv_fails(self):
+        """[A3] Empty summary table CSV must raise ValueError."""
+        with tempfile.NamedTemporaryFile(suffix=".csv", mode="w", delete=False) as tf:
+            temp_path = tf.name
+        try:
+            with self.assertRaises(ValueError):
+                verify_benchmarks(self.raw_csv, temp_path, self.cached_instances)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    # --- A4: Missing Claim Validator Import Tests ---
+    def test_missing_claim_validator_import_fails(self):
+        """[A4] Import failure of claim reconciliation module must fail closed."""
+        with patch.dict("sys.modules", {"scripts.sync_published_claims": None, "sync_published_claims": None}):
+            with self.assertRaises(ImportError):
+                verify_benchmarks(self.raw_csv, self.summary_csv, self.cached_instances)
+
+    # --- A5: Claim Validator Assertion Propagation Tests ---
+    def test_claim_validator_assertion_error_propagates(self):
+        """[A5] An assertion failure in sync_published_claims must propagate and fail verification."""
+        import scripts.sync_published_claims as sync_mod
+        with patch.object(sync_mod, "check_all_claims", side_effect=AssertionError("Adversarial claim mismatch")):
+            with self.assertRaises(AssertionError):
+                verify_benchmarks(self.raw_csv, self.summary_csv, self.cached_instances)
+
+    # --- A6: Numeric Value vs Bit Encoding Invariant Mutations ---
+    def test_tampered_cost_numeric_mismatch_fails(self):
+        """[A6] Mutating edge cost numeric value without updating cost_bits must fail validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        corrupted[0]['canonical_edges'][0]['cost'] = 999.0  # cost_bits remains unchanged
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_tampered_weight_numeric_mismatch_fails(self):
+        """[A6] Mutating edge weight numeric value without updating weight_bits must fail validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        corrupted[0]['canonical_edges'][0]['weight'] = 888.0  # weight_bits remains unchanged
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_tampered_budget_numeric_mismatch_fails(self):
+        """[A6] Mutating instance budget numeric value without updating budget_bits must fail validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        corrupted[0]['budget'] = 777.0  # budget_bits remains unchanged
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_corrupted_bit_string_width_fails(self):
+        """[A6] Bit string with width != 16 characters must fail validation."""
+        with self.assertRaises(ValueError):
+            validate_numeric_representation(10.0, "402400000000", "test_cost")
+
+    def test_corrupted_bit_string_non_hex_fails(self):
+        """[A6] Bit string with non-hexadecimal characters must fail validation."""
+        with self.assertRaises(ValueError):
+            validate_numeric_representation(10.0, "402400000000000z", "test_cost")
+
+    def test_nan_numeric_value_rejected(self):
+        """[A6] NaN float values must be strictly rejected."""
+        with self.assertRaises(ValueError):
+            validate_numeric_representation(float('nan'), "7ff8000000000000", "test_cost")
+
+    def test_inf_numeric_value_rejected(self):
+        """[A6] Infinite float values must be strictly rejected."""
+        with self.assertRaises(ValueError):
+            validate_numeric_representation(float('inf'), "7ff0000000000000", "test_cost")
+
+    def test_signed_negative_zero_rejected(self):
+        """[A6] Negative zero (-0.0) encodings must be strictly rejected."""
+        with self.assertRaises(ValueError):
+            validate_numeric_representation(-0.0, "8000000000000000", "test_cost")
+
+    def test_negative_cost_or_weight_rejected(self):
+        """[A6] Negative cost or weight values must be rejected."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        # Set negative cost and matching negative float IEEE bits
+        corrupted[0]['canonical_edges'][0]['cost'] = -5.0
+        corrupted[0]['canonical_edges'][0]['cost_bits'] = "c014000000000000"
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    # --- A7: Structural Metadata & Invariant Enforcements ---
+    def test_structural_vertex_from_out_of_bounds_fails(self):
+        """[A7] Edge 'from' vertex >= nodes must fail structural validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        nodes = corrupted[0]['nodes']
+        corrupted[0]['canonical_edges'][0]['from'] = nodes + 5
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_structural_vertex_to_out_of_bounds_fails(self):
+        """[A7] Edge 'to' vertex >= nodes must fail structural validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        nodes = corrupted[0]['nodes']
+        corrupted[0]['canonical_edges'][0]['to'] = nodes + 2
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_structural_source_out_of_bounds_fails(self):
+        """[A7] Source vertex >= nodes must fail structural validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        nodes = corrupted[0]['nodes']
+        corrupted[0]['source'] = nodes + 1
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_structural_target_out_of_bounds_fails(self):
+        """[A7] Target vertex >= nodes must fail structural validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        nodes = corrupted[0]['nodes']
+        corrupted[0]['target'] = nodes + 1
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    def test_structural_edge_count_mismatch_fails(self):
+        """[A7] Canonical edge count != declared 'edges' must fail validation."""
+        corrupted = copy.deepcopy(self.cached_instances)
+        corrupted[0]['edges'] = len(corrupted[0]['canonical_edges']) + 1
+        with self.assertRaises(ValueError):
+            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
+
+    # --- A8: Dual Canonical Identity Semantics ---
+    def test_problem_instance_vs_topology_digest_separation(self):
+        """
+        [A8] Modifying a problem parameter (budget or costs) must change the Problem-Instance
+        digest (adhp-canonical-v1) while strictly preserving the Graph Topology digest (adhp-topology-v1).
+        """
+        rec = copy.deepcopy(self.cached_instances[0])
+        orig_inst_hash = recompute_canonical_graph_sha256(rec)
+        orig_topo_hash = recompute_canonical_topology_sha256(rec)
+
+        # Mutate budget (valid float and matching bits)
+        rec['budget'] = 12345.0
+        rec['budget_bits'] = "40c81c8000000000"
+
+        new_inst_hash = recompute_canonical_graph_sha256(rec)
+        new_topo_hash = recompute_canonical_topology_sha256(rec)
+
+        # Instance digest changes because problem parameter changed
+        self.assertNotEqual(orig_inst_hash, new_inst_hash)
+        # Topology digest remains identical because graph structure (nodes, edge endpoints) is invariant
+        self.assertEqual(orig_topo_hash, new_topo_hash)
+
+    # --- A9: Deterministic Serialization under Reordering ---
+    def test_deterministic_serialization_under_edge_reordering(self):
+        """
+        [A9] Shuffling the input edge list must produce bit-exact identical Problem-Instance
+        and Topology digests, proving canonical sorting invariance.
+        """
+        rec = copy.deepcopy(self.cached_instances[0])
+        orig_inst_hash = recompute_canonical_graph_sha256(rec)
+        orig_topo_hash = recompute_canonical_topology_sha256(rec)
+
+        # Reverse and randomly shuffle edges
+        shuffled_edges = list(reversed(rec['canonical_edges']))
+        rng = random.Random(42)
+        rng.shuffle(shuffled_edges)
+        rec['canonical_edges'] = shuffled_edges
+
+        recomputed_inst_hash = recompute_canonical_graph_sha256(rec)
+        recomputed_topo_hash = recompute_canonical_topology_sha256(rec)
+
+        self.assertEqual(orig_inst_hash, recomputed_inst_hash)
+        self.assertEqual(orig_topo_hash, recomputed_topo_hash)
+
+    # --- A10: Published Claim Mutation Tests ---
+    def test_published_claim_mutation_in_readme_fails(self):
+        """[A10] Mutating a table value in README.md must trigger claim verification failure."""
+        import scripts.sync_published_claims as sync_mod
+        df = pd.read_csv(self.raw_csv)
+        with open(sync_mod.README_PATH, "r", encoding="utf-8") as f:
+            orig_content = f.read()
+        target = "$74.23 \\, \\mu\\text{s}$"
+        self.assertIn(target, orig_content)
+        try:
+            mutated = orig_content.replace(target, "$999.99 \\, \\mu\\text{s}$")
+            with open(sync_mod.README_PATH, "w", encoding="utf-8") as f:
+                f.write(mutated)
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(df)
+        finally:
+            with open(sync_mod.README_PATH, "w", encoding="utf-8") as f:
+                f.write(orig_content)
+
+    def test_published_claim_mutation_in_paper_tex_fails(self):
+        """[A10] Mutating a table value in paper/main.tex must trigger claim verification failure."""
+        import scripts.sync_published_claims as sync_mod
+        df = pd.read_csv(self.raw_csv)
+        with open(sync_mod.TEX_PATH, "r", encoding="utf-8") as f:
+            orig_content = f.read()
+        target = "\\textbf{19.97}"
+        self.assertIn(target, orig_content)
+        try:
+            mutated = orig_content.replace(target, "999.99")
+            with open(sync_mod.TEX_PATH, "w", encoding="utf-8") as f:
+                f.write(mutated)
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(df)
+        finally:
+            with open(sync_mod.TEX_PATH, "w", encoding="utf-8") as f:
+                f.write(orig_content)
+
+    def test_published_claim_mutation_in_paper_typ_fails(self):
+        """[A10] Mutating a table value in paper/main.typ must trigger claim verification failure."""
+        import scripts.sync_published_claims as sync_mod
+        df = pd.read_csv(self.raw_csv)
+        with open(sync_mod.TYP_PATH, "r", encoding="utf-8") as f:
+            orig_content = f.read()
+        target = "[*19.97 µs*]"
+        self.assertIn(target, orig_content)
+        try:
+            mutated = orig_content.replace(target, "[*999.99 µs*]")
+            with open(sync_mod.TYP_PATH, "w", encoding="utf-8") as f:
+                f.write(mutated)
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(df)
+        finally:
+            with open(sync_mod.TYP_PATH, "w", encoding="utf-8") as f:
+                f.write(orig_content)
+
+    def test_published_claim_mutation_in_benchmark_report_fails(self):
+        """[A10] Mutating a table value in research/BENCHMARK_REPORT.md must trigger claim verification failure."""
+        import scripts.sync_published_claims as sync_mod
+        df = pd.read_csv(self.raw_csv)
+        with open(sync_mod.REPORT_PATH, "r", encoding="utf-8") as f:
+            orig_content = f.read()
+        target = "$19.97 \\pm 4.22$"
+        self.assertIn(target, orig_content)
+        try:
+            mutated = orig_content.replace(target, "$999.99 \\pm 0.00$")
+            with open(sync_mod.REPORT_PATH, "w", encoding="utf-8") as f:
+                f.write(mutated)
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(df)
+        finally:
+            with open(sync_mod.REPORT_PATH, "w", encoding="utf-8") as f:
+                f.write(orig_content)
+
+    # --- Structural & Schema Verification Negative Tests ---
     def test_missing_column_fails(self):
         """Dropping a required column must fail verification."""
         df = pd.read_csv(self.raw_csv)
@@ -153,7 +442,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
 
     def test_corrupted_instance_registry_count_fails(self):
         """Instance registry with missing evaluation record must fail verification."""
-        corrupted_insts = self.cached_instances[:-1]  # Drop one record
+        corrupted_insts = self.cached_instances[:-1]
         with self.assertRaises(AssertionError):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
 
@@ -164,58 +453,27 @@ class TestBenchmarkVerifier(unittest.TestCase):
         with self.assertRaises(AssertionError):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
 
-    def test_tampered_edge_weight_fails_sha256(self):
-        """Tampering with an edge weight in canonical_edges must cause SHA-256 mismatch."""
-        corrupted_insts = copy.deepcopy(self.cached_instances)
-        corrupted_insts[0]['canonical_edges'][0]['weight_bits'] = '4050000000000000'
-        with self.assertRaises(AssertionError):
-            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
-
-    def test_tampered_budget_bits_fails_sha256(self):
-        """Tampering with budget_bits must cause SHA-256 mismatch."""
-        corrupted_insts = copy.deepcopy(self.cached_instances)
-        corrupted_insts[0]['budget_bits'] = 'ffffffffffffffff'
-        with self.assertRaises(AssertionError):
-            verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
-
     def test_unsupported_schema_version_fails(self):
         """Invalid schema_version must fail verification."""
         corrupted_insts = copy.deepcopy(self.cached_instances)
         corrupted_insts[0]['schema_version'] = 'unsupported-schema-v99'
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, ValueError)):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
 
     def test_corrupted_instance_identity_deduplication_fails(self):
         """Instance registry where distinct instances share graph content collapses count and must fail."""
         corrupted_insts = copy.deepcopy(self.cached_instances)
-        # Duplicate record 0 content into record 1 in Suite 1, reducing distinct count to 199
         corrupted_insts[1]['nodes'] = corrupted_insts[0]['nodes']
+        corrupted_insts[1]['edges'] = corrupted_insts[0]['edges']
         corrupted_insts[1]['source'] = corrupted_insts[0]['source']
         corrupted_insts[1]['target'] = corrupted_insts[0]['target']
+        corrupted_insts[1]['budget'] = corrupted_insts[0]['budget']
         corrupted_insts[1]['budget_bits'] = corrupted_insts[0]['budget_bits']
         corrupted_insts[1]['canonical_edges'] = copy.deepcopy(corrupted_insts[0]['canonical_edges'])
         corrupted_insts[1]['graph_id'] = corrupted_insts[0]['graph_id']
 
         with self.assertRaises(AssertionError):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
-
-    def test_corrupted_published_headline_fails(self):
-        """Mutating a published headline value in raw benchmark data must fail verification."""
-        df = pd.read_csv(self.raw_csv)
-        df_corrupted = df.copy()
-        g10_idx = df_corrupted[(df_corrupted['instance_name'] == 'grid_10x10') & 
-                               (df_corrupted['solver_name'] == 'Adaptive Hybrid ADHP')].index[0]
-        df_corrupted.loc[g10_idx, 'mean_runtime_micros'] = 999.0
-        with tempfile.NamedTemporaryFile(suffix=".csv", mode="w", delete=False) as tf:
-            df_corrupted.to_csv(tf.name, index=False)
-            temp_path = tf.name
-
-        try:
-            with self.assertRaises(AssertionError):
-                verify_benchmarks(temp_path, self.summary_csv, self.cached_instances)
-        finally:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
 
 
 if __name__ == "__main__":

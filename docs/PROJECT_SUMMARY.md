@@ -30,15 +30,15 @@ We prove:
 ---
 
 ### 3. Empirical Results
-Across 25 benchmark configurations and 250 timed executions:
-- **Label Suppression**: On anti-correlated networks, ADHP reduces candidate labels from 1,449 (Martins) and 2,671 (Pulse) down to **48 labels** (a **96.7% reduction**).
-- **Wall-Clock Speedup**: On 2D mesh grid networks, ADHP achieves a **2.64x speedup** over Martins at $n=81$ ($26.29 \, \mu\text{s}$ vs $69.34 \, \mu\text{s}$).
-- **Break-Even Boundary**: On small dense graphs ($n \le 50$), the fixed cost of computing $K=5$ reverse Dijkstra passes makes lightweight 1D-bounding (Dumitrescu-Boland) faster. ADHP is engineered for non-trivial, combinatorial bottleneck regimes.
+Across 25 benchmark configurations and 250 timed executions (200 distinct problem instances, 164 unique topologies):
+- **Label Suppression**: On anti-correlated networks ($n=100$), ADHP reduces candidate labels from 2,751 (Martins) down to **79 labels** (a **97.1% reduction**).
+- **Wall-Clock Speedup**: On 2D mesh grid networks ($10 \times 10, n=100$), Adaptive Hybrid ADHP achieves an **8.2x speedup** over Martins ($19.97 \, \mu\text{s}$ vs $163.82 \, \mu\text{s}$) and **6.3x** over Pulse ($124.91 \, \mu\text{s}$).
+- **Break-Even Boundary**: On small random graphs ($n \le 60$), the fixed cost of multi-faceted Dijkstra passes makes standard Martins faster ($3.89 \, \mu\text{s}$ at $n=30$). ADHP is engineered for combinatorial bottleneck regimes with severe conflict or long paths.
 
 ---
 
 ### 4. Verification and Software Deliverables
-- **Codebase**: Idiomatic Rust library (`adhp-cspp`), zero clippy warnings with `-D warnings`, zero `.unwrap()` in lowering pipelines.
-- **Verification**: 100% agreement on 30 differential instances across all 5 solvers; mathematical property test suite.
-- **Paper**: Complete LaTeX manuscript (`paper/main.tex`) and compiled PDF (`paper/paper.pdf`).
+- **Codebase**: Idiomatic Rust library (`adhp-cspp`), zero clippy warnings with `-D warnings`, zero `.unwrap()` in production paths.
+- **Verification**: 100% agreement on 150 differential instances (100 float + 50 exact integer) against SciPy HiGHS MILP oracle; 32 Rust tests, 48 Python tests.
+- **Paper**: Complete LaTeX manuscript (`paper/main.tex`) and synchronized Typst preprint (`paper/main.typ`).
 - **Repository**: Published on GitHub at [https://github.com/rajveersinh-is-dev/adhp-cspp](https://github.com/rajveersinh-is-dev/adhp-cspp).
