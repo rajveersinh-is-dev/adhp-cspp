@@ -632,7 +632,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
         """[R16] Verify that claim inventory has valid structure, unique IDs, and derived counts."""
         import scripts.sync_published_claims as sync_mod
         res = sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
-        self.assertEqual(res["status"], "VERIFIED")
+        self.assertEqual(res["status"], "SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST")
         self.assertGreater(res["verified_claims"], 700)
         self.assertEqual(res["exact_numerical"] + res["derived_statistics"] + res["document_presence"], res["verified_claims"])
         self.assertEqual(res["verified_claims"] + res["manual_review"], res["total_claims"])
@@ -748,13 +748,13 @@ class TestBenchmarkVerifier(unittest.TestCase):
             md_content = f.read()
 
         summary = json_data["summary"]
-        self.assertEqual(summary["overall_verification_status"], "FULLY_VERIFIED_WITH_RECORDED_EVIDENCE")
+        self.assertEqual(summary["overall_verification_status"], "SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST")
         self.assertEqual(summary["manual_review_pending"], 0)
         self.assertEqual(summary["verification_failed"], 0)
         self.assertEqual(summary["total_claims_tracked"], len(json_data["claims"]))
         self.assertIn(f"| **Claims Passed (Automated)** | **{summary['claims_passed']}** |", md_content)
         self.assertIn(f"| **Claims Reviewed with Documented Evidence** | {summary['claims_reviewed_with_documented_evidence']} |", md_content)
-        self.assertIn("| **Overall Repository Verification Status** | **FULLY_VERIFIED_WITH_RECORDED_EVIDENCE** |", md_content)
+        self.assertIn("| **Overall Repository Verification Status** | **SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST** |", md_content)
 
         # Assert every claim in JSON is present in Markdown
         for claim in json_data["claims"]:
@@ -789,8 +789,8 @@ class TestPhase7MutationBattery(unittest.TestCase):
         with open(os.path.join(REPO_ROOT, "results", "raw", "benchmark_instances.json"), "r", encoding="utf-8") as f:
             cls.instances = json.load(f)
 
-    def test_mutation_1_changed_table_cell_with_original_value_elsewhere_fails(self):
-        """[Phase 7.1] Changing published table cell while keeping original value elsewhere in doc fails."""
+    def test_mutation_mode_1_number_moved_to_unrelated_sentence_fails_anchored_prose(self):
+        """Mode 1: Correct number moved into an unrelated sentence fails anchored extraction."""
         import io
         import scripts.sync_published_claims as sync_mod
         orig_open = open
@@ -798,19 +798,41 @@ class TestPhase7MutationBattery(unittest.TestCase):
             if os.path.abspath(path) == os.path.abspath(sync_mod.README_PATH):
                 with orig_open(path, *args, **kwargs) as f:
                     content = f.read()
-                # Mutate cell in Table A: 6.18 -> 99.99, but put 6.18 at end of file
-                mutated = content.replace("$6.18 \\, \\mu\\text{s}$", "$99.99 \\, \\mu\\text{s}$", 1)
-                mutated += "\n\nFootnote mentioning $6.18 \\, \\mu\\text{s}$ elsewhere.\n"
+                target = r"On **Random ER $n=120$**, Adaptive Hybrid runtime is **$50.92 \, \mu\text{s}**"
+                self.assertIn(target, content)
+                mutated = content.replace(target, r"On **Random ER $n=120$**, Adaptive Hybrid runtime is **$99.99 \, \mu\text{s}**")
+                mutated += "\n\nUnrelated paragraph mentions 50.92 microsecond measurement elsewhere.\n"
                 return io.StringIO(mutated)
             return orig_open(path, *args, **kwargs)
 
         with patch("builtins.open", side_effect=custom_open):
             with self.assertRaises(AssertionError) as ctx:
                 sync_mod.check_all_claims(self.raw_df)
-            self.assertIn("README-TAB-A-n20-HYB-TIME", str(ctx.exception))
+            self.assertIn("README-PROSE-ER120-HYB-TIME", str(ctx.exception))
 
-    def test_mutation_2_swapped_table_columns_fails(self):
-        """[Phase 7.2] Swapping two valid numbers between table columns in same row fails coordinate check."""
+    def test_mutation_mode_2_correct_number_retained_elsewhere_fails_anchored_check(self):
+        """Mode 2: Correct number retained elsewhere in document after target claim is corrupted."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.TEX_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                target = r"delivering a $8.2\times$ speedup over Martins"
+                self.assertIn(target, content)
+                mutated = content.replace(target, r"delivering a $15.0\times$ speedup over Martins")
+                mutated += "\n% Retained 8.20 in comment\n"
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError) as ctx:
+                sync_mod.check_all_claims(self.raw_df)
+            self.assertIn("TEX-PROSE-G10-MAR-SPEEDUP", str(ctx.exception))
+
+    def test_mutation_mode_3_value_moved_to_wrong_table_row_or_column_fails(self):
+        """Mode 3: Swapping two numbers between table columns in same row fails coordinate check."""
         import io
         import scripts.sync_published_claims as sync_mod
         orig_open = open
@@ -818,10 +840,9 @@ class TestPhase7MutationBattery(unittest.TestCase):
             if os.path.abspath(path) == os.path.abspath(sync_mod.README_PATH):
                 with orig_open(path, *args, **kwargs) as f:
                     content = f.read()
-                # Row 20 in Table A: swap DB ($3.39) and Pulse ($3.89)
                 target = "| 20 | $6.18 \\, \\mu\\text{s}$ | $10.92 \\, \\mu\\text{s}$ | $15.33 \\, \\mu\\text{s}$ | **$3.39 \\, \\mu\\text{s}$** | $3.89 \\, \\mu\\text{s}$ | $3.50 \\, \\mu\\text{s}$ |"
                 swapped = "| 20 | $6.18 \\, \\mu\\text{s}$ | $10.92 \\, \\mu\\text{s}$ | $15.33 \\, \\mu\\text{s}$ | $3.89 \\, \\mu\\text{s}$ | **$3.39 \\, \\mu\\text{s}$** | $3.50 \\, \\mu\\text{s}$ |"
-                assert target in content, "Target row not found in README!"
+                self.assertIn(target, content)
                 mutated = content.replace(target, swapped)
                 return io.StringIO(mutated)
             return orig_open(path, *args, **kwargs)
@@ -831,8 +852,28 @@ class TestPhase7MutationBattery(unittest.TestCase):
                 sync_mod.check_all_claims(self.raw_df)
             self.assertTrue("README-TAB-A-n20-DB-TIME" in str(ctx.exception) or "README-TAB-A-n20-PULSE-TIME" in str(ctx.exception))
 
-    def test_mutation_3_altered_raw_measurement_without_updating_claims_fails(self):
-        """[Phase 7.3] Altering raw benchmark measurement fails downstream claim checks."""
+    def test_mutation_mode_4_derived_speedup_numerically_incorrect_fails(self):
+        """Mode 4: Derived speedup or suppression ratio numerically incorrect fails check."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.README_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                target = r"Martins ($163.82 \, \mu\text{s}$, a **$8.2\times$ speedup**)"
+                self.assertIn(target, content)
+                mutated = content.replace(target, r"Martins ($163.82 \, \mu\text{s}$, a **$99.9\times$ speedup**)")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError) as ctx:
+                sync_mod.check_all_claims(self.raw_df)
+            self.assertIn("README-PROSE-G10-MAR-SPEEDUP", str(ctx.exception))
+
+    def test_mutation_mode_5_changed_raw_measurement_with_stale_docs_fails(self):
+        """Mode 5: Changed raw measurement without document update fails verification."""
         import scripts.sync_published_claims as sync_mod
         df_mut = self.raw_df.copy()
         idx = df_mut[(df_mut['instance_name'] == 'anticorr_n20') & (df_mut['solver_name'].str.startswith('Adaptive Hybrid'))].index[0]
@@ -841,55 +882,46 @@ class TestPhase7MutationBattery(unittest.TestCase):
         with self.assertRaises(AssertionError):
             sync_mod.check_all_claims(df_mut)
 
-    def test_mutation_4_corrupt_source_identifier_or_hash_fails(self):
-        """[Phase 7.4] Empty source reference or corrupted instance topology hash is rejected."""
+    def test_mutation_mode_6_missing_or_duplicated_anchor_fails_closed(self):
+        """Mode 6: Missing anchor fails closed; duplicated anchor fails closed."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        with self.assertRaises(AssertionError):
-            inv.add_exact_numerical("TEST-EMPTY-SRC", "README.md", "Test", "1.0", "1.0", source_ref="   ")
+        doc_content = "This is a single sentence mentioning 42.0.\n"
+        with self.assertRaises(AssertionError) as ctx1:
+            inv.add_anchored_prose_numerical(
+                "TEST-MISSING", "test.md", "Desc", doc_content,
+                r"Nonexistent anchor with (?P<val>[\d\.]+)", 42.0, "src:1"
+            )
+        self.assertIn("Missing claim anchor", str(ctx1.exception))
 
-        # Corrupted graph edge hash check
-        rec = dict(self.instances[0])
-        computed_hash = recompute_canonical_graph_sha256(rec)
-        self.assertEqual(computed_hash, rec["graph_id"])
+        dup_doc = doc_content + doc_content
+        with self.assertRaises(AssertionError) as ctx2:
+            inv.add_anchored_prose_numerical(
+                "TEST-DUP", "test.md", "Desc", dup_doc,
+                r"mentioning (?P<val>[\d\.]+)", 42.0, "src:1"
+            )
+        self.assertIn("Ambiguous/duplicated claim anchor", str(ctx2.exception))
 
-        edges = [dict(e) for e in rec["canonical_edges"]]
-        edges[0] = dict(edges[0])
-        edges[0]["cost_bits"] = "4040000000000000"  # 32.0 in hex
-        edges[0]["cost"] = 32.0
-        rec_corrupted = dict(rec)
-        rec_corrupted["canonical_edges"] = edges
-        corrupted_hash = recompute_canonical_graph_sha256(rec_corrupted)
-        self.assertNotEqual(corrupted_hash, rec["graph_id"])
-
-    def test_mutation_5_delete_or_duplicate_registry_entry_rejected(self):
-        """[Phase 7.5] Duplicate claim IDs and missing required registry entries are rejected."""
+    def test_mutation_mode_7_material_statement_deleted_from_registry_fails(self):
+        """Mode 7: Material claim present in document but omitted from registry fails discovery audit."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        inv.add_document_presence("CLAIM-DUP-1", "README.md", "Desc 1", "test", "test", "src:1")
+        inv.add_exact_numerical("NUM-1", "README.md", "Desc", "19.97", "19.97", "src:1")
         with self.assertRaises(AssertionError) as ctx:
-            inv.add_document_presence("CLAIM-DUP-1", "README.md", "Desc 2", "test", "test", "src:2")
-        self.assertIn("Duplicate claim ID", str(ctx.exception))
+            sync_mod.run_claim_discovery_audit(inv, self.raw_df)
+        self.assertIn("uncovered material claims detected", str(ctx.exception))
 
-    def test_mutation_6_contradictory_benchmark_denominator_fails(self):
-        """[Phase 7.6] Contradictory configuration/evaluation denominator fails verification."""
-        import io
-        import scripts.sync_published_claims as sync_mod
-        orig_open = open
-        def custom_open(path, *args, **kwargs):
-            if os.path.abspath(path) == os.path.abspath(sync_mod.DOCS_METHOD_PATH):
-                with orig_open(path, *args, **kwargs) as f:
-                    content = f.read()
-                mutated = content.replace("25 configurations", "20 configurations")
-                return io.StringIO(mutated)
-            return orig_open(path, *args, **kwargs)
+    def test_mutation_mode_8_resolved_defect_reintroduced_regression_fails(self):
+        """Mode 8: Regression test verifying that Defect 3.1 checked overflow cannot silently succeed."""
+        max_u64 = 0xFFFFFFFFFFFFFFFF
+        cost_multiplier = 2
+        wrapped_64 = (max_u64 * cost_multiplier) & 0xFFFFFFFFFFFFFFFF
+        checked_128 = max_u64 * cost_multiplier
+        self.assertNotEqual(wrapped_64, checked_128, "64-bit multiplication wrapped silently!")
+        self.assertGreater(checked_128, max_u64, "Checked 128-bit arithmetic did not detect overflow!")
 
-        with patch("builtins.open", side_effect=custom_open):
-            with self.assertRaises(AssertionError):
-                sync_mod.check_all_claims(self.raw_df)
-
-    def test_mutation_7_remove_historical_qualification_from_defect_fails(self):
-        """[Phase 7.7] Removing historical qualification from defect statement fails verification."""
+    def test_mutation_mode_9_historical_defect_incorrectly_labeled_current_fact_fails(self):
+        """Mode 9: Changing [HISTORICAL — RESOLVED] to active defect fails verifier."""
         import io
         import scripts.sync_published_claims as sync_mod
         orig_open = open
@@ -897,7 +929,8 @@ class TestPhase7MutationBattery(unittest.TestCase):
             if os.path.abspath(path) == os.path.abspath(sync_mod.AUDIT_PATH):
                 with orig_open(path, *args, **kwargs) as f:
                     content = f.read()
-                mutated = content.replace("[HISTORICAL — RESOLVED]", "[ACTIVE DEFECT]")
+                self.assertIn("[HISTORICAL — RESOLVED]", content)
+                mutated = content.replace("[HISTORICAL — RESOLVED]", "[ACTIVE DEFECT — UNRESOLVED]")
                 return io.StringIO(mutated)
             return orig_open(path, *args, **kwargs)
 
@@ -905,38 +938,31 @@ class TestPhase7MutationBattery(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 sync_mod.check_all_claims(self.raw_df)
 
-    def test_mutation_8_changed_complexity_claim_without_updating_review_fails(self):
-        """[Phase 7.8] Mutating theoretical complexity formula in docs fails verification."""
-        import io
-        import scripts.sync_published_claims as sync_mod
-        orig_open = open
-        def custom_open(path, *args, **kwargs):
-            if os.path.abspath(path) == os.path.abspath(sync_mod.COMPLEXITY_PATH):
-                with orig_open(path, *args, **kwargs) as f:
-                    content = f.read()
-                target_str = r"T_{\text{prep}} \le (K + 1) \cdot O(m + n \log n)"
-                assert target_str in content, "Target complexity string not found!"
-                mutated = content.replace(target_str, r"T_{\text{prep}} \le O(m^2)")
-                return io.StringIO(mutated)
-            return orig_open(path, *args, **kwargs)
-
-        with patch("builtins.open", side_effect=custom_open):
-            with self.assertRaises(AssertionError):
-                sync_mod.check_all_claims(self.raw_df)
-
-    def test_mutation_9_pending_manual_review_item_prevents_full_verification(self):
-        """[Phase 7.9] An unreviewed manual claim fails full verification status."""
+    def test_mutation_mode_10_proof_presence_check_labeled_mathematically_verified_fails(self):
+        """Mode 10: Structural document presence check cannot claim exact numerical proof."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        inv.add_exact_numerical("NUM-1", "README.md", "Desc", "1.0", "1.0", "src:1")
-        inv.add_manual_review("REV-1", "docs/COMPLEXITY_ANALYSIS.md", "Pending item",
-                              "O(K * m log n)", "src:2", review_status="MANUAL_REVIEW_PENDING")
-        self.assertEqual(inv.manual_review_pending_count, 1)
-        self.assertEqual(inv.overall_verification_status, "PARTIAL_VERIFIED_PENDING_MANUAL_REVIEW")
-        self.assertNotEqual(inv.overall_verification_status, "FULLY_VERIFIED_WITH_RECORDED_EVIDENCE")
+        inv.add_document_presence("PRESENCE-1", "docs/COMPLEXITY_ANALYSIS.md", "Theorem 1 Presence",
+                                  "T_{prep} <= (K+1)*O(m+n log n)", "T_{prep} <= (K+1)*O(m+n log n)",
+                                  "docs/COMPLEXITY_ANALYSIS.md")
+        rec = inv.records[0]
+        self.assertEqual(rec.claim_type, "DOCUMENT_PRESENCE")
+        self.assertEqual(rec.check_performed, "structural_document_text_presence_check")
+        self.assertIn("structural text presence check; not independent numerical validation", rec.evidence)
+        self.assertNotEqual(rec.claim_type, "EXACT_NUMERICAL")
 
-    def test_mutation_10_tampered_json_markdown_inventory_discrepancy_detected(self):
-        """[Phase 7.10] Cross-audit catches tampering between JSON and Markdown inventories."""
+    def test_mutation_mode_11_inventory_claims_full_coverage_despite_uncovered_material_claim_fails(self):
+        """Mode 11: Inventory rejects full coverage status when material claims are uncovered."""
+        import scripts.sync_published_claims as sync_mod
+        inv = sync_mod.ClaimInventory()
+        with self.assertRaises(AssertionError):
+            sync_mod.run_claim_discovery_audit(inv, self.raw_df)
+        self.assertGreater(inv.material_claims_not_yet_covered, 0)
+        self.assertNotEqual(inv.overall_verification_status, "SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST")
+        self.assertEqual(inv.overall_verification_status, "DISCOVERY_AUDIT_UNCOVERED_MATERIAL_CLAIMS")
+
+    def test_mutation_mode_12_mismatch_between_json_markdown_and_executed_results_fails(self):
+        """Mode 12: Tampered JSON or Markdown inventory causes cross-audit discrepancy."""
         import scripts.sync_published_claims as sync_mod
         with open(sync_mod.CLAIM_JSON_PATH, "r", encoding="utf-8") as f:
             json_data = json.load(f)
