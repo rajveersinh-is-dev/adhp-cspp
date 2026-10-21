@@ -83,7 +83,7 @@ impl CsppSolver for DumitrescuBolandSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        if s >= n || t >= n || budget.is_nan() {
+        if instance.validate().is_err() {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return CsppSolution {
                 status: SolutionStatus::UnsupportedInput,

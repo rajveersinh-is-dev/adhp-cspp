@@ -14,7 +14,7 @@ The primary trade-off in dual lower-bounding algorithms is the balance between *
 
 - **Empirical Observation**: On dense Erdős–Rényi graphs ($p=0.20$, $m/n \ge 3.5$) with moderate size ($n \le 60$), the hop diameter is small ($k \approx 3-5$ hops). On such graphs, classical label setting (Martins) settles the optimal path in only $5-14 \, \mu\text{s}$ because very few non-dominated Pareto trade-offs exist.
 - **Fixed ADHP Overhead**: Fixed ADHP ($K=5$) computes multiple reverse Dijkstra trees during preprocessing, consuming $25-50 \, \mu\text{s}$. Consequently, fixed ADHP is slower in end-to-end wall-clock time than Martins on small dense networks, even though it explores fewer forward labels.
-- **Mitigation & Boundary**: The `HybridAdhpSolver` detects $\rho \ge 3.5$ and caps preprocessing at $K=1$, reducing total runtime from $31.11 \, \mu\text{s}$ down to $15.66 \, \mu\text{s}$ at $n=60$. However, on tiny instances ($n \le 20$), zero-preprocessing solvers remain faster.
+- **Mitigation & Boundary**: The `HybridAdhpSolver` detects $\rho \ge 3.5$ and caps preprocessing at $K=1$, reducing total runtime from $24.85 \, \mu\text{s}$ down to $15.41 \, \mu\text{s}$ at $n=60$. However, on tiny instances ($n \le 20$), zero-preprocessing solvers remain faster.
 
 ---
 
@@ -24,14 +24,14 @@ A critical negative result uncovered by our ablation study (Suite 5, $n=70$ Anti
 
 | Facet Count $K$ | Preprocessing Time (µs) | Search Time (µs) | Total Runtime (µs) | Forward Labels Generated | Dual Labels Pruned |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$K = 1$** | $11.06$ | $4.60$ | **$15.66$** | $146$ | $40$ |
-| **$K = 2$** | $17.78$ | $2.32$ | **$20.10$** | **$91$** (37.7% drop) | $39$ |
-| **$K = 3$** | $20.78$ | $2.20$ | **$22.98$** | **$91$** | $39$ |
-| **$K = 5$** | $25.86$ | $2.21$ | **$28.07$** | **$91$** | $39$ |
-| **$K = 8$** | $25.10$ | $2.13$ | **$27.23$** | **$91$** | $39$ |
-| **$K = 12$** | $25.39$ | $2.29$ | **$27.68$** | **$91$** | $39$ |
+| **$K = 1$** | $11.74$ | $4.83$ | **$16.57$** | $146$ | $40$ |
+| **$K = 2$** | $18.37$ | $2.61$ | **$20.99$** | **$91$** (37.7% drop) | $39$ |
+| **$K = 3$** | $23.30$ | $2.81$ | **$26.11$** | **$91$** | $39$ |
+| **$K = 5$** | $26.36$ | $2.39$ | **$28.75$** | **$91$** | $39$ |
+| **$K = 8$** | $27.46$ | $2.36$ | **$29.82$** | **$91$** | $39$ |
+| **$K = 12$** | $27.13$ | $2.17$ | **$29.30$** | **$91$** | $39$ |
 
-- **Analytical Finding**: Moving from $K=1$ (single 1D cost tree) to $K=2$ (adding the primary lower hull bisector) cuts forward search labels from 146 to 91 and halves search time ($4.60 \, \mu\text{s} \to 2.32 \, \mu\text{s}$).
+- **Analytical Finding**: Moving from $K=1$ (single 1D cost tree) to $K=2$ (adding the primary lower hull bisector) cuts forward search labels from 146 to 91 and reduces search time ($4.83 \, \mu\text{s} \to 2.61 \, \mu\text{s}$).
 - **The Plateau**: For $K \ge 3$, forward labels plateau at 91 because the dual envelope already approximates the lower convex hull closely enough that additional facets do not intersect any reachable intermediate label states. Every additional facet beyond $K=3$ purely consumes extra Dijkstra passes without further pruning.
 - **Conclusion**: Users should configure $K \in \{2, 3\}$ for general instances, or use `HybridAdhpSolver` which dynamically chooses between $K=1, 2, 5$.
 

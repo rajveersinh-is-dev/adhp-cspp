@@ -122,8 +122,8 @@ def validate_numeric_representation(val, bit_str: str, field_name: str):
     except Exception as e:
         raise ValueError(f"Field '{field_name}' bit string '{bit_str}' failed hex/IEEE-754 decoding: {e}")
 
-    if not isinstance(val, (int, float)):
-        raise TypeError(f"Field '{field_name}' value must be numeric float/int, got: {type(val)}")
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        raise TypeError(f"Field '{field_name}' value must be numeric float/int (not bool), got: {type(val)}")
 
     val_f = float(val)
 
@@ -154,14 +154,14 @@ def recompute_canonical_graph_sha256(rec):
         raise ValueError(f"Unsupported instance schema version: {schema}")
 
     nodes = rec.get("nodes")
-    if not isinstance(nodes, int) or nodes <= 0:
+    if isinstance(nodes, bool) or not isinstance(nodes, int) or nodes <= 0:
         raise ValueError(f"Invalid node count: {nodes}")
 
     source = rec.get("source")
     target = rec.get("target")
-    if not isinstance(source, int) or not (0 <= source < nodes):
+    if isinstance(source, bool) or not isinstance(source, int) or not (0 <= source < nodes):
         raise ValueError(f"Invalid source vertex {source} for graph with {nodes} nodes")
-    if not isinstance(target, int) or not (0 <= target < nodes):
+    if isinstance(target, bool) or not isinstance(target, int) or not (0 <= target < nodes):
         raise ValueError(f"Invalid target vertex {target} for graph with {nodes} nodes")
 
     budget = rec.get("budget")
@@ -177,15 +177,15 @@ def recompute_canonical_graph_sha256(rec):
         raise ValueError("canonical_edges must be a list of edge objects")
     
     declared_edges = rec.get("edges")
-    if len(edges) != declared_edges:
+    if isinstance(declared_edges, bool) or not isinstance(declared_edges, int) or len(edges) != declared_edges:
         raise ValueError(f"Canonical edge count mismatch: declared {declared_edges}, actual {len(edges)}")
 
     for e in edges:
         u = e.get("from")
         v = e.get("to")
-        if not isinstance(u, int) or not (0 <= u < nodes):
+        if isinstance(u, bool) or not isinstance(u, int) or not (0 <= u < nodes):
             raise ValueError(f"Edge 'from' vertex {u} out of bounds for graph with {nodes} nodes")
-        if not isinstance(v, int) or not (0 <= v < nodes):
+        if isinstance(v, bool) or not isinstance(v, int) or not (0 <= v < nodes):
             raise ValueError(f"Edge 'to' vertex {v} out of bounds for graph with {nodes} nodes")
 
         c = e.get("cost")
@@ -223,8 +223,19 @@ def recompute_canonical_topology_sha256(rec):
     Independently reconstructs the graph topology digest (schema adhp-topology-v1).
     Captures node count and deterministically sorted directed edge endpoints (from, to).
     """
-    nodes = rec["nodes"]
+    nodes = rec.get("nodes")
+    if isinstance(nodes, bool) or not isinstance(nodes, int) or nodes <= 0:
+        raise ValueError(f"Invalid node count: {nodes}")
     edges = rec.get("canonical_edges", [])
+    if not isinstance(edges, list):
+        raise ValueError("canonical_edges must be a list of edge objects")
+    for e in edges:
+        u = e.get("from")
+        v = e.get("to")
+        if isinstance(u, bool) or not isinstance(u, int) or not (0 <= u < nodes):
+            raise ValueError(f"Edge 'from' vertex {u} out of bounds for topology")
+        if isinstance(v, bool) or not isinstance(v, int) or not (0 <= v < nodes):
+            raise ValueError(f"Edge 'to' vertex {v} out of bounds for topology")
     sorted_edges = sorted(edges, key=lambda e: (e['from'], e['to']))
     lines = [
         "adhp-topology-v1\n",

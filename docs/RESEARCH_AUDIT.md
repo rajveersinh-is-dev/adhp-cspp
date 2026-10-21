@@ -119,10 +119,10 @@ File "/home/runner/work/adhp-cspp/adhp-cspp/scripts/verify_against_ilp.py", line
      - 5 Budget Tightness values on $n=50$ anti-correlated graphs ($\alpha \in \{0.10, 0.25, 0.50, 0.75, 0.90\}$).
      - 1 Facet Ablation suite ($K \in \{1, 2, 3, 5, 8, 12\}$ on $n=70$).
    - 10 distinct random instances per configuration = 200 distinct problem instances total.
-   - Evaluated with 3 discarded warmups and 3 timed trials per instance using in-process monotonic timing (`std::time::Instant`).
+   - Evaluated with 5 discarded warmups and 3 timed trials per instance using in-process monotonic timing (`std::time::Instant`).
 
 2. **Empirical Reality vs. Previous Narrative**:
-   - **Where ADHP Wins in Total Runtime**: On **Grid $10 \times 10$ ($n = 100$)**, ADHP is the fastest solver overall at $57.11 \, \mu\text{s}$ (105 labels), beating Carlyle-Wood ($61.67 \, \mu\text{s}$), Dumitrescu-Boland ($72.82 \, \mu\text{s}$), Pulse ($288.66 \, \mu\text{s}$), and Martins ($337.70 \, \mu\text{s}$, a $5.9\times$ speedup).
+   - **Where ADHP Wins in Total Runtime**: On **Grid $10 \times 10$ ($n = 100$)**, Adaptive Hybrid ADHP is the fastest solver overall at $19.97 \, \mu\text{s}$ (and fixed ADHP at $38.24 \, \mu\text{s}$ generating 105 labels), outperforming Dumitrescu-Boland ($32.22 \, \mu\text{s}$), Carlyle-Wood ($43.07 \, \mu\text{s}$), Pulse ($124.91 \, \mu\text{s}$, a $6.3\times$ speedup), and Martins ($163.82 \, \mu\text{s}$, an $8.2\times$ speedup).
    - **Where ADHP Loses in Total Runtime**: On dense anti-correlated graphs ($n \le 100$) and Random ER networks, backward Dijkstra preprocessing ($15$–$156 \, \mu\text{s}$) consumes 70–85% of total runtime. When the search space is small enough that unguided search (Martins) or 1D bounding (Dumitrescu-Boland) finishes in $< 50 \, \mu\text{s}$, those lightweight methods achieve lower total wall-clock times.
    - **Label Suppression**: ADHP suppresses candidate labels by **85% to 97%** relative to standard multi-label Dijkstra across all instances with severe cost-weight conflicts.
 
@@ -150,7 +150,7 @@ File "/home/runner/work/adhp-cspp/adhp-cspp/scripts/verify_against_ilp.py", line
 #### A. Verified Facts (Established by Code & Data)
 1. ADHP strictly subsumes classical 1D cost bounding (Filter 2 is pointwise $\ge d_c(u, t)$).
 2. ADHP achieves dramatic label suppression (up to 97% fewer labels than Martins, up to 98% fewer than Pulse).
-3. On planar grids ($10 \times 10$), ADHP is the fastest solver in total wall-clock time ($57.11 \, \mu\text{s}$ vs $61.67 \, \mu\text{s}$ for Carlyle-Wood and $337.70 \, \mu\text{s}$ for Martins).
+3. On planar grids ($10 \times 10$), Adaptive Hybrid ADHP is the fastest solver in total wall-clock time ($19.97 \, \mu\text{s}$ vs $32.22 \, \mu\text{s}$ for Dumitrescu-Boland, $38.24 \, \mu\text{s}$ for fixed ADHP, $43.07 \, \mu\text{s}$ for Carlyle-Wood, $124.91 \, \mu\text{s}$ for Pulse, and $163.82 \, \mu\text{s}$ for Martins).
 4. On dense random and anti-correlated graphs with small $n$, ADHP's multi-tree preprocessing overhead exceeds the search time of unguided or 1D methods.
 5. In `src/exact.rs`, composite metric overflow in `u64` can cause silent edge drops and false pruning.
 6. The CI failure on PR #1 was caused by an unhandled `NoneType` bug in their Python script refactoring.

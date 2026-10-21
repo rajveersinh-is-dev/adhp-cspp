@@ -127,6 +127,62 @@ impl IntDirectedGraph {
             &[]
         }
     }
+
+    /// Validates internal structural and metric invariants of the integer graph.
+    ///
+    /// Guarantees that:
+    /// - Adjacency lists match `node_count`.
+    /// - All edge endpoints are in bounds.
+    /// - All edge costs and weights are within the supported domain ($\le 10^{18}$).
+    /// - IntHalfEdge indices, endpoints, and metrics match their corresponding IntEdge records.
+    pub fn validate(&self) -> Result<(), &'static str> {
+        if self.forward_adj.len() != self.node_count || self.reverse_adj.len() != self.node_count {
+            return Err("Adjacency list length does not match node_count");
+        }
+        for (i, edge) in self.edges.iter().enumerate() {
+            if edge.id != i {
+                return Err("Edge id mismatch with position");
+            }
+            if edge.from >= self.node_count || edge.to >= self.node_count {
+                return Err("Edge endpoint out of bounds");
+            }
+        }
+        for (u, adj) in self.forward_adj.iter().enumerate() {
+            for he in adj {
+                if he.target >= self.node_count {
+                    return Err("Forward half-edge target out of bounds");
+                }
+                let edge = match self.edges.get(he.edge_id) {
+                    Some(e) => e,
+                    None => return Err("Forward half-edge references invalid edge_id"),
+                };
+                if edge.from != u || edge.to != he.target {
+                    return Err("Forward half-edge does not match underlying edge endpoints");
+                }
+                if edge.cost != he.cost || edge.weight != he.weight {
+                    return Err("Forward half-edge metrics do not match underlying edge");
+                }
+            }
+        }
+        for (v, adj) in self.reverse_adj.iter().enumerate() {
+            for he in adj {
+                if he.target >= self.node_count {
+                    return Err("Reverse half-edge target out of bounds");
+                }
+                let edge = match self.edges.get(he.edge_id) {
+                    Some(e) => e,
+                    None => return Err("Reverse half-edge references invalid edge_id"),
+                };
+                if edge.to != v || edge.from != he.target {
+                    return Err("Reverse half-edge does not match underlying edge endpoints");
+                }
+                if edge.cost != he.cost || edge.weight != he.weight {
+                    return Err("Reverse half-edge metrics do not match underlying edge");
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Exact integer CSPP problem instance.
@@ -146,6 +202,15 @@ impl IntCsppInstance {
             target,
             budget,
         }
+    }
+
+    /// Validates problem instance structure, endpoints, and underlying integer graph invariants.
+    pub fn validate(&self) -> Result<(), &'static str> {
+        let n = self.graph.num_nodes();
+        if self.source >= n || self.target >= n {
+            return Err("Source or target vertex out of bounds");
+        }
+        self.graph.validate()
     }
 
     /// Converts a floating-point CSPP instance into an exact integer CSPP instance
@@ -571,7 +636,7 @@ impl IntAdhpSolver {
         let budget = instance.budget;
         let n = instance.graph.num_nodes();
 
-        if s >= n || t >= n {
+        if instance.validate().is_err() {
             stats.elapsed_nanos = start_time.elapsed().as_nanos() as u64;
             return IntCsppSolution {
                 status: SolutionStatus::UnsupportedInput,

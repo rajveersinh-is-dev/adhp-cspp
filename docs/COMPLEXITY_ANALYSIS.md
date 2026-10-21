@@ -79,7 +79,7 @@ $$T_{\text{total}} = T_{\text{prep}} + T_{\text{search}}$$
 
 1. **Favorable Regime (ADHP Dominates)**:
    - Planar grids, mesh networks, transport topologies, and large sparse multigraphs where shortest paths branch heavily and many alternative paths exist.
-   - On Grid 10x10 ($n = 100$): ADHP takes $57.11 \ \mu\text{s}$ (generating 105 labels), outperforming Dumitrescu-Boland ($72.82 \ \mu\text{s}$, 662 labels), Pulse ($288.66 \ \mu\text{s}$, 4,741 labels), and Martins ($337.70 \ \mu\text{s}$, 3,111 labels).
+   - On Grid 10x10 ($n = 100$): Adaptive Hybrid ADHP achieves $19.97 \ \mu\text{s}$ and ADHP ($K=5$) takes $38.24 \ \mu\text{s}$ (generating only 105 labels), outperforming Dumitrescu-Boland ($32.22 \ \mu\text{s}$, 662 labels), Carlyle-Wood ($43.07 \ \mu\text{s}$, 115 labels), Pulse ($124.91 \ \mu\text{s}$, 4,741 labels), and Martins ($163.82 \ \mu\text{s}$, 3,111 labels).
    - In this regime, the 6x to 45x reduction in label exploration easily offsets the $K+1$ backward Dijkstra preprocessing passes.
 
 2. **Unfavorable Regime (Simpler Solvers Win)**:

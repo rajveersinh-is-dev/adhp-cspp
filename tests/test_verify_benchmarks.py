@@ -186,6 +186,38 @@ class TestBenchmarkVerifier(unittest.TestCase):
         with self.assertRaises(ValueError):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted)
 
+    def test_boolean_numeric_value_rejected(self):
+        """[A6] Boolean values (True/False) must be strictly rejected for numeric fields."""
+        with self.assertRaises(TypeError):
+            validate_numeric_representation(True, "3ff0000000000000", "test_cost")
+        with self.assertRaises(TypeError):
+            validate_numeric_representation(False, "0000000000000000", "test_cost")
+
+    def test_boolean_node_count_rejected_in_canonical_hashing(self):
+        """[A7] Boolean value for 'nodes' must be rejected in canonical and topology digests."""
+        rec = copy.deepcopy(self.cached_instances[0])
+        rec['nodes'] = True
+        with self.assertRaises(ValueError):
+            recompute_canonical_graph_sha256(rec)
+        with self.assertRaises(ValueError):
+            recompute_canonical_topology_sha256(rec)
+
+    def test_boolean_source_target_rejected(self):
+        """[A7] Boolean value for source/target must be rejected in canonical digest."""
+        rec = copy.deepcopy(self.cached_instances[0])
+        rec['source'] = True
+        with self.assertRaises(ValueError):
+            recompute_canonical_graph_sha256(rec)
+
+    def test_boolean_edge_endpoint_rejected(self):
+        """[A7] Boolean value for edge endpoints must be rejected in canonical and topology digests."""
+        rec = copy.deepcopy(self.cached_instances[0])
+        rec['canonical_edges'][0]['from'] = True
+        with self.assertRaises(ValueError):
+            recompute_canonical_graph_sha256(rec)
+        with self.assertRaises(ValueError):
+            recompute_canonical_topology_sha256(rec)
+
     # --- A7: Structural Metadata & Invariant Enforcements ---
     def test_structural_vertex_from_out_of_bounds_fails(self):
         """[A7] Edge 'from' vertex >= nodes must fail structural validation."""
@@ -475,6 +507,72 @@ class TestBenchmarkVerifier(unittest.TestCase):
         with self.assertRaises(AssertionError):
             verify_benchmarks(self.raw_csv, self.summary_csv, corrupted_insts)
 
+    # --- A8: Adversarial Claim Mutation Tests (Prose & Secondary Documents) ---
+    def test_reconciliation_mutated_readme_prose_fails(self):
+        """[R17] Mutating speedup or runtime in README.md prose outside table must fail reconciliation."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.README_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("19.97", "99.99")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_reconciliation_mutated_limitations_ablation_fails(self):
+        """[R17] Mutating ablation runtimes in docs/KNOWN_LIMITATIONS.md must fail reconciliation."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.LIMITATIONS_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("16.57", "99.99")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_reconciliation_mutated_complexity_runtime_fails(self):
+        """[R17] Mutating Grid 10x10 runtimes in docs/COMPLEXITY_ANALYSIS.md must fail reconciliation."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.COMPLEXITY_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("19.97", "99.99")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_reconciliation_mutated_methodology_warmups_fails(self):
+        """[R17] Mutating warmup count in docs/BENCHMARK_METHODOLOGY.md must fail reconciliation."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.DOCS_METHOD_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("at least 5 discarded warmup runs", "0 warmup runs")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
 
 if __name__ == "__main__":
     unittest.main()
+

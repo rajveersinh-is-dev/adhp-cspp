@@ -1001,3 +1001,84 @@ fn test_dumitrescu_and_pulse_initial_upper_bound_pruning() {
     assert_eq!(sol_pulse.path, vec![0, 1, 3]);
     assert!(sol_pulse.stats.peak_memory_bytes > 0);
 }
+
+#[test]
+fn test_all_solvers_reject_unsupported_inputs_fail_closed() {
+    use adhp_cspp::{
+        AdhpSolver, CarlyleWoodSolver, CsppInstance, CsppSolver, DirectedGraph,
+        DumitrescuBolandSolver, HybridAdhpSolver, MartinsSolver, PulseSolver, SolutionStatus,
+    };
+
+    let g = DirectedGraph::new(3);
+
+    // Case 1: Source out of bounds
+    let inst_invalid_source = CsppInstance::new(g.clone(), 5, 2, 10.0);
+    assert!(inst_invalid_source.validate().is_err());
+
+    // Case 2: Target out of bounds
+    let inst_invalid_target = CsppInstance::new(g.clone(), 0, 5, 10.0);
+    assert!(inst_invalid_target.validate().is_err());
+
+    // Case 3: NaN budget
+    let inst_nan_budget = CsppInstance::new(g.clone(), 0, 2, f64::NAN);
+    assert!(inst_nan_budget.validate().is_err());
+
+    let solvers: Vec<Box<dyn CsppSolver>> = vec![
+        Box::new(AdhpSolver::new(3)),
+        Box::new(HybridAdhpSolver::new()),
+        Box::new(MartinsSolver::new()),
+        Box::new(DumitrescuBolandSolver::new()),
+        Box::new(PulseSolver::new()),
+        Box::new(CarlyleWoodSolver::new()),
+    ];
+
+    for solver in solvers {
+        let sol1 = solver.solve(&inst_invalid_source);
+        assert_eq!(
+            sol1.status,
+            SolutionStatus::UnsupportedInput,
+            "{} must return UnsupportedInput for invalid source",
+            solver.name()
+        );
+
+        let sol2 = solver.solve(&inst_invalid_target);
+        assert_eq!(
+            sol2.status,
+            SolutionStatus::UnsupportedInput,
+            "{} must return UnsupportedInput for invalid target",
+            solver.name()
+        );
+
+        let sol3 = solver.solve(&inst_nan_budget);
+        assert_eq!(
+            sol3.status,
+            SolutionStatus::UnsupportedInput,
+            "{} must return UnsupportedInput for NaN budget",
+            solver.name()
+        );
+    }
+}
+
+#[test]
+fn test_integer_solver_rejects_unsupported_inputs_fail_closed() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    use adhp_cspp::SolutionStatus;
+
+    let g = IntDirectedGraph::new(3);
+
+    // Case 1: Source out of bounds
+    let inst_invalid_source = IntCsppInstance::new(g.clone(), 10, 2, 50);
+    assert!(inst_invalid_source.validate().is_err());
+
+    // Case 2: Target out of bounds
+    let inst_invalid_target = IntCsppInstance::new(g, 0, 10, 50);
+    assert!(inst_invalid_target.validate().is_err());
+
+    let solver = IntAdhpSolver::new(3);
+
+    let sol1 = solver.solve(&inst_invalid_source);
+    assert_eq!(sol1.status, SolutionStatus::UnsupportedInput);
+
+    let sol2 = solver.solve(&inst_invalid_target);
+    assert_eq!(sol2.status, SolutionStatus::UnsupportedInput);
+}

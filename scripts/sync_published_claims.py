@@ -28,6 +28,12 @@ README_PATH = os.path.join(REPO_ROOT, "README.md")
 REPORT_PATH = os.path.join(REPO_ROOT, "research", "BENCHMARK_REPORT.md")
 TEX_PATH = os.path.join(REPO_ROOT, "paper", "main.tex")
 TYP_PATH = os.path.join(REPO_ROOT, "paper", "main.typ")
+LIMITATIONS_PATH = os.path.join(REPO_ROOT, "docs", "KNOWN_LIMITATIONS.md")
+COMPLEXITY_PATH = os.path.join(REPO_ROOT, "docs", "COMPLEXITY_ANALYSIS.md")
+RELATED_PATH = os.path.join(REPO_ROOT, "docs", "RELATED_WORK.md")
+AUDIT_PATH = os.path.join(REPO_ROOT, "docs", "RESEARCH_AUDIT.md")
+DOCS_METHOD_PATH = os.path.join(REPO_ROOT, "docs", "BENCHMARK_METHODOLOGY.md")
+RES_METHOD_PATH = os.path.join(REPO_ROOT, "research", "BENCHMARK_METHODOLOGY.md")
 
 
 def get_solver_record(df, instance_name, solver_prefix):
@@ -522,15 +528,49 @@ def update_documents(df):
         pre = readme_content.split(readme_sec3_table_start)[0]
         post = "\n\n" + readme_sec4_start + readme_content.split(readme_sec4_start)[1]
         
-        pre = re.sub(
-            r"On \*\*Grid \$10 \\times 10\$ \(\$n = 100\$\)\*\*, \*\*Adaptive Hybrid ADHP is the fastest solver overall at \$[0-9\.]+ \\, \\mu\\text\{s\}\*\*",
-            lambda _: f"On **Grid $10 \\times 10$ ($n = 100$)**, **Adaptive Hybrid ADHP is the fastest solver overall at ${g10_hyb:.2f} \\, \\mu\\text{{s}}**",
-            pre
+        new_readme_grid_bullet = (
+            f"- **Break-Even Regime (Grid Topologies)**: On planar grids with exponential branching, ADHP's state-space pruning pays for itself completely. "
+            f"On **Grid $10 \\times 10$ ($n = 100$)**, **Adaptive Hybrid ADHP is the fastest solver overall at ${g10_hyb:.2f} \\, \\mu\\text{{s}}** "
+            f"(and fixed ADHP at ${g10_adhp:.2f} \\, \\mu\\text{{s}} generating only 105 labels), "
+            f"outperforming Dumitrescu-Boland (${g10_db:.2f} \\, \\mu\\text{{s}}$), "
+            f"Carlyle-Wood (${g10_cw:.2f} \\, \\mu\\text{{s}}$), "
+            f"Pulse (${g10_pulse:.2f} \\, \\mu\\text{{s}}$, a **${g10_speedup_pulse:.1f}\\times$ speedup**), "
+            f"and Martins (${g10_mar:.2f} \\, \\mu\\text{{s}}$, a **${g10_speedup_mar:.1f}\\times$ speedup**)."
         )
         pre = re.sub(
-            r"Pulse \(\$[0-9\.]+ \\, \\mu\\text\{s\}\$, a \*\*\$[0-9\.]+\\times\$ speedup\*\*\), and Martins \(\$[0-9\.]+ \\, \\mu\\text\{s\}\$, a \*\*\$[0-9\.]+\\times\$ speedup\*\*\)",
-            lambda _: f"Pulse (${g10_pulse:.2f} \\, \\mu\\text{{s}}$, a **${g10_speedup_pulse:.1f}\\times$ speedup**), and Martins (${g10_mar:.2f} \\, \\mu\\text{{s}}$, a **${g10_speedup_mar:.1f}\\times$ speedup**)",
-            pre
+            r"- \*\*Break-Even Regime \(Grid Topologies\)\*\*:.*?(?=\n- \*\*Dense Networks)",
+            lambda _: new_readme_grid_bullet,
+            pre,
+            flags=re.DOTALL
+        )
+
+        er120_hyb = get_solver_record(df, "random_er_n120", "Adaptive Hybrid")['mean_runtime_micros']
+        er120_db = get_solver_record(df, "random_er_n120", "Dumitrescu-Boland")['mean_runtime_micros']
+        er120_cw = get_solver_record(df, "random_er_n120", "Carlyle-Wood")['mean_runtime_micros']
+        ac150_db = get_solver_record(df, "anticorr_n150", "Dumitrescu-Boland")['mean_runtime_micros']
+        ac150_mar = get_solver_record(df, "anticorr_n150", "Martins")['mean_runtime_micros']
+        ac150_hyb = get_solver_record(df, "anticorr_n150", "Adaptive Hybrid")['mean_runtime_micros']
+        ac150_pulse = get_solver_record(df, "anticorr_n150", "Pulse")['mean_runtime_micros']
+        ac150_adhp = get_solver_record(df, "anticorr_n150", "ADHP (Adaptive Dual")['mean_runtime_micros']
+        ac150_cw = get_solver_record(df, "anticorr_n150", "Carlyle-Wood")['mean_runtime_micros']
+
+        new_readme_dense_bullet = (
+            f"- **Dense Networks & Adaptive Hybrid Solver**: Standard ADHP evaluates $K$ dual trees during preprocessing, "
+            f"which accounts for $70$–$85\\%$ of total time on small dense networks. To resolve this, "
+            f"**Adaptive Hybrid ADHP (`HybridAdhpSolver`)** uses an $O(1)$ decision policy based on graph density $\\rho = m/n$, "
+            f"duality gap $\\gamma$, and budget factor $\\alpha$ to dynamically select $K \\in \\{{1, 2, 5\\}}$. "
+            f"On **Random ER $n=120$**, Adaptive Hybrid runtime is **${er120_hyb:.2f} \\, \\mu\\text{{s}}** "
+            f"(and Dumitrescu-Boland at ${er120_db:.2f} \\, \\mu\\text{{s}}$, outperforming Carlyle-Wood at ${er120_cw:.2f} \\, \\mu\\text{{s}}$). "
+            f"On **Anti-Correlated $n=150$**, Dumitrescu-Boland achieves ${ac150_db:.2f} \\, \\mu\\text{{s}}$, "
+            f"Martins achieves ${ac150_mar:.2f} \\, \\mu\\text{{s}}$, and Adaptive Hybrid ADHP achieves **${ac150_hyb:.2f} \\, \\mu\\text{{s}}**, "
+            f"outperforming Pulse (${ac150_pulse:.2f} \\, \\mu\\text{{s}}$), ADHP (${ac150_adhp:.2f} \\, \\mu\\text{{s}}$), "
+            f"and Carlyle-Wood (${ac150_cw:.2f} \\, \\mu\\text{{s}}$)."
+        )
+        pre = re.sub(
+            r"- \*\*Dense Networks & Adaptive Hybrid Solver\*\*:.*?(?=\n- \*\*Combinatorial Label Suppression)",
+            lambda _: new_readme_dense_bullet,
+            pre,
+            flags=re.DOTALL
         )
 
         new_tables = format_readme_tables(df)
@@ -664,8 +704,8 @@ def update_documents(df):
     # Section 2 Table A: Anti-Correlated
     rep_ac_table = format_report_anticorr_table(df)
     report_content = re.sub(
-        r"(#### A\. Anti-Correlated Graph Scaling.*?\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_ac_table + "\n\n" + m.group(3),
+        r"(#### A\. Anti-Correlated Graph Scaling[^\n]*\n\n).*?(?=\n\n---\n\n#### B\. 2D Mesh Grid Scaling)",
+        lambda m: m.group(1) + rep_ac_table,
         report_content,
         flags=re.DOTALL
     )
@@ -673,8 +713,8 @@ def update_documents(df):
     # Section 2 Table B: Grid
     rep_grid_table = format_report_grid_table(df)
     report_content = re.sub(
-        r"(#### B\. 2D Mesh Grid Scaling.*?\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_grid_table + "\n\n" + m.group(3),
+        r"(#### B\. 2D Mesh Grid Scaling[^\n]*\n\n).*?(?=\n\n\*Labels Generated on Grid)",
+        lambda m: m.group(1) + rep_grid_table,
         report_content,
         flags=re.DOTALL
     )
@@ -682,8 +722,8 @@ def update_documents(df):
     # Section 2 Table C: Random ER
     rep_er_table = format_report_random_er_table(df)
     report_content = re.sub(
-        r"(#### C\. Random Erdős–Rényi Scaling.*?\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_er_table + "\n\n" + m.group(3),
+        r"(#### C\. Random Erdős–Rényi Scaling[^\n]*\n\n).*?(?=\n\n---\n\n#### D\. Budget)",
+        lambda m: m.group(1) + rep_er_table,
         report_content,
         flags=re.DOTALL
     )
@@ -691,8 +731,8 @@ def update_documents(df):
     # Section 2 Table D: Budget Sensitivity
     rep_budget_table = format_report_budget_table(df)
     report_content = re.sub(
-        r"(#### D\. Budget Tightness Sensitivity.*?\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_budget_table + "\n\n" + m.group(3),
+        r"(#### D\. Budget Tightness Sensitivity[^\n]*\n\n).*?(?=\n\n---\n\n#### E\. Ablation)",
+        lambda m: m.group(1) + rep_budget_table,
         report_content,
         flags=re.DOTALL
     )
@@ -700,8 +740,8 @@ def update_documents(df):
     # Section 2 Table E: Ablation
     rep_abl_table = format_report_ablation_table(df)
     report_content = re.sub(
-        r"(#### E\. Ablation Analysis on Facet Count \$K\$.*?\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_abl_table + "\n\n" + m.group(3),
+        r"(#### E\. Ablation Analysis on Facet Count \$K\$[^\n]*\n\n).*?(?=\n\n---\n\n### 3\. Summary)",
+        lambda m: m.group(1) + rep_abl_table,
         report_content,
         flags=re.DOTALL
     )
@@ -709,8 +749,8 @@ def update_documents(df):
     # Section 3: Rankings Table
     rep_rank_table = format_report_rankings_table(df)
     report_content = re.sub(
-        r"(### 3\. Summary of Overall Solver Rankings\n\n)(.*?)(---)",
-        lambda m: m.group(1) + rep_rank_table + "\n\n" + m.group(3),
+        r"(### 3\. Summary of Overall Solver Rankings\n\n).*?(?=\n\n---\n\n### 4\. Reproducibility)",
+        lambda m: m.group(1) + rep_rank_table,
         report_content,
         flags=re.DOTALL
     )
@@ -862,7 +902,22 @@ def check_all_claims(df):
     assert f"${g10_pulse:.2f} \\, \\mu\\text{{s}}$" in readme, "README missing Grid 10x10 Pulse runtime"
     assert f"${g10_speedup_mar:.1f}\\times$" in readme, "README missing Grid 10x10 Martins speedup"
     assert f"${g10_speedup_pulse:.1f}\\times$" in readme, "README missing Grid 10x10 Pulse speedup"
-    verified_claims += 5
+    assert f"Adaptive Hybrid ADHP is the fastest solver overall at ${g10_hyb:.2f} \\, \\mu\\text{{s}}" in readme, "README missing Grid 10x10 headline phrase"
+    
+    er120_hyb = get_solver_record(df, "random_er_n120", "Adaptive Hybrid")['mean_runtime_micros']
+    er120_db = get_solver_record(df, "random_er_n120", "Dumitrescu-Boland")['mean_runtime_micros']
+    er120_cw = get_solver_record(df, "random_er_n120", "Carlyle-Wood")['mean_runtime_micros']
+    ac150_db = get_solver_record(df, "anticorr_n150", "Dumitrescu-Boland")['mean_runtime_micros']
+    ac150_mar = get_solver_record(df, "anticorr_n150", "Martins")['mean_runtime_micros']
+    ac150_hyb = get_solver_record(df, "anticorr_n150", "Adaptive Hybrid")['mean_runtime_micros']
+    ac150_pulse = get_solver_record(df, "anticorr_n150", "Pulse")['mean_runtime_micros']
+    ac150_adhp = get_solver_record(df, "anticorr_n150", "ADHP (Adaptive Dual")['mean_runtime_micros']
+    ac150_cw = get_solver_record(df, "anticorr_n150", "Carlyle-Wood")['mean_runtime_micros']
+
+    assert f"${er120_hyb:.2f} \\, \\mu\\text{{s}}$" in readme, "README missing ER n=120 Hybrid runtime"
+    assert f"${ac150_db:.2f} \\, \\mu\\text{{s}}$" in readme, "README missing Anti-Corr n=150 DB runtime"
+    assert f"${ac150_hyb:.2f} \\, \\mu\\text{{s}}$" in readme, "README missing Anti-Corr n=150 Hybrid runtime"
+    verified_claims += 9
 
     # paper/main.tex text
     assert f"${g10_hyb:.2f} \\, \\mu\\text{{s}}$" in tex, "paper/main.tex missing Grid 10x10 Hybrid runtime"
@@ -881,9 +936,67 @@ def check_all_claims(df):
     assert f"${g10_hyb:.2f} \\, \\mu\\text{{s}}$" in report, "BENCHMARK_REPORT missing Grid 10x10 Hybrid runtime"
     assert f"${g10_speedup_mar:.1f}\\times$" in report, "BENCHMARK_REPORT missing Grid 10x10 Martins speedup"
     assert f"${g10_speedup_pulse:.1f}\\times$" in report, "BENCHMARK_REPORT missing Grid 10x10 Pulse speedup"
+    assert f"Dumitrescu-Boland achieves ${ac150_db:.2f} \\, \\mu\\text{{s}}" in report, "BENCHMARK_REPORT missing AC n=150 DB runtime"
+    assert f"Martins achieves ${ac150_mar:.2f} \\, \\mu\\text{{s}}" in report, "BENCHMARK_REPORT missing AC n=150 Martins runtime"
+    assert f"Adaptive Hybrid ADHP achieves ${ac150_hyb:.2f} \\, \\mu\\text{{s}}" in report, "BENCHMARK_REPORT missing AC n=150 Hybrid runtime"
+    
+    er90_mar = get_solver_record(df, "random_er_n90", "Martins")['mean_runtime_micros']
+    er90_hyb = get_solver_record(df, "random_er_n90", "Adaptive Hybrid")['mean_runtime_micros']
+    assert f"Martins achieves ${er90_mar:.2f} \\, \\mu\\text{{s}}" in report, "BENCHMARK_REPORT missing ER n=90 Martins runtime"
+    assert f"Adaptive Hybrid ADHP achieves ${er90_hyb:.2f} \\, \\mu\\text{{s}}" in report, "BENCHMARK_REPORT missing ER n=90 Hybrid runtime"
+    
+    er30_mar = get_solver_record(df, "random_er_n30", "Martins")['mean_runtime_micros']
+    er30_hyb = get_solver_record(df, "random_er_n30", "Adaptive Hybrid")['mean_runtime_micros']
+    assert f"${er30_mar:.2f} \\, \\mu\\text{{s}}$ on Random ER $n=30$ vs ${er30_hyb:.2f} \\, \\mu\\text{{s}}$ for Adaptive Hybrid ADHP" in report, "BENCHMARK_REPORT missing ER n=30 comparison"
+    verified_claims += 8
+
+    # 6. Audit Secondary Documentation
+    # docs/KNOWN_LIMITATIONS.md
+    with open(LIMITATIONS_PATH, "r", encoding="utf-8") as f:
+        limitations = f.read()
+    assert "$11.74$" in limitations and "$4.83$" in limitations and "$16.57$" in limitations, "KNOWN_LIMITATIONS.md missing K=1 row"
+    assert "$18.37$" in limitations and "$2.61$" in limitations and "$20.99$" in limitations, "KNOWN_LIMITATIONS.md missing K=2 row"
+    assert "$23.30$" in limitations and "$2.81$" in limitations and "$26.11$" in limitations, "KNOWN_LIMITATIONS.md missing K=3 row"
+    assert "$26.36$" in limitations and "$2.39$" in limitations and "$28.75$" in limitations, "KNOWN_LIMITATIONS.md missing K=5 row"
+    assert "$27.46$" in limitations and "$2.36$" in limitations and "$29.82$" in limitations, "KNOWN_LIMITATIONS.md missing K=8 row"
+    assert "$27.13$" in limitations and "$2.17$" in limitations and "$29.30$" in limitations, "KNOWN_LIMITATIONS.md missing K=12 row"
+    assert "reducing total runtime from $24.85 \\, \\mu\\text{s}$ down to $15.41 \\, \\mu\\text{s}$ at $n=60$" in limitations, "KNOWN_LIMITATIONS.md missing ER n=60 mitigation runtime"
+    verified_claims += 7
+
+    # docs/COMPLEXITY_ANALYSIS.md
+    with open(COMPLEXITY_PATH, "r", encoding="utf-8") as f:
+        complexity = f.read()
+    assert f"Adaptive Hybrid ADHP achieves ${g10_hyb:.2f} \\ \\mu\\text{{s}}$" in complexity, "COMPLEXITY_ANALYSIS.md missing Grid 10x10 Hybrid runtime"
+    assert f"ADHP ($K=5$) takes ${g10_adhp:.2f} \\ \\mu\\text{{s}}$" in complexity, "COMPLEXITY_ANALYSIS.md missing Grid 10x10 ADHP runtime"
+    assert f"Dumitrescu-Boland (${g10_db:.2f} \\ \\mu\\text{{s}}" in complexity, "COMPLEXITY_ANALYSIS.md missing Grid 10x10 DB runtime"
+    assert f"Pulse (${g10_pulse:.2f} \\ \\mu\\text{{s}}" in complexity, "COMPLEXITY_ANALYSIS.md missing Grid 10x10 Pulse runtime"
+    assert f"Martins (${g10_mar:.2f} \\ \\mu\\text{{s}}" in complexity, "COMPLEXITY_ANALYSIS.md missing Grid 10x10 Martins runtime"
+    verified_claims += 5
+
+    # docs/RELATED_WORK.md
+    with open(RELATED_PATH, "r", encoding="utf-8") as f:
+        related = f.read()
+    assert f"| **Grid 10x10 Latency** | ${g10_mar:.2f} \\, \\mu\\text{{s}}$ | ${g10_cw:.2f} \\, \\mu\\text{{s}}$ | ${g10_db:.2f} \\, \\mu\\text{{s}}$ | ${g10_pulse:.2f} \\, \\mu\\text{{s}}$ | ${g10_adhp:.2f} \\, \\mu\\text{{s}}$ | **${g10_hyb:.2f} \\, \\mu\\text{{s}}$ (Fastest of All)** |" in related, "RELATED_WORK.md missing Grid 10x10 Latency row"
+    assert f"| **Anti-Corr n=150 Latency** | ${ac150_mar:.2f} \\, \\mu\\text{{s}}$ | ${ac150_cw:.2f} \\, \\mu\\text{{s}}$ | **${ac150_db:.2f} \\, \\mu\\text{{s}}$ (Fastest of All)** | ${ac150_pulse:.2f} \\, \\mu\\text{{s}}$ | ${ac150_adhp:.2f} \\, \\mu\\text{{s}}$ | ${ac150_hyb:.2f} \\, \\mu\\text{{s}}$ |" in related, "RELATED_WORK.md missing Anti-Corr n=150 Latency row"
+    verified_claims += 12
+
+    # docs/RESEARCH_AUDIT.md
+    with open(AUDIT_PATH, "r", encoding="utf-8") as f:
+        audit = f.read()
+    assert f"On planar grids ($10 \\times 10$), Adaptive Hybrid ADHP is the fastest solver in total wall-clock time (${g10_hyb:.2f} \\, \\mu\\text{{s}}$ vs ${g10_db:.2f} \\, \\mu\\text{{s}}$ for Dumitrescu-Boland, ${g10_adhp:.2f} \\, \\mu\\text{{s}}$ for fixed ADHP, ${g10_cw:.2f} \\, \\mu\\text{{s}}$ for Carlyle-Wood, ${g10_pulse:.2f} \\, \\mu\\text{{s}}$ for Pulse, and ${g10_mar:.2f} \\, \\mu\\text{{s}}$ for Martins)." in audit, "RESEARCH_AUDIT.md missing Grid 10x10 runtimes"
+    verified_claims += 6
+
+    # docs/BENCHMARK_METHODOLOGY.md & research/BENCHMARK_METHODOLOGY.md
+    with open(DOCS_METHOD_PATH, "r", encoding="utf-8") as f:
+        docs_method = f.read()
+    with open(RES_METHOD_PATH, "r", encoding="utf-8") as f:
+        res_method = f.read()
+    assert "at least 5 discarded warmup runs" in docs_method, "docs/BENCHMARK_METHODOLOGY.md missing 5 warmup runs"
+    assert "5 discarded warmup runs" in res_method, "research/BENCHMARK_METHODOLOGY.md missing 5 warmup runs"
+    assert "25 configurations, 250 configuration-instance evaluations, and 200 distinct generated graphs" in docs_method, "docs/BENCHMARK_METHODOLOGY.md missing evaluation counts"
     verified_claims += 3
 
-    print(f" [PASSED] Successfully reconciled and verified {verified_claims} published claims and table cells across all 4 documents.")
+    print(f" [PASSED] Successfully reconciled and verified {verified_claims} published claims and table cells across all maintained documents.")
     return {"total_claims": verified_claims, "status": "VERIFIED"}
 
 

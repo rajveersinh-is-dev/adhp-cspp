@@ -60,9 +60,9 @@ Extensive literature over four decades has developed exact algorithms falling in
 | **Pruning Mechanism** | Pareto dominance only | 1D Lagrangian bound | 1D cost + resource bound | DFS pruning | **Dual Hull Pruning + Strict Pareto Dominance** | **Adaptive Dual Hull + Strict Pareto Dominance** |
 | **Arithmetic Integrity** | Float or Integer | Float | Float | Float | **Exact 128-bit checked arithmetic (`u128`)** | **Certified $(\epsilon_{\text{feas}}, \epsilon_{\text{prune}})$ & Exact 128-bit** |
 | **Subsumption of 1D Bounds**| No | No | N/A | No | **Strict Mathematical Subsumption (Theorem 2)** | **Strict Mathematical Subsumption (Theorem 2)** |
-| **Grid 10x10 Latency** | $242.01 \, \mu\text{s}$ | $54.82 \, \mu\text{s}$ | $46.40 \, \mu\text{s}$ | $189.17 \, \mu\text{s}$ | $38.96 \, \mu\text{s}$ | **$33.74 \, \mu\text{s}$ (Fastest of All)** |
+| **Grid 10x10 Latency** | $163.82 \, \mu\text{s}$ | $43.07 \, \mu\text{s}$ | $32.22 \, \mu\text{s}$ | $124.91 \, \mu\text{s}$ | $38.24 \, \mu\text{s}$ | **$19.97 \, \mu\text{s}$ (Fastest of All)** |
 | **Grid 10x10 Labels** | $3,111$ | $115$ | $662$ | $4,741$ | $105$ | **$136$ (95.6% reduction vs Martins)** |
-| **Anti-Corr n=150 Latency** | $90.25 \, \mu\text{s}$ | $160.42 \, \mu\text{s}$ | $97.87 \, \mu\text{s}$ | $141.58 \, \mu\text{s}$ | $98.67 \, \mu\text{s}$ | **$76.92 \, \mu\text{s}$ (Fastest of All)** |
+| **Anti-Corr n=150 Latency** | $73.51 \, \mu\text{s}$ | $162.91 \, \mu\text{s}$ | **$69.13 \, \mu\text{s}$ (Fastest of All)** | $87.92 \, \mu\text{s}$ | $114.03 \, \mu\text{s}$ | $74.23 \, \mu\text{s}$ |
 
 ---
 

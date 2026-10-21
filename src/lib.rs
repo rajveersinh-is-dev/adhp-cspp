@@ -75,6 +75,18 @@ impl CsppInstance {
         }
     }
 
+    /// Validates problem instance structure, endpoints, and underlying graph invariants.
+    pub fn validate(&self) -> Result<(), &'static str> {
+        let n = self.graph.num_nodes();
+        if self.source >= n || self.target >= n {
+            return Err("Source or target vertex out of bounds");
+        }
+        if self.budget.is_nan() {
+            return Err("Budget is NaN");
+        }
+        self.graph.validate()
+    }
+
     /// Evaluates the total cost and resource consumption of an explicit sequence of edge indices.
     /// This provides unambiguous, exact path verification even in multigraphs with parallel edges.
     pub fn evaluate_edge_path(&self, edge_indices: &[usize]) -> Option<(f64, f64)> {

@@ -27,7 +27,7 @@ The benchmark harness (`src/bin/benchmark_suite.rs`) evaluates 6 competitive sol
 | Suite | Category | Graph Topology | Parameter Range | Evaluations | Distinct Graphs | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Suite 1** | Anti-Correlated Scaling | Random Directed ($p=0.25$), $c_e$ vs $w_e$ negatively correlated | $n \in \{20, 40, 60, 80, 100, 150\}$ | 60 | 60 | Tests label explosion when low cost implies high resource consumption. |
-| **Suite 2** | 2D Mesh Grid Scaling | Directed 2D Planar Mesh Grids | $4\times4, 6\times6, 8\times8, 10\times10$ ($n=16$ to $100$) | 40 | 40 | Tests performance on sparse planar networks with long hop diameters and exponential simple paths. |
+| **Suite 2** | 2D Mesh Grid Scaling | Directed 2D Planar Mesh Grids | $4\times4, 6\times6, 8\times8, 10\times10$ ($n=16$ to $100$) | 40 | 4 unique topologies (40 problem instances) | Tests performance on sparse planar networks with long hop diameters and exponential simple paths. |
 | **Suite 3** | Random Erdős–Rényi | Directed Erdős–Rényi ($p=0.20$), Uniform Cost & Weight | $n \in \{30, 60, 90, 120\}$ ($m$ up to $3000$) | 40 | 40 | Evaluates dense networks with small hop diameter and tests dual preprocessing overhead. |
 | **Suite 4** | Budget Factor Sensitivity | Anti-Correlated Graph ($n=50$) | $\alpha \in \{0.10, 0.25, 0.50, 0.75, 0.90\}$ | 50 | 50 | Tests transition from severely tight budget ($\alpha=0.10$) to loose budget ($\alpha=0.90$). |
 | **Suite 5** | Ablation Analysis | Anti-Correlated Graph ($n=70$) | $K \in \{1, 2, 3, 5, 8, 12\}$ | 60 | 10 | Isolates the causal impact of dual facet count $K$ on the exact same 10 controlled graphs. |
@@ -73,7 +73,7 @@ To prevent circular evaluation and overfitting:
 To reproduce all experimental results, figures, and verification records from a clean checkout:
 
 ```bash
-# 1. Run all unit, property, and adversarial regression tests (22 tests)
+# 1. Run all unit, property, and adversarial regression tests (34 tests)
 cargo test
 
 # 2. Run differential verification against 4 baselines (100 instances)
