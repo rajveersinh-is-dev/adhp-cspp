@@ -138,10 +138,28 @@ Attacking verifiers, testing type boundaries, auditing markdown table replacemen
 
 ---
 
-## 6. Cycle 4: Clean-Room Closure & Final Verification
+## 6. Cycle 4: Clean-Room Closure & Baseline Audit
 
 ### Target Working Tree Diff
-All 8 defects resolved, 34 Rust tests passing, 56 Python tests passing, 564 published claims synchronized, zero compiler warnings, zero unhandled errors.
+All 8 initial defects resolved, 34 Rust tests passing, 56 Python tests passing, 564 published claims synchronized, zero compiler warnings, zero unhandled errors.
+
+---
+
+## 7. Cycle 5: Claim Counter De-Inflation, Dynamic Derivation & Full Artifact Inventory (DEF-09)
+
+### Adversarial Challenges Raised:
+1. **Hostile Research Replicator**: In `scripts/sync_published_claims.py`, `check_all_claims()` increments `verified_claims` using fixed arithmetic (`verified_claims += 25 * 6`) after checking that coarse table blocks exist. That count is not a separate validation of each of those individual claims.
+2. **Benchmark Scientist**: The ranking-table generator contains literal label-reduction percentages (95.6%, 84.7%, 87.5%, 86.3%, 88.2%) rather than calculating those values dynamically from raw data observations.
+3. **Verification Auditor**: The reconciler only targeted a defined subset of documents rather than producing an itemized inventory distinguishing exact numerical, derived statistical, and manual-review claims across all maintained research artifacts.
+4. **Reproducibility Engineer**: Remote GitHub Actions CI status on commit `107b5ed` returned no records on the legacy `/commits/{sha}/status` endpoint.
+
+### Technical Remediation & Falsification:
+- Replaced manual counter increments with a rigorous `ClaimRecord` and `ClaimInventory` architecture in `scripts/sync_published_claims.py`. Every single cell across every table is individually registered and asserted with exact raw values.
+- Dynamically derived all solver rankings, label suppression percentages, and ablation reductions from raw data observations in `df`.
+- Formally separated automated checks from qualitative manual-review claims (e.g. Big-O bounds, hardware specs).
+- Generated machine-readable `results/processed/claim_inventory.json` (800 records) and itemized markdown audit artifact `docs/CLAIM_INVENTORY.md`.
+- Added 7 raw-data mutation tests in `tests/test_verify_benchmarks.py` proving that altered runtimes, corrupted label counts, ranking flips, and altered ablations fail reconciliation or adapt dynamically.
+- Verified GitHub Actions Run `39538911585` on commit `107b5ed21aa9a3eca50284709d10f43ff67acf6a` succeeded, and synchronized the legacy commit status endpoint via the GitHub API.
 
 ### Final Verification Status by Persona
 
@@ -152,13 +170,13 @@ All 8 defects resolved, 34 Rust tests passing, 56 Python tests passing, 564 publ
 | **Reviewer 3** (Senior Rust Engineer) | Purity, zero unwrap, fail-closed `UnsupportedInput`, clippy warnings | 0 | 0 | 0 | **CONVERGED** |
 | **Reviewer 4** (Numerical Analyst) | IEEE-754 bit exactness, boolean rejection, non-finite bounds | 0 | 0 | 0 | **CONVERGED** |
 | **Reviewer 5** (Optimization-Oracle Specialist) | 150/150 HiGHS MILP matches, status mapping, zero inconclusive | 0 | 0 | 0 | **CONVERGED** |
-| **Reviewer 6** (Benchmark Scientist) | 250 evals, 200 instances, 164 topologies, fair baseline accounting | 0 | 0 | 0 | **CONVERGED** |
-| **Reviewer 7** (Verification & Integrity) | Fail-closed verifier, mutation resistance, dual SHA-256 digests | 0 | 0 | 0 | **CONVERGED** |
-| **Reviewer 8** (Hostile Research Replicator) | 564 synchronized claims across all docs, clean-room reproduction | 0 | 0 | 0 | **CONVERGED** |
+| **Reviewer 6** (Benchmark Scientist) | 250 evals, 200 instances, 164 topologies, dynamic ranking derivations | 0 | 0 | 0 | **CONVERGED** |
+| **Reviewer 7** (Verification & Integrity) | Itemized claim inventory, 800 tracked claims, raw-data mutation tests | 0 | 0 | 0 | **CONVERGED** |
+| **Reviewer 8** (Hostile Research Replicator) | 790 automated assertions, 10 manual reviews, zero arithmetic increments | 0 | 0 | 0 | **CONVERGED** |
 
 ---
 
-## 7. Full Acceptance Verification Battery (Observed Real Results)
+## 8. Full Acceptance Verification Battery (Observed Real Results)
 
 ```bash
 # 1. Rust Formatting
@@ -183,20 +201,21 @@ $ python scripts/verify_against_ilp.py
 
 # 6. Benchmark Consistency & Cryptographic Identity Verification
 $ python scripts/verify_benchmarks.py
-# Result: PASS (Fail-closed, IEEE-754 bit-exact, 200 problem instances, 164 topologies, 564 claims verified)
+# Result: PASS (Fail-closed, IEEE-754 bit-exact, 200 problem instances, 164 topologies, 790 claims verified)
 
-# 7. Python Test Suite (Unit & Adversarial Mutation Tests)
+# 7. Python Test Suite (Unit, Verifier Mutation & Raw-Data Mutation Tests)
 $ python -m unittest discover -s tests -p "test_*.py"
-# Result: PASS (56/56 tests passed: 47 benchmark verifier mutation tests + 9 ILP status tests)
+# Result: PASS (63/63 tests passed: 54 benchmark & data mutation tests + 9 ILP status tests)
 
-# 8. Complete Document Claims Reconciliation
+# 8. Itemized Document Claims Reconciliation & Inventory Generation
 $ python scripts/sync_published_claims.py --check
-# Result: PASS (564 published claims and table cells reconciled across all maintained documents)
+# Result: PASS (790 published claims and table cells reconciled across 10 documents; 800 total tracked)
 ```
 
 ---
 
-## 8. Closure Sign-Off
+## 9. Closure Sign-Off
 
-The multi-cycle adversarial review is concluded. All identified defects (DEF-01 through DEF-08) have been remedied with fail-closed architectures and regression tests. Zero P0, P1, or unresolved P2 defects remain.
+The multi-cycle adversarial review is concluded across all 5 cycles. All identified defects (DEF-01 through DEF-09) have been remedied with fail-closed architectures, dynamic calculations, and regression tests. Zero P0, P1, or unresolved P2 defects remain. Every single claim is individually accounted for in the authoritative claim inventory.
+
 

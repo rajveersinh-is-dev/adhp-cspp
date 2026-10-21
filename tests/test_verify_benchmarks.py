@@ -572,6 +572,86 @@ class TestBenchmarkVerifier(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
 
+    # --- A9: Raw Source Data Mutation Tests (Data-Side Verification) ---
+    def test_raw_data_mutation_runtime_fails_reconciliation(self):
+        """[R17] Mutating raw benchmark runtime in DataFrame must trigger reconciliation failure."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[(df_mut['instance_name'] == 'grid_10x10') & (df_mut['solver_name'].str.startswith('Adaptive Hybrid'))].index[0]
+        df_mut.at[idx, 'mean_runtime_micros'] = 999.0
+        with self.assertRaises(AssertionError):
+            sync_mod.check_all_claims(df_mut)
+
+    def test_raw_data_mutation_labels_fails_reconciliation(self):
+        """[R17] Mutating raw label counts alters derived suppression and triggers reconciliation failure."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[(df_mut['instance_name'] == 'grid_10x10') & (df_mut['solver_name'].str.startswith('Martins'))].index[0]
+        df_mut.at[idx, 'mean_labels_generated'] = 99999
+        with self.assertRaises(AssertionError):
+            sync_mod.check_all_claims(df_mut)
+
+    def test_raw_data_mutation_ranking_flip_fails_reconciliation(self):
+        """[R17] Mutating raw runtime to alter solver ranking order triggers reconciliation failure."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[(df_mut['instance_name'] == 'anticorr_n150') & (df_mut['solver_name'].str.startswith('Dumitrescu-Boland'))].index[0]
+        df_mut.at[idx, 'mean_runtime_micros'] = 500.0  # Flips 1st place from DB to Martins
+        with self.assertRaises(AssertionError):
+            sync_mod.check_all_claims(df_mut)
+
+    def test_raw_data_mutation_ablation_fails_reconciliation(self):
+        """[R17] Mutating raw ablation preprocessing runtime triggers reconciliation failure."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[df_mut['instance_name'] == 'ablation_k1'].index[0]
+        df_mut.at[idx, 'mean_preprocessing_micros'] = 99.99
+        with self.assertRaises(AssertionError):
+            sync_mod.check_all_claims(df_mut)
+
+    def test_dynamic_ranking_generator_adapts_to_data_mutation(self):
+        """[R17] format_report_rankings_table dynamically recalculates rankings when raw data changes."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[(df_mut['instance_name'] == 'grid_10x10') & (df_mut['solver_name'].str.startswith('Carlyle-Wood'))].index[0]
+        df_mut.at[idx, 'mean_runtime_micros'] = 1.05
+        table = sync_mod.format_report_rankings_table(df_mut)
+        self.assertIn("**Carlyle-Wood ($1.05 \\, \\mu\\text{s}$)**", table)
+        self.assertIn("Adaptive Hybrid ADHP ($19.97 \\, \\mu\\text{s}$)", table)
+
+    def test_dynamic_ablation_generator_adapts_to_data_mutation(self):
+        """[R17] format_report_ablation_table dynamically recalculates label reduction % when raw data changes."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[df_mut['instance_name'] == 'ablation_k2'].index[0]
+        df_mut.at[idx, 'mean_labels_generated'] = 73  # (73 - 146)/146 = -50.0%
+        table = sync_mod.format_report_ablation_table(df_mut)
+        self.assertIn("(-50.0%)", table)
+
+    def test_claim_inventory_integrity_and_traceability(self):
+        """[R16] Verify that claim inventory has valid structure, unique IDs, and derived counts."""
+        import scripts.sync_published_claims as sync_mod
+        res = sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+        self.assertEqual(res["status"], "VERIFIED")
+        self.assertGreater(res["verified_claims"], 700)
+        self.assertEqual(res["exact_numerical"] + res["derived_statistics"] + res["document_presence"], res["verified_claims"])
+        self.assertEqual(res["verified_claims"] + res["manual_review"], res["total_claims"])
+        
+        # Verify unique IDs and non-empty sources
+        inv = res["inventory"]
+        claim_ids = set()
+        for rec in inv.records:
+            self.assertNotIn(rec.claim_id, claim_ids, f"Duplicate claim ID: {rec.claim_id}")
+            claim_ids.add(rec.claim_id)
+            self.assertTrue(len(rec.source_reference) > 0, f"Empty source reference for {rec.claim_id}")
+            self.assertIn(rec.claim_type, ["EXACT_NUMERICAL", "DERIVED_STATISTIC", "DOCUMENT_PRESENCE", "MANUAL_REVIEW"])
+
+        # Verify exported files exist and are populated
+        self.assertTrue(os.path.exists(sync_mod.CLAIM_JSON_PATH))
+        self.assertTrue(os.path.exists(sync_mod.CLAIM_MD_PATH))
+        self.assertGreater(os.path.getsize(sync_mod.CLAIM_JSON_PATH), 100000)
+        self.assertGreater(os.path.getsize(sync_mod.CLAIM_MD_PATH), 50000)
+
 
 if __name__ == "__main__":
     unittest.main()
