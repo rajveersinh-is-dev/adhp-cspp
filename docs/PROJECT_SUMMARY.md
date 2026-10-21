@@ -39,6 +39,6 @@ Across 25 benchmark configurations and 250 timed executions (200 distinct proble
 
 ### 4. Verification and Software Deliverables
 - **Codebase**: Idiomatic Rust library (`adhp-cspp`), zero clippy warnings with `-D warnings`, zero `.unwrap()` in production paths.
-- **Verification**: 100% agreement on 150 differential instances (100 float + 50 exact integer) against SciPy HiGHS MILP oracle; 32 Rust tests, 48 Python tests.
+- **Verification**: 100% agreement on 150 differential instances (100 float + 50 exact integer) against SciPy HiGHS MILP oracle; verified by comprehensive Rust test suite and Python verification test suites.
 - **Paper**: Complete LaTeX manuscript (`paper/main.tex`) and synchronized Typst preprint (`paper/main.typ`).
 - **Repository**: Published on GitHub at [https://github.com/rajveersinh-is-dev/adhp-cspp](https://github.com/rajveersinh-is-dev/adhp-cspp).

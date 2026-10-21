@@ -1082,3 +1082,98 @@ fn test_integer_solver_rejects_unsupported_inputs_fail_closed() {
     let sol2 = solver.solve(&inst_invalid_target);
     assert_eq!(sol2.status, SolutionStatus::UnsupportedInput);
 }
+
+#[test]
+fn test_adversarial_multigraph_and_path_reconstruction_validation() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    use adhp_cspp::{AdhpSolver, CsppInstance, DirectedGraph, SolutionStatus};
+
+    // Create a 6-node multigraph with parallel edges, cycles, and competing tradeoffs
+    let mut g_float = DirectedGraph::new(6);
+    let mut g_int = IntDirectedGraph::new(6);
+
+    // Node 0 -> 1 (3 parallel edges)
+    assert!(g_float.add_edge(0, 1, 10.0, 2.0));
+    assert!(g_int.add_edge(0, 1, 10, 2));
+    assert!(g_float.add_edge(0, 1, 5.0, 8.0));
+    assert!(g_int.add_edge(0, 1, 5, 8));
+    assert!(g_float.add_edge(0, 1, 20.0, 1.0));
+    assert!(g_int.add_edge(0, 1, 20, 1));
+
+    // Node 1 -> 2 (2 parallel edges)
+    assert!(g_float.add_edge(1, 2, 4.0, 6.0));
+    assert!(g_int.add_edge(1, 2, 4, 6));
+    assert!(g_float.add_edge(1, 2, 12.0, 1.0));
+    assert!(g_int.add_edge(1, 2, 12, 1));
+
+    // Node 1 -> 3
+    assert!(g_float.add_edge(1, 3, 15.0, 3.0));
+    assert!(g_int.add_edge(1, 3, 15, 3));
+
+    // Node 2 -> 4
+    assert!(g_float.add_edge(2, 4, 8.0, 2.0));
+    assert!(g_int.add_edge(2, 4, 8, 2));
+
+    // Node 3 -> 4
+    assert!(g_float.add_edge(3, 4, 2.0, 5.0));
+    assert!(g_int.add_edge(3, 4, 2, 5));
+
+    // Node 4 -> 5 (target)
+    assert!(g_float.add_edge(4, 5, 3.0, 3.0));
+    assert!(g_int.add_edge(4, 5, 3, 3));
+
+    // Cycle between 2 and 3
+    assert!(g_float.add_edge(2, 3, 1.0, 4.0));
+    assert!(g_int.add_edge(2, 3, 1, 4));
+    assert!(g_float.add_edge(3, 2, 7.0, 2.0));
+    assert!(g_int.add_edge(3, 2, 7, 2));
+
+    let budgets_float = [5.0, 7.0, 10.0, 12.0, 15.0, 25.0];
+    let budgets_int = [5u64, 7, 10, 12, 15, 25];
+
+    let solver_float = AdhpSolver::new(5);
+    let solver_int = IntAdhpSolver::new(5);
+
+    for (&bf, &bi) in budgets_float.iter().zip(budgets_int.iter()) {
+        let inst_f = CsppInstance::new(g_float.clone(), 0, 5, bf);
+        let inst_i = IntCsppInstance::new(g_int.clone(), 0, 5, bi);
+
+        let sol_f = solver_float.solve(&inst_f);
+        let sol_i = solver_int.solve(&inst_i);
+
+        if sol_f.status == SolutionStatus::Optimal {
+            assert_eq!(sol_i.status, SolutionStatus::Optimal);
+            assert!(
+                (sol_f.cost - sol_i.cost as f64).abs() < 1e-9,
+                "Float cost {} != Int cost {}",
+                sol_f.cost,
+                sol_i.cost
+            );
+            assert!(
+                (sol_f.weight - sol_i.weight as f64).abs() < 1e-9,
+                "Float weight {} != Int weight {}",
+                sol_f.weight,
+                sol_i.weight
+            );
+            assert!(sol_f.weight <= bf + 1e-9);
+            assert!(sol_i.weight <= bi);
+
+            // Validate reconstructed path topology: must start at 0, end at 5, and be contiguous
+            assert_eq!(sol_f.path.first(), Some(&0));
+            assert_eq!(sol_f.path.last(), Some(&5));
+            assert_eq!(sol_i.path.first(), Some(&0));
+            assert_eq!(sol_i.path.last(), Some(&5));
+
+            // Verify path contiguity in float graph
+            for w in sol_f.path.windows(2) {
+                let u = w[0];
+                let v = w[1];
+                let has_edge = g_float.outgoing_edges(u).iter().any(|e| e.target == v);
+                assert!(has_edge, "Edge ({}, {}) not found in graph", u, v);
+            }
+        } else {
+            assert_eq!(sol_f.status, SolutionStatus::Infeasible);
+            assert_eq!(sol_i.status, SolutionStatus::Infeasible);
+        }
+    }
+}
