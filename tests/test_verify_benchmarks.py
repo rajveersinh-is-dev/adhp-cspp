@@ -652,6 +652,130 @@ class TestBenchmarkVerifier(unittest.TestCase):
         self.assertGreater(os.path.getsize(sync_mod.CLAIM_JSON_PATH), 100000)
         self.assertGreater(os.path.getsize(sync_mod.CLAIM_MD_PATH), 50000)
 
+    # --- A10: Contradiction & Truthful Claim States Regression Tests ---
+    def test_contradictory_configuration_counts_detected(self):
+        """[R18] Stale or contradictory '20 configurations' count in methodology fails verification."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.DOCS_METHOD_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("25 configurations", "20 configurations")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_contradictory_instance_and_topology_counts_detected(self):
+        """[R18] Conflating 200 problem instances with 200 distinct graphs fails verification."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.DOCS_METHOD_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace(
+                    "25 configurations, 250 configuration-instance evaluations, 20 distinct problem instance sets, 200 distinct problem instances, and 164 distinct graph topologies",
+                    "25 configurations, 250 configuration-instance evaluations, and 200 distinct generated graphs"
+                )
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_obsolete_defect_statements_cannot_survive_without_qualification(self):
+        """[R18] Removing historical qualification from defect statement in audit log fails verification."""
+        import io
+        import scripts.sync_published_claims as sync_mod
+        orig_open = open
+        def custom_open(path, *args, **kwargs):
+            if os.path.abspath(path) == os.path.abspath(sync_mod.AUDIT_PATH):
+                with orig_open(path, *args, **kwargs) as f:
+                    content = f.read()
+                mutated = content.replace("[HISTORICAL — RESOLVED]", "[ACTIVE DEFECT]")
+                return io.StringIO(mutated)
+            return orig_open(path, *args, **kwargs)
+        with patch("builtins.open", side_effect=custom_open):
+            with self.assertRaises(AssertionError):
+                sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+
+    def test_pending_manual_review_cannot_be_reported_as_fully_verified(self):
+        """[R18] A pending manual review claim must prevent status from reporting FULLY_VERIFIED."""
+        import scripts.sync_published_claims as sync_mod
+        inv = sync_mod.ClaimInventory()
+        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv")
+        inv.add_manual_review("TEST-REV-1", "docs/COMPLEXITY_ANALYSIS.md", "Pending Review",
+                              "O(K * m * log n)", "docs/COMPLEXITY_ANALYSIS.md",
+                              review_status="MANUAL_REVIEW_PENDING", evidence="")
+        self.assertEqual(inv.overall_verification_status, "PARTIAL_VERIFIED_PENDING_MANUAL_REVIEW")
+        self.assertNotEqual(inv.overall_verification_status, "FULLY_VERIFIED_WITH_RECORDED_EVIDENCE")
+
+    def test_verification_failed_claim_sets_overall_failure(self):
+        """[R18] Any failed claim must set overall status to VERIFICATION_FAILED."""
+        import scripts.sync_published_claims as sync_mod
+        inv = sync_mod.ClaimInventory()
+        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv")
+        with self.assertRaises(AssertionError):
+            inv.add_exact_numerical("TEST-NUM-FAIL", "README.md", "Missing Num", "99.99", "19.97", "raw.csv")
+        self.assertEqual(inv.verification_failed_count, 1)
+        self.assertEqual(inv.overall_verification_status, "VERIFICATION_FAILED")
+
+    def test_claim_inventory_no_duplicate_ids_and_nonempty_provenance(self):
+        """[R18] All claims must have globally unique IDs and non-empty provenance and check_performed."""
+        import scripts.sync_published_claims as sync_mod
+        res = sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+        inv = res["inventory"]
+        seen_ids = set()
+        for r in inv.records:
+            self.assertNotIn(r.claim_id, seen_ids, f"Duplicate claim ID: {r.claim_id}")
+            seen_ids.add(r.claim_id)
+            self.assertTrue(len(r.source_reference.strip()) > 0, f"Empty source reference for {r.claim_id}")
+            self.assertTrue(len(r.check_performed.strip()) > 0, f"Empty check_performed for {r.claim_id}")
+            self.assertIn(r.status, ["AUTOMATED_PASSED", "MANUAL_REVIEW_PENDING", "MANUAL_REVIEW_COMPLETED", "VERIFICATION_FAILED"])
+
+    def test_claim_inventory_json_markdown_agreement(self):
+        """[R18] Generated JSON and Markdown inventories must agree on counts, status, and records."""
+        import scripts.sync_published_claims as sync_mod
+        sync_mod.check_all_claims(pd.read_csv(self.raw_csv))
+        with open(sync_mod.CLAIM_JSON_PATH, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+        with open(sync_mod.CLAIM_MD_PATH, "r", encoding="utf-8") as f:
+            md_content = f.read()
+
+        summary = json_data["summary"]
+        self.assertEqual(summary["overall_verification_status"], "FULLY_VERIFIED_WITH_RECORDED_EVIDENCE")
+        self.assertEqual(summary["manual_review_pending"], 0)
+        self.assertEqual(summary["verification_failed"], 0)
+        self.assertEqual(summary["total_claims_tracked"], len(json_data["claims"]))
+        self.assertIn(f"| **Total Automated Checks Passed** | **{summary['automated_checks_passed']}** |", md_content)
+        self.assertIn(f"| **Manual Review Completed with Recorded Evidence** | {summary['manual_review_completed']} |", md_content)
+        self.assertIn("| **Overall Repository Verification Status** | **FULLY_VERIFIED_WITH_RECORDED_EVIDENCE** |", md_content)
+
+        # Assert every claim in JSON is present in Markdown
+        for claim in json_data["claims"]:
+            self.assertIn(f"`{claim['claim_id']}`", md_content)
+            self.assertIn(f"**{claim['status']}**", md_content)
+
+    def test_raw_data_mutation_distinguishes_failure_from_dynamic_regeneration(self):
+        """[R18] Distinguish expected verification failure on stale docs from dynamic regeneration."""
+        import scripts.sync_published_claims as sync_mod
+        df_mut = pd.read_csv(self.raw_csv)
+        idx = df_mut[(df_mut['instance_name'] == 'grid_10x10') & (df_mut['solver_name'].str.startswith('Adaptive Hybrid'))].index[0]
+        df_mut.at[idx, 'mean_runtime_micros'] = 12.34  # Mutate runtime
+
+        # 1. Un-regenerated documents must fail verification (expected failure)
+        with self.assertRaises(AssertionError):
+            sync_mod.check_all_claims(df_mut)
+
+        # 2. Dynamic table generator dynamically reflects mutated data (expected regeneration)
+        rankings_table = sync_mod.format_report_rankings_table(df_mut)
+        self.assertIn("12.34", rankings_table)
+
 
 if __name__ == "__main__":
     unittest.main()

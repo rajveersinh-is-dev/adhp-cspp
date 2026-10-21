@@ -22,22 +22,22 @@ To eliminate benchmark bias, synthetic inflation, and reproducibility defects, a
 
 ### 2. Experimental Benchmark Suites & Instance Accounting
 
-The benchmark harness (`src/bin/benchmark_suite.rs`) evaluates 6 competitive solvers across 5 distinct benchmark suites comprising **25 configurations, 250 configuration-instance evaluations, and 200 distinct generated graphs**:
+The benchmark harness (`src/bin/benchmark_suite.rs`) evaluates 6 competitive solvers across 5 distinct benchmark suites comprising **25 configurations, 250 configuration-instance evaluations, 20 distinct problem instance sets, 200 distinct problem instances, and 164 distinct graph topologies**:
 
-| Suite | Category | Graph Topology | Parameter Range | Evaluations | Distinct Graphs | Purpose |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Suite 1** | Anti-Correlated Scaling | Random Directed ($p=0.25$), $c_e$ vs $w_e$ negatively correlated | $n \in \{20, 40, 60, 80, 100, 150\}$ | 60 | 60 | Tests label explosion when low cost implies high resource consumption. |
-| **Suite 2** | 2D Mesh Grid Scaling | Directed 2D Planar Mesh Grids | $4\times4, 6\times6, 8\times8, 10\times10$ ($n=16$ to $100$) | 40 | 4 unique topologies (40 problem instances) | Tests performance on sparse planar networks with long hop diameters and exponential simple paths. |
-| **Suite 3** | Random Erdős–Rényi | Directed Erdős–Rényi ($p=0.20$), Uniform Cost & Weight | $n \in \{30, 60, 90, 120\}$ ($m$ up to $3000$) | 40 | 40 | Evaluates dense networks with small hop diameter and tests dual preprocessing overhead. |
-| **Suite 4** | Budget Factor Sensitivity | Anti-Correlated Graph ($n=50$) | $\alpha \in \{0.10, 0.25, 0.50, 0.75, 0.90\}$ | 50 | 50 | Tests transition from severely tight budget ($\alpha=0.10$) to loose budget ($\alpha=0.90$). |
-| **Suite 5** | Ablation Analysis | Anti-Correlated Graph ($n=70$) | $K \in \{1, 2, 3, 5, 8, 12\}$ | 60 | 10 | Isolates the causal impact of dual facet count $K$ on the exact same 10 controlled graphs. |
-| **Total** | **All 5 Suites** | **Diverse Topologies** | **25 Configurations** | **250** | **200** | **Comprehensive empirical evaluation across distinct and controlled graphs.** |
+| Suite | Category | Graph Topology | Parameter Range | Evaluations | Unique Instances | Unique Topologies | Purpose |
+| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
+| **Suite 1** | Anti-Correlated Scaling | Random Directed ($p=0.25$), $c_e$ vs $w_e$ negatively correlated | $n \in \{20, 40, 60, 80, 100, 150\}$ | 60 | 60 | 60 | Tests label explosion when low cost implies high resource consumption. |
+| **Suite 2** | 2D Mesh Grid Scaling | Directed 2D Planar Mesh Grids | $4\times4, 6\times6, 8\times8, 10\times10$ ($n=16$ to $100$) | 40 | 40 | 4 | Tests performance on sparse planar networks with long hop diameters and exponential simple paths (4 static topologies with varied metrics/budgets). |
+| **Suite 3** | Random Erdős–Rényi | Directed Erdős–Rényi ($p=0.20$), Uniform Cost & Weight | $n \in \{30, 60, 90, 120\}$ ($m$ up to $3000$) | 40 | 40 | 40 | Evaluates dense networks with small hop diameter and tests dual preprocessing overhead. |
+| **Suite 4** | Budget Factor Sensitivity | Anti-Correlated Graph ($n=50$) | $\alpha \in \{0.10, 0.25, 0.50, 0.75, 0.90\}$ | 50 | 50 | 50 | Tests transition from severely tight budget ($\alpha=0.10$) to loose budget ($\alpha=0.90$). |
+| **Suite 5** | Ablation Analysis | Anti-Correlated Graph ($n=70$) | $K \in \{1, 2, 3, 5, 8, 12\}$ | 60 | 10 | 10 | Isolates the causal impact of dual facet count $K$ on the exact same 10 controlled graphs. |
+| **Total** | **All 5 Suites** | **Diverse Topologies** | **25 Configurations** | **250** | **200** | **164** | **Comprehensive empirical evaluation across distinct and controlled instances.** |
 
 > [!NOTE]
-> **Evaluation Count vs. Distinct Graph Count**:
-> In Suites 1–4, each evaluated instance is a newly generated random graph (totaling $60 + 40 + 40 + 50 = 190$ distinct graphs across 19 configurations).
-> In Suite 5 (Ablation), a controlled repeated-graph design evaluates 6 different facet settings ($K \in \{1, 2, 3, 5, 8, 12\}$) on the **exact same 10 generated graphs** to isolate the causal effect of $K$ without graph generation variance.
-> Therefore, the benchmark suite conducts **250 configuration-instance evaluations across 200 distinct problem graphs**.
+> **Evaluation Count, Problem Instance Count, and Graph Topology Count**:
+> - **250 Evaluations**: Total timed runs ($25 \text{ configurations} \times 10 \text{ evaluations}$).
+> - **200 Distinct Problem Instances**: Evaluated under schema `adhp-canonical-v1` (encoding vertices, directed edges, endpoints, costs, weights, source, target, and budget). Suites 1–4 comprise 190 unique instances ($60 + 40 + 40 + 50$); Suite 5 reuses 10 controlled problem instances across 6 facet settings ($190 + 10 = 200$).
+> - **164 Distinct Graph Topologies**: Evaluated under schema `adhp-topology-v1` (encoding only vertices, directed edges, and endpoints, invariant to budgets or edge metric scaling). In Suite 2, 40 evaluations share 4 underlying grid structures ($40 - 4 = 36$ shared). Thus, $200 - 36 = 164$ unique graph topologies.
 
 ---
 

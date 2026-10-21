@@ -23,7 +23,7 @@ To ensure strict scientific reproducibility and eliminate measurement artifacts:
 ### 2. Experimental Protocols
 
 1. **Multi-Instance Sample Evaluation**:
-   - Rather than repeatedly timing a single synthetic instance, every configuration is evaluated across **10 distinct random instances** generated with independent seeds (200 distinct problem instances total across 20 configuration sets).
+   - Rather than repeatedly timing a single synthetic instance, evaluation spans **25 benchmark configurations** (19 competitive solver configurations across Suites 1–4, and 6 facet-ablation configurations in Suite 5). Each configuration is evaluated across **10 distinct random instances** generated with independent seeds, totaling **250 configuration-instance evaluations** across **20 distinct problem instance sets**, **200 distinct problem instances**, and **164 distinct graph topologies**.
    - For each instance, 5 discarded warmup runs ensure instruction and data cache warmness, followed by 3 timed runs to eliminate transient OS scheduling jitter.
 2. **Statistical Distribution Metrics**:
    - Reports the sample arithmetic mean ($\mu$), sample median, and sample standard deviation ($\sigma$) across the 10 instances.

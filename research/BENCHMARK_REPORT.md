@@ -11,7 +11,7 @@
 
 ### 1. Executive Summary & Honest Scientific Assessment
 
-Across **25 systematic configurations comprising 250 configuration-instance evaluations across 200 distinct generated graphs** (190 distinct graphs across Suites 1–4 plus 10 controlled repeated graphs in Suite 5), evaluated under 5 discarded warmup runs and 3 repeated trials per instance using in-process monotonic timing (`std::time::Instant`):
+Across **25 systematic configurations comprising 250 configuration-instance evaluations across 200 distinct problem instances and 164 distinct graph topologies** (190 unique instances across Suites 1–4 plus 10 controlled repeated instances in Suite 5), evaluated under 5 discarded warmup runs and 3 repeated trials per instance using in-process monotonic timing (`std::time::Instant`):
 
 1. **State-Space Pruning Power (Search Phase)**:
    - On **Anti-Correlated** networks (severe trade-offs between cost and resource consumption), ADHP and Adaptive Hybrid ADHP achieve orders-of-magnitude candidate label suppression:

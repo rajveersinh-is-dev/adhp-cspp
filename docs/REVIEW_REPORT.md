@@ -105,7 +105,7 @@ The latest adversarial audit identified five concrete correctness and verificati
 
 5. **Substantive Benchmark Verification & Instance Accounting (`scripts/verify_benchmarks.py`)**:
    - *Problem*: Script was previously non-assertive and did not exit with nonzero status on error.
-   - *Fix*: Transformed `scripts/verify_benchmarks.py` into a rigorous verifier with 19 schema checks, exit code 1 on mismatch, and unit tests in `tests/test_verify_benchmarks.py`. Corrected accounting: 25 configurations with 250 configuration-instance evaluations across 200 distinct graphs.
+   - *Fix*: Transformed `scripts/verify_benchmarks.py` into a rigorous verifier with 19 schema checks, exit code 1 on mismatch, and unit tests in `tests/test_verify_benchmarks.py`. Corrected accounting: 25 configurations with 250 configuration-instance evaluations across 200 distinct problem instances and 164 distinct graph topologies.
 
 ---
 

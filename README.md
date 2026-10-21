@@ -75,7 +75,7 @@ Full proofs are documented in [`docs/MATHEMATICAL_FOUNDATIONS.md`](docs/MATHEMAT
 
 ## 3. Empirical Benchmark Summary
 
-Evaluated on an **11th Gen Intel Core i5-11260H @ 2.60GHz** running Windows 11 with 16 GB RAM. Evaluated across **25 benchmark configurations comprising 250 configuration-instance evaluations across 200 distinct generated graphs** (190 distinct graphs across Suites 1–4 plus 10 controlled repeated graphs in Suite 5), with **5 discarded warmups** and **3 timed runs** per instance using in-process monotonic timing (`std::time::Instant`).
+Evaluated on an **11th Gen Intel Core i5-11260H @ 2.60GHz** running Windows 11 with 16 GB RAM. Evaluated across **25 benchmark configurations comprising 250 configuration-instance evaluations across 200 distinct problem instances and 164 distinct graph topologies** (190 unique instances across Suites 1–4 plus 10 controlled repeated instances in Suite 5), with **5 discarded warmups** and **3 timed runs** per instance using in-process monotonic timing (`std::time::Instant`).
 
 Complete raw datasets, scripts, and methodology are documented in [`docs/BENCHMARK_METHODOLOGY.md`](docs/BENCHMARK_METHODOLOGY.md) and [`research/BENCHMARK_REPORT.md`](research/BENCHMARK_REPORT.md).
 
