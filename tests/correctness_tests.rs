@@ -1177,3 +1177,119 @@ fn test_adversarial_multigraph_and_path_reconstruction_validation() {
         }
     }
 }
+
+#[test]
+fn test_cycle_9_mathematical_edge_cases() {
+    use adhp_cspp::exact::{IntAdhpSolver, IntCsppInstance, IntDirectedGraph};
+    use adhp_cspp::{AdhpSolver, CsppInstance, DirectedGraph, SolutionStatus};
+
+    // 1. Source equals target (s == t)
+    {
+        let mut g_int = IntDirectedGraph::new(3);
+        g_int.add_edge(0, 1, 10, 10);
+        let inst_int = IntCsppInstance::new(g_int, 0, 0, 0);
+        let sol_int = IntAdhpSolver::new(3).solve(&inst_int);
+        assert_eq!(sol_int.status, SolutionStatus::Optimal);
+        assert_eq!(sol_int.cost, 0);
+        assert_eq!(sol_int.weight, 0);
+        assert_eq!(sol_int.path, vec![0]);
+        assert!(sol_int.edge_path.is_empty());
+
+        let mut g_float = DirectedGraph::new(3);
+        assert!(g_float.add_edge(0, 1, 10.0, 10.0));
+        let inst_float = CsppInstance::new(g_float, 0, 0, 0.0);
+        let sol_float = AdhpSolver::new(3).solve(&inst_float);
+        assert_eq!(sol_float.status, SolutionStatus::Optimal);
+        assert_eq!(sol_float.cost, 0.0);
+        assert_eq!(sol_float.weight, 0.0);
+        assert_eq!(sol_float.path, vec![0]);
+    }
+
+    // 2. Disconnected graph with isolated components
+    {
+        let mut g_int = IntDirectedGraph::new(4);
+        g_int.add_edge(0, 1, 5, 5);
+        g_int.add_edge(2, 3, 5, 5);
+        let inst_int = IntCsppInstance::new(g_int, 0, 3, 100);
+        let sol_int = IntAdhpSolver::new(3).solve(&inst_int);
+        assert_eq!(sol_int.status, SolutionStatus::Infeasible);
+        assert!(sol_int.path.is_empty());
+        assert_eq!(sol_int.cost, u64::MAX);
+
+        let mut g_float = DirectedGraph::new(4);
+        assert!(g_float.add_edge(0, 1, 5.0, 5.0));
+        assert!(g_float.add_edge(2, 3, 5.0, 5.0));
+        let inst_float = CsppInstance::new(g_float, 0, 3, 100.0);
+        let sol_float = AdhpSolver::new(3).solve(&inst_float);
+        assert_eq!(sol_float.status, SolutionStatus::Infeasible);
+    }
+
+    // 3. Exact budget boundary: W = w(P) vs W = w(P) - 1
+    {
+        let mut g_int = IntDirectedGraph::new(3);
+        // Cheap but heavy: cost 10, weight 20
+        g_int.add_edge(0, 1, 5, 10);
+        g_int.add_edge(1, 2, 5, 10);
+        // Expensive but light: cost 30, weight 10
+        g_int.add_edge(0, 2, 30, 10);
+
+        // Budget 19: cannot afford weight 20, must pick cost 30
+        let inst_19 = IntCsppInstance::new(g_int.clone(), 0, 2, 19);
+        let sol_19 = IntAdhpSolver::new(3).solve(&inst_19);
+        assert_eq!(sol_19.status, SolutionStatus::Optimal);
+        assert_eq!(sol_19.cost, 30);
+        assert_eq!(sol_19.weight, 10);
+
+        // Budget 20: exactly affords weight 20, picks cost 10
+        let inst_20 = IntCsppInstance::new(g_int.clone(), 0, 2, 20);
+        let sol_20 = IntAdhpSolver::new(3).solve(&inst_20);
+        assert_eq!(sol_20.status, SolutionStatus::Optimal);
+        assert_eq!(sol_20.cost, 10);
+        assert_eq!(sol_20.weight, 20);
+
+        // Budget 9: cannot afford either path
+        let inst_9 = IntCsppInstance::new(g_int, 0, 2, 9);
+        let sol_9 = IntAdhpSolver::new(3).solve(&inst_9);
+        assert_eq!(sol_9.status, SolutionStatus::Infeasible);
+    }
+
+    // 4. Zero-cost and zero-weight edges
+    {
+        let mut g_int = IntDirectedGraph::new(3);
+        g_int.add_edge(0, 1, 0, 10); // zero cost
+        g_int.add_edge(1, 2, 10, 0); // zero weight
+        let inst_int = IntCsppInstance::new(g_int, 0, 2, 10);
+        let sol_int = IntAdhpSolver::new(3).solve(&inst_int);
+        assert_eq!(sol_int.status, SolutionStatus::Optimal);
+        assert_eq!(sol_int.cost, 10);
+        assert_eq!(sol_int.weight, 10);
+        assert_eq!(sol_int.path, vec![0, 1, 2]);
+
+        let mut g_float = DirectedGraph::new(3);
+        assert!(g_float.add_edge(0, 1, 0.0, 10.0));
+        assert!(g_float.add_edge(1, 2, 10.0, 0.0));
+        let inst_float = CsppInstance::new(g_float, 0, 2, 10.0);
+        let sol_float = AdhpSolver::new(3).solve(&inst_float);
+        assert_eq!(sol_float.status, SolutionStatus::Optimal);
+        assert_eq!(sol_float.cost, 10.0);
+        assert_eq!(sol_float.weight, 10.0);
+    }
+
+    // 5. Multiple equally optimal solutions
+    {
+        let mut g_int = IntDirectedGraph::new(4);
+        g_int.add_edge(0, 1, 5, 5);
+        g_int.add_edge(1, 3, 5, 5);
+        g_int.add_edge(0, 2, 5, 5);
+        g_int.add_edge(2, 3, 5, 5);
+        let inst_int = IntCsppInstance::new(g_int.clone(), 0, 3, 10);
+        let sol_int = IntAdhpSolver::new(3).solve(&inst_int);
+        assert_eq!(sol_int.status, SolutionStatus::Optimal);
+        assert_eq!(sol_int.cost, 10);
+        assert_eq!(sol_int.weight, 10);
+        assert!(sol_int.path == vec![0, 1, 3] || sol_int.path == vec![0, 2, 3]);
+
+        let eval = inst_int.evaluate_edge_path(&sol_int.edge_path);
+        assert_eq!(eval, Some((10, 10)));
+    }
+}

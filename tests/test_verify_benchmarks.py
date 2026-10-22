@@ -708,7 +708,7 @@ class TestBenchmarkVerifier(unittest.TestCase):
         """[R18] A pending manual review claim must prevent status from reporting FULLY_VERIFIED."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv")
+        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv", anchor_pattern=r"19\.97")
         inv.add_manual_review("TEST-REV-1", "docs/COMPLEXITY_ANALYSIS.md", "Pending Review",
                               "O(K * m * log n)", "docs/COMPLEXITY_ANALYSIS.md",
                               review_status="MANUAL_REVIEW_PENDING", evidence="")
@@ -719,9 +719,9 @@ class TestBenchmarkVerifier(unittest.TestCase):
         """[R18] Any failed claim must set overall status to VERIFICATION_FAILED."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv")
+        inv.add_exact_numerical("TEST-NUM-1", "README.md", "Test Num", "19.97", "19.97", "raw.csv", anchor_pattern=r"19\.97")
         with self.assertRaises(AssertionError):
-            inv.add_exact_numerical("TEST-NUM-FAIL", "README.md", "Missing Num", "99.99", "19.97", "raw.csv")
+            inv.add_exact_numerical("TEST-NUM-FAIL", "README.md", "Missing Num", "99.99", "19.97", "raw.csv", anchor_pattern=r"19\.97")
         self.assertEqual(inv.verification_failed_count, 1)
         self.assertEqual(inv.overall_verification_status, "VERIFICATION_FAILED")
 
@@ -906,7 +906,7 @@ class TestPhase7MutationBattery(unittest.TestCase):
         """Mode 7: Material claim present in document but omitted from registry fails discovery audit."""
         import scripts.sync_published_claims as sync_mod
         inv = sync_mod.ClaimInventory()
-        inv.add_exact_numerical("NUM-1", "README.md", "Desc", "19.97", "19.97", "src:1")
+        inv.add_exact_numerical("NUM-1", "README.md", "Desc", "19.97", "19.97", "src:1", anchor_pattern=r"19\.97")
         with self.assertRaises(AssertionError) as ctx:
             sync_mod.run_claim_discovery_audit(inv, self.raw_df)
         self.assertIn("uncovered material claims detected", str(ctx.exception))
@@ -944,7 +944,7 @@ class TestPhase7MutationBattery(unittest.TestCase):
         inv = sync_mod.ClaimInventory()
         inv.add_document_presence("PRESENCE-1", "docs/COMPLEXITY_ANALYSIS.md", "Theorem 1 Presence",
                                   "T_{prep} <= (K+1)*O(m+n log n)", "T_{prep} <= (K+1)*O(m+n log n)",
-                                  "docs/COMPLEXITY_ANALYSIS.md")
+                                  "docs/COMPLEXITY_ANALYSIS.md", anchor_pattern=r"T_\{prep\}")
         rec = inv.records[0]
         self.assertEqual(rec.claim_type, "DOCUMENT_PRESENCE")
         self.assertEqual(rec.check_performed, "structural_document_text_presence_check")
