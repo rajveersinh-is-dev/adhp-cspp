@@ -1,18 +1,54 @@
 {
   "summary": {
+    "raw_candidates_count": 1426,
+    "unique_candidates_count": 1382,
+    "candidate_categories_breakdown": {
+      "TABLE_CELL": 1007,
+      "QUANTITATIVE_PROSE": 249,
+      "FORMAL_THEORY": 64,
+      "METHODOLOGY_INVARIANT": 58,
+      "AUDIT_DEFECT": 4
+    },
     "registered_claims_count": 819,
-    "independently_discovered_candidates_count": 1060,
-    "candidates_matched_to_registry_count": 819,
-    "unregistered_candidates_count": 328,
+    "matched_registered_claims_count": 819,
     "stale_registered_claims_count": 0,
+    "unique_matched_candidates_count": 729,
+    "compound_cell_claims_count": 76,
+    "unregistered_candidates_count": 653,
     "ambiguous_candidate_mappings_count": 0,
+    "automated_passed_count": 805,
+    "human_review_required_count": 14,
+    "human_review_evidence_recorded_count": 14,
+    "claims_failed_count": 0,
+    "claims_awaiting_human_review_count": 0,
+    "unresolved_or_ambiguous_claims_count": 0,
+    "is_complete_scan": true,
+    "artifact_statuses": {
+      "README.md": "OK",
+      "paper/main.tex": "OK",
+      "paper/main.typ": "OK",
+      "research/BENCHMARK_REPORT.md": "OK",
+      "research/BENCHMARK_METHODOLOGY.md": "OK",
+      "docs/BENCHMARK_METHODOLOGY.md": "OK",
+      "docs/KNOWN_LIMITATIONS.md": "OK",
+      "docs/COMPLEXITY_ANALYSIS.md": "OK",
+      "docs/RELATED_WORK.md": "OK",
+      "docs/RESEARCH_AUDIT.md": "OK",
+      "docs/REVIEW_REPORT.md": "OK",
+      "docs/PROBLEM_DEFINITION.md": "OK",
+      "docs/PROJECT_SUMMARY.md": "OK",
+      "docs/MATHEMATICAL_FOUNDATIONS.md": "OK",
+      "reviews/REVISION_LOG.md": "OK",
+      "docs/ADVERSARIAL_REVIEW_LOG.md": "OK"
+    },
+    "scan_failures_count": 0,
+    "scan_failures": [],
     "registered_claims_verified": 819,
-    "material_claims_detected_by_discovery": 1060,
-    "material_claims_registered_and_covered": 819,
+    "independently_discovered_candidates_count": 1382,
+    "candidates_matched_to_registry_count": 819,
     "claims_requiring_human_judgment": 14,
     "claims_reviewed_with_documented_evidence": 14,
     "claims_awaiting_human_review": 0,
-    "unresolved_or_ambiguous_claims": 0,
     "total_claims_tracked": 819,
     "claims_checked_automatically": 805,
     "claims_passed": 805,
@@ -24,96 +60,128 @@
     "accounting_coverage_status": "REGISTERED_MANIFEST_RECONCILED_WITH_DISCOVERY_AUDIT",
     "overall_verification_status": "SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST",
     "status": "VERIFIED",
+    "automated_checks_passed": 805,
+    "manual_review_completed": 14,
+    "manual_review_pending": 0,
+    "verification_failed": 0,
     "exact_numerical_claims": 757,
     "derived_statistical_claims": 28,
     "document_presence_claims": 20,
     "manual_review_claims": 14,
-    "epistemic_scope_note": "Epistemic Scope Note: Verification confirms that all 250 raw benchmark measurements, all 25 configurations, all table cells across Markdown, LaTeX, and Typst, all anchored headline prose statistics, and all qualitative theorems conform exactly to the registered manifest and underlying data. Independent automated discovery scans all 16 maintained artifacts producing 1,021 candidate statements across tables, prose, and invariants, matching 819 core registered claims (100% of registered claims mapped) and identifying 202 literature/comparative candidates outside the core benchmark manifest. Automated scanners cannot replace human mathematical judgment or prove universal semantic completeness.",
-    "automated_checks_passed": 805,
-    "manual_review_completed": 14,
-    "manual_review_pending": 0,
-    "verification_failed": 0
+    "epistemic_scope_note": "Epistemic Scope Note: Automated verification confirms that all 250 raw benchmark measurements, all 25 configurations, all table cells across Markdown, LaTeX, and Typst, all anchored headline prose statistics, and all qualitative theorems conform exactly to the registered manifest and underlying data. Independent automated discovery scans all 16 maintained artifacts producing 1382 unique candidate propositions (1426 raw detector emissions) across tables, prose, formal theorems, and methodology invariants, matching 819 core registered claims (729 distinct candidates plus 76 compound cell metrics) and identifying 653 candidates outside the core benchmark manifest for inspection. Internal review personas represent automated algorithmic validations rather than external third-party peer review. Automated scanners cannot replace human mathematical judgment or prove universal semantic completeness."
   },
   "maintained_artifacts": {
     "README.md": {
       "description": "Primary Project Specification, Benchmark Summary & Architectural Overview",
       "category": "PRIMARY_SPECIFICATION",
-      "coverage": "FULL_NUMERICAL_AND_PROSE"
+      "coverage": "FULL_NUMERICAL_AND_PROSE",
+      "required": true,
+      "format": "markdown"
     },
     "paper/main.tex": {
       "description": "LaTeX Academic Paper Manuscript",
       "category": "PAPER_MANUSCRIPT",
-      "coverage": "FULL_NUMERICAL_AND_PROSE"
+      "coverage": "FULL_NUMERICAL_AND_PROSE",
+      "required": true,
+      "format": "latex"
     },
     "paper/main.typ": {
       "description": "Typst Modern Typesetting Academic Manuscript",
       "category": "PAPER_MANUSCRIPT",
-      "coverage": "FULL_NUMERICAL_AND_PROSE"
+      "coverage": "FULL_NUMERICAL_AND_PROSE",
+      "required": true,
+      "format": "typst"
     },
     "research/BENCHMARK_REPORT.md": {
       "description": "Comprehensive Empirical Benchmark Report (Tables A-F, Ablation, Analysis)",
       "category": "BENCHMARK_REPORT",
-      "coverage": "FULL_NUMERICAL_AND_PROSE"
+      "coverage": "FULL_NUMERICAL_AND_PROSE",
+      "required": true,
+      "format": "markdown"
     },
     "research/BENCHMARK_METHODOLOGY.md": {
       "description": "Experimental Methodology, Protocol, Warmup Enforcements, Hardware",
       "category": "METHODOLOGY_SPECIFICATION",
-      "coverage": "FULL_METHODOLOGY_AND_COUNTS"
+      "coverage": "FULL_METHODOLOGY_AND_COUNTS",
+      "required": true,
+      "format": "markdown"
     },
     "docs/BENCHMARK_METHODOLOGY.md": {
       "description": "Detailed Suite Accounting, Graph Topologies & Instance Identifiers",
       "category": "METHODOLOGY_SPECIFICATION",
-      "coverage": "FULL_METHODOLOGY_AND_COUNTS"
+      "coverage": "FULL_METHODOLOGY_AND_COUNTS",
+      "required": true,
+      "format": "markdown"
     },
     "docs/KNOWN_LIMITATIONS.md": {
       "description": "Honest Empirical Boundaries, Overhead Analysis, and Tradeoffs",
       "category": "EMPIRICAL_LIMITATIONS",
-      "coverage": "QUANTITATIVE_ABLATION_AND_PROSE"
+      "coverage": "QUANTITATIVE_ABLATION_AND_PROSE",
+      "required": true,
+      "format": "markdown"
     },
     "docs/COMPLEXITY_ANALYSIS.md": {
       "description": "Formal Asymptotic Time and Space Complexity Bounds",
       "category": "THEORETICAL_COMPLEXITY",
-      "coverage": "ASYMPTOTIC_PROOFS_AND_LATENCY"
+      "coverage": "ASYMPTOTIC_PROOFS_AND_LATENCY",
+      "required": true,
+      "format": "markdown"
     },
     "docs/RELATED_WORK.md": {
       "description": "Literature Context, Historical Baselines, and Theoretical Lineage",
       "category": "LITERATURE_AND_BASELINES",
-      "coverage": "QUALITATIVE_ATTRIBUTION_AND_FORMULATIONS"
+      "coverage": "QUALITATIVE_ATTRIBUTION_AND_FORMULATIONS",
+      "required": true,
+      "format": "markdown"
     },
     "docs/RESEARCH_AUDIT.md": {
       "description": "Research Defect Log, Historical Remediations, and Empirical Audit",
       "category": "HISTORICAL_AUDIT_LOG",
-      "coverage": "DEFECT_REMEDIATION_AND_LATENCY_AUDIT"
+      "coverage": "DEFECT_REMEDIATION_AND_LATENCY_AUDIT",
+      "required": true,
+      "format": "markdown"
     },
     "docs/REVIEW_REPORT.md": {
       "description": "Multi-Perspective Peer Review Log and Defect Remediation Tracking",
       "category": "REVIEW_REPORT",
-      "coverage": "AUDIT_REMEDIATION_ACCOUNTING"
+      "coverage": "AUDIT_REMEDIATION_ACCOUNTING",
+      "required": true,
+      "format": "markdown"
     },
     "docs/PROBLEM_DEFINITION.md": {
       "description": "Formal Mathematical Formulation of the Constrained Shortest Path Problem",
       "category": "MATHEMATICAL_SPECIFICATION",
-      "coverage": "FORMULATION_AND_COMPLEXITY_BOUNDS"
+      "coverage": "FORMULATION_AND_COMPLEXITY_BOUNDS",
+      "required": true,
+      "format": "markdown"
     },
     "docs/PROJECT_SUMMARY.md": {
       "description": "Executive Research Summary, Novelty Claims, and Key Findings",
       "category": "EXECUTIVE_SUMMARY",
-      "coverage": "QUANTITATIVE_AND_QUALITATIVE_SUMMARY"
+      "coverage": "QUANTITATIVE_AND_QUALITATIVE_SUMMARY",
+      "required": true,
+      "format": "markdown"
     },
     "docs/MATHEMATICAL_FOUNDATIONS.md": {
       "description": "Mathematical Proofs of Theorem 0, 1, 2, 3, and 4 (Duality, Admissibility, Error Bounds)",
       "category": "MATHEMATICAL_THEORY",
-      "coverage": "FORMAL_THEOREMS_AND_PROOFS"
+      "coverage": "FORMAL_THEOREMS_AND_PROOFS",
+      "required": true,
+      "format": "markdown"
     },
     "reviews/REVISION_LOG.md": {
       "description": "Comprehensive Peer Review Revision Log and Claim Reconciliation Matrix",
       "category": "REVISION_LOG",
-      "coverage": "HISTORICAL_REVISION_ACCOUNTING"
+      "coverage": "HISTORICAL_REVISION_ACCOUNTING",
+      "required": true,
+      "format": "markdown"
     },
     "docs/ADVERSARIAL_REVIEW_LOG.md": {
       "description": "Adversarial Multi-Agent Review Cycles and Hostile Audit Findings",
       "category": "AUDIT_REVIEW_LOG",
-      "coverage": "ADVERSARIAL_CRITIQUE_AND_EVIDENCE"
+      "coverage": "ADVERSARIAL_CRITIQUE_AND_EVIDENCE",
+      "required": true,
+      "format": "markdown"
     }
   },
   "claims": [

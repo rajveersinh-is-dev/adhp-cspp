@@ -23,6 +23,7 @@ import copy
 import json
 import os
 import random
+import shutil
 import sys
 import tempfile
 import unittest
@@ -983,6 +984,169 @@ class TestPhase7MutationBattery(unittest.TestCase):
                     mismatch_found = True
                 break
         self.assertTrue(mismatch_found, "Cross-audit failed to detect tampered JSON status against Markdown!")
+
+
+class TestClaimDiscoveryAndReconciliationAuthoritative(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.raw_csv = os.path.join(REPO_ROOT, "results", "raw", "benchmark_raw.csv")
+        cls.raw_df = pd.read_csv(cls.raw_csv)
+        import scripts.sync_published_claims as sync_mod
+        cls.sync_mod = sync_mod
+
+    def test_authoritative_reconciliation_arithmetic_identities(self):
+        """Phase 1: Validate fundamental arithmetic count identities on authoritative scan."""
+        report = self.sync_mod.scan_all_artifacts(repo_root=REPO_ROOT)
+        self.assertTrue(report.is_complete_scan)
+        self.assertEqual(len(report.scan_failures), 0)
+
+        with open(self.sync_mod.CLAIM_JSON_PATH, "r", encoding="utf-8") as f:
+            stored_json = json.load(f)
+        summary = stored_json["summary"]
+
+        unique_cands = summary["unique_candidates_count"]
+        raw_cands = summary["raw_candidates_count"]
+        unique_matched = summary["unique_matched_candidates_count"]
+        unregistered = summary["unregistered_candidates_count"]
+        ambiguous = summary["ambiguous_candidate_mappings_count"]
+        reg_claims = summary["registered_claims_count"]
+        matched_reg = summary["matched_registered_claims_count"]
+        stale_reg = summary["stale_registered_claims_count"]
+        compound = summary["compound_cell_claims_count"]
+        manual_ev = summary["human_review_evidence_recorded_count"]
+
+        # Assert fundamental candidate partition identity:
+        # unique_candidates == unique_matched_candidates + unregistered_candidates + ambiguous_candidate_mappings
+        self.assertEqual(unique_cands, unique_matched + unregistered + ambiguous)
+        self.assertLessEqual(unique_cands, raw_cands)
+
+        # Assert candidate breakdown adds up to unique candidates
+        cat_breakdown = summary["candidate_categories_breakdown"]
+        self.assertEqual(
+            sum(cat_breakdown.values()),
+            unique_cands
+        )
+
+        # Assert registry partition identity:
+        # registered_claims == matched_registered_claims + stale_registered_claims
+        self.assertEqual(reg_claims, matched_reg + stale_reg)
+
+        # Assert matched registration derivation:
+        # matched_registered == unique_matched + compound_cell_claims + human_review_evidence_recorded
+        self.assertEqual(matched_reg, unique_matched + compound + manual_ev)
+
+    def test_json_and_markdown_summary_exact_match(self):
+        """Phase 1: Assert JSON and Markdown contain identical shared metrics."""
+        self.sync_mod.verify_inventory_consistency(REPO_ROOT)
+        with open(self.sync_mod.CLAIM_JSON_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        with open(self.sync_mod.CLAIM_MD_PATH, "r", encoding="utf-8") as f:
+            md_text = f.read()
+
+        s = data["summary"]
+        self.assertIn(f"| **Registered Claims Verified** | **{s['registered_claims_count']} / {s['registered_claims_count']}** |", md_text)
+        self.assertIn(f"| **Independently Discovered Candidates** | **{s['unique_candidates_count']}** |", md_text)
+        self.assertIn(f"| **Distinct Discovered Candidates Matched** | **{s['unique_matched_candidates_count']}** |", md_text)
+        self.assertIn(f"| **Discovered Unregistered Candidates** | **{s['unregistered_candidates_count']}** |", md_text)
+
+    def test_tampered_count_in_inventory_markdown_fails(self):
+        """Phase 1: Fail if Markdown report contains a count diverging from generated candidate data."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for sub in ["results/processed", "docs", "paper", "research", "reviews"]:
+                os.makedirs(os.path.join(temp_dir, sub), exist_ok=True)
+            shutil.copy2(self.sync_mod.CLAIM_JSON_PATH, os.path.join(temp_dir, "results", "processed", "claim_inventory.json"))
+            shutil.copy2(self.sync_mod.AUDIT_PATH, os.path.join(temp_dir, "docs", "RESEARCH_AUDIT.md"))
+            with open(self.sync_mod.CLAIM_MD_PATH, "r", encoding="utf-8") as f:
+                md_content = f.read()
+            # Tamper the unique candidates count
+            tampered_md = md_content.replace(
+                "| **Independently Discovered Candidates** | **1382** |",
+                "| **Independently Discovered Candidates** | **9999** |"
+            )
+            with open(os.path.join(temp_dir, "docs", "CLAIM_INVENTORY.md"), "w", encoding="utf-8") as f:
+                f.write(tampered_md)
+
+            with self.assertRaises(AssertionError) as ctx:
+                self.sync_mod.verify_inventory_consistency(temp_dir)
+            self.assertIn("inconsistent unique candidates count", str(ctx.exception))
+
+    def test_add_and_remove_source_claim_reconciles_dynamically(self):
+        """Phase 1: Count invariants recompute dynamically after adding and removing a source claim."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Clone maintained artifacts to temp_dir
+            for path in self.sync_mod.MAINTAINED_RESEARCH_ARTIFACTS:
+                src = os.path.join(REPO_ROOT, path)
+                dst = os.path.join(temp_dir, path)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+
+            # Step 1: Baseline scan
+            rep0 = self.sync_mod.scan_all_artifacts(repo_root=temp_dir)
+            u0 = rep0.unique_candidates_count
+
+            # Step 2: Add novel source claim in README
+            readme_path = os.path.join(temp_dir, "README.md")
+            with open(readme_path, "r", encoding="utf-8") as f:
+                orig_readme = f.read()
+            novel_claim = "\n\nNovel Discovery Test: Our custom dual variant reduces latency to 12.34 ms on sparse networks.\n"
+            with open(readme_path, "w", encoding="utf-8") as f:
+                f.write(orig_readme + novel_claim)
+
+            rep_added = self.sync_mod.scan_all_artifacts(repo_root=temp_dir)
+            self.assertEqual(rep_added.unique_candidates_count, u0 + 1)
+
+            # Step 3: Remove the claim
+            with open(readme_path, "w", encoding="utf-8") as f:
+                f.write(orig_readme)
+
+            rep_removed = self.sync_mod.scan_all_artifacts(repo_root=temp_dir)
+            self.assertEqual(rep_removed.unique_candidates_count, u0)
+
+    def test_missing_required_artifact_fails_closed(self):
+        """Phase 3: Missing maintained required artifact records structured failure and aborts complete scan."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for path in self.sync_mod.MAINTAINED_RESEARCH_ARTIFACTS:
+                src = os.path.join(REPO_ROOT, path)
+                dst = os.path.join(temp_dir, path)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+
+            # Delete paper/main.tex
+            tex_file = os.path.join(temp_dir, "paper", "main.tex")
+            os.remove(tex_file)
+
+            rep = self.sync_mod.scan_all_artifacts(repo_root=temp_dir)
+            self.assertFalse(rep.is_complete_scan)
+            self.assertGreater(len(rep.scan_failures), 0)
+            fail = rep.scan_failures[0]
+            self.assertEqual(fail.artifact, "paper/main.tex")
+            self.assertEqual(fail.failure_type, "MISSING")
+            self.assertEqual(rep.artifact_statuses["paper/main.tex"], "MISSING")
+
+    def test_unreadable_or_corrupted_encoding_fails_closed(self):
+        """Phase 3: Artifact with invalid encoding records structured failure and aborts complete scan."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for path in self.sync_mod.MAINTAINED_RESEARCH_ARTIFACTS:
+                src = os.path.join(REPO_ROOT, path)
+                dst = os.path.join(temp_dir, path)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+
+            # Write invalid UTF-8 bytes to paper/main.typ
+            typ_file = os.path.join(temp_dir, "paper", "main.typ")
+            with open(typ_file, "wb") as f:
+                f.write(b"\x80\x81\xff\xfe\x00\x00")
+
+            rep = self.sync_mod.scan_all_artifacts(repo_root=temp_dir)
+            self.assertFalse(rep.is_complete_scan)
+            self.assertGreater(len(rep.scan_failures), 0)
+            fail = [sf for sf in rep.scan_failures if sf.artifact == "paper/main.typ"][0]
+            self.assertEqual(fail.failure_type, "UNREADABLE")
+            self.assertEqual(rep.artifact_statuses["paper/main.typ"], "INVALID_ENCODING")
+
 
 
 if __name__ == "__main__":

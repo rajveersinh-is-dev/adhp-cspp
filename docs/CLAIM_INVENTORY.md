@@ -11,20 +11,28 @@
 
 | Metric / Claim Category | Count / Value | Status | Verification & Provenance Basis |
 | :--- | :---: | :---: | :--- |
-| **Registered Claims Verified** | **819 / 819** | **VERIFIED** | Formally registered claims with passing automated validation or documented expert review |
-| **Independently Discovered Candidates** | **1060** | **DISCOVERED** | Independent multi-format AST, table, prose, and invariant scanning across 16 maintained artifacts |
-| **Candidates Matched to Registered Records** | **819 / 819** | **MAPPED** | Discovered candidates mapped to explicit source coordinates in registered inventory |
-| **Discovered Unregistered Candidates** | **328** | **UNREGISTERED_DISCOVERED** | Material table cells discovered in literature/comparative sections outside core benchmark manifest |
+| **Registered Claims Verified** | **819 / 819** | **VERIFIED** | Formally registered claims with passing automated validation or documented evidence |
+| **Raw Detector Emissions** | **1426** | **DETECTED_RAW** | Total candidate emissions from AST, table, prose, and invariant detectors before deduplication |
+| **Independently Discovered Candidates** | **1382** | **DISCOVERED_UNIQUE** | Deterministically deduplicated unique candidate propositions across 16 maintained artifacts |
+| **— Table Data Cells** | 1007 | **PARSED** | Discovered table cells across Markdown tables, LaTeX tabulars, and Typst tables |
+| **— Quantitative Prose Claims** | 249 | **EXTRACTED** | Numerical propositions, latencies, speedup ratios, percentages, and memory bounds |
+| **— Formal Theory & Bounds** | 64 | **EXTRACTED** | Mathematical theorems, lemmas, corollaries, definitions, and asymptotic complexity bounds |
+| **— Methodology Invariants** | 58 | **EXTRACTED** | Warmup discards, configuration and instance counts, graph topology counts |
+| **— Historical Defect Records** | 4 | **LOGGED** | Audit defect statements and resolution qualifications in research audit logs |
+| **Distinct Discovered Candidates Matched** | **729** | **MAPPED** | Distinct discovered candidates consumed by registered inventory records |
+| **Compound Cell Surplus Claims** | **76** | **COMPOUND_CELLS** | Registered metrics sharing compound table cells (e.g. Mean/Med or Prep/Search) |
+| **Candidates Matched to Registered Records** | **819 / 819** | **MAPPED** | Registered claims mapped to explicit source coordinates in registered inventory |
+| **Discovered Unregistered Candidates** | **653** | **UNREGISTERED_DISCOVERED** | Material candidates discovered in literature/comparative sections outside core benchmark manifest |
 | **Stale Registered Claims (No Source Match)** | **0** | **NONE_STALE** | Registered claims whose source statements disappeared from maintained documents |
-| **Ambiguous Candidate Mappings** | **0** | **NONE_AMBIGUOUS** | Candidates with multiple or conflicting coordinate mappings |
+| **Ambiguous Candidate Mappings** | **0** | **NONE_AMBIGUOUS** | Candidates with multiple conflicting coordinate mappings |
 | **Claims Requiring Substantive Human Judgment** | **14** | **HUMAN_JUDGMENT** | Formal mathematical proofs, literature baseline citations, and physical hardware specifications |
 | **Unresolved or Ambiguous Claims** | **0** | **NONE_UNRESOLVED** | Uncovered material claims, duplicated anchors, or pending unreviewed claims (fails closed if > 0) |
 | **Claims Checked Automatically** | 805 | **AUTOMATED** | Evaluated via coordinate cell AST, anchored regex extraction, or structural presence |
 | **Claims Passed (Automated)** | **805** | **AUTOMATED_PASSED** | Derived strictly from executed assertions (zero fixed increments, zero assumptions) |
 | **Claims Failed** | 0 | **NONE_FAILED** | Checks that failed assertion or coordinate validation |
 | **Claims Awaiting Human Review** | 0 | **NONE_PENDING** | Claims requiring human review without recorded evidence |
-| **Claims Reviewed with Documented Evidence** | 14 | **MANUAL_REVIEW_COMPLETED** | Expert proofs, citations, and hardware audits with inspectable evidence |
-| **Artifacts Inspected** | 16 | **INSPECTED** | 16 maintained research artifacts with 100% manifest tracking |
+| **Claims Reviewed with Documented Evidence** | 14 | **MANUAL_REVIEW_COMPLETED** | Expert proofs, citations, and hardware audits with inspectable recorded evidence |
+| **Artifacts Inspected & Scanned** | 16 / 16 | **COMPLETE_SCAN** | All 16 maintained research artifacts scanned fail-closed without silent skipping |
 | **Exact Numerical Table Cells & Runtimes** | 757 | **AUTOMATED_PASSED** | Cell-by-cell coordinate matching directly against `results/raw/benchmark_raw.csv` |
 | **Derived Statistical Ratios & Reductions** | 28 | **AUTOMATED_PASSED** | Dynamically computed from raw measurements (speedups, label reductions %, rankings) |
 | **Document Text Invariant Presence** | 20 | **AUTOMATED_PASSED** | Text pattern presence check (structural document presence; not independent numerical validation) |
@@ -32,30 +40,30 @@
 | **Overall Repository Verification Status** | **SCOPED_VERIFIED_AGAINST_REGISTERED_MANIFEST** | **VERIFIED** | Scoped against registered manifest, zero failures, zero ambiguous anchors |
 
 > [!NOTE]
-> Epistemic Scope Note: Verification confirms that all 250 raw benchmark measurements, all 25 configurations, all table cells across Markdown, LaTeX, and Typst, all anchored headline prose statistics, and all qualitative theorems conform exactly to the registered manifest and underlying data. Independent automated discovery scans all 16 maintained artifacts producing 1,021 candidate statements across tables, prose, and invariants, matching 819 core registered claims (100% of registered claims mapped) and identifying 202 literature/comparative candidates outside the core benchmark manifest. Automated scanners cannot replace human mathematical judgment or prove universal semantic completeness.
+> Epistemic Scope Note: Automated verification confirms that all 250 raw benchmark measurements, all 25 configurations, all table cells across Markdown, LaTeX, and Typst, all anchored headline prose statistics, and all qualitative theorems conform exactly to the registered manifest and underlying data. Independent automated discovery scans all 16 maintained artifacts producing 1382 unique candidate propositions (1426 raw detector emissions) across tables, prose, formal theorems, and methodology invariants, matching 819 core registered claims (729 distinct candidates plus 76 compound cell metrics) and identifying 653 candidates outside the core benchmark manifest for inspection. Internal review personas represent automated algorithmic validations rather than external third-party peer review. Automated scanners cannot replace human mathematical judgment or prove universal semantic completeness.
 
 ---
 
 ## 2. Maintained Research Artifacts Manifest & Coverage Scope
 
-| Document Artifact Path | Category | Coverage Scope | Description |
-| :--- | :---: | :---: | :--- |
-| `README.md` | PRIMARY_SPECIFICATION | FULL_NUMERICAL_AND_PROSE | Primary Project Specification, Benchmark Summary & Architectural Overview |
-| `paper/main.tex` | PAPER_MANUSCRIPT | FULL_NUMERICAL_AND_PROSE | LaTeX Academic Paper Manuscript |
-| `paper/main.typ` | PAPER_MANUSCRIPT | FULL_NUMERICAL_AND_PROSE | Typst Modern Typesetting Academic Manuscript |
-| `research/BENCHMARK_REPORT.md` | BENCHMARK_REPORT | FULL_NUMERICAL_AND_PROSE | Comprehensive Empirical Benchmark Report (Tables A-F, Ablation, Analysis) |
-| `research/BENCHMARK_METHODOLOGY.md` | METHODOLOGY_SPECIFICATION | FULL_METHODOLOGY_AND_COUNTS | Experimental Methodology, Protocol, Warmup Enforcements, Hardware |
-| `docs/BENCHMARK_METHODOLOGY.md` | METHODOLOGY_SPECIFICATION | FULL_METHODOLOGY_AND_COUNTS | Detailed Suite Accounting, Graph Topologies & Instance Identifiers |
-| `docs/KNOWN_LIMITATIONS.md` | EMPIRICAL_LIMITATIONS | QUANTITATIVE_ABLATION_AND_PROSE | Honest Empirical Boundaries, Overhead Analysis, and Tradeoffs |
-| `docs/COMPLEXITY_ANALYSIS.md` | THEORETICAL_COMPLEXITY | ASYMPTOTIC_PROOFS_AND_LATENCY | Formal Asymptotic Time and Space Complexity Bounds |
-| `docs/RELATED_WORK.md` | LITERATURE_AND_BASELINES | QUALITATIVE_ATTRIBUTION_AND_FORMULATIONS | Literature Context, Historical Baselines, and Theoretical Lineage |
-| `docs/RESEARCH_AUDIT.md` | HISTORICAL_AUDIT_LOG | DEFECT_REMEDIATION_AND_LATENCY_AUDIT | Research Defect Log, Historical Remediations, and Empirical Audit |
-| `docs/REVIEW_REPORT.md` | REVIEW_REPORT | AUDIT_REMEDIATION_ACCOUNTING | Multi-Perspective Peer Review Log and Defect Remediation Tracking |
-| `docs/PROBLEM_DEFINITION.md` | MATHEMATICAL_SPECIFICATION | FORMULATION_AND_COMPLEXITY_BOUNDS | Formal Mathematical Formulation of the Constrained Shortest Path Problem |
-| `docs/PROJECT_SUMMARY.md` | EXECUTIVE_SUMMARY | QUANTITATIVE_AND_QUALITATIVE_SUMMARY | Executive Research Summary, Novelty Claims, and Key Findings |
-| `docs/MATHEMATICAL_FOUNDATIONS.md` | MATHEMATICAL_THEORY | FORMAL_THEOREMS_AND_PROOFS | Mathematical Proofs of Theorem 0, 1, 2, 3, and 4 (Duality, Admissibility, Error Bounds) |
-| `reviews/REVISION_LOG.md` | REVISION_LOG | HISTORICAL_REVISION_ACCOUNTING | Comprehensive Peer Review Revision Log and Claim Reconciliation Matrix |
-| `docs/ADVERSARIAL_REVIEW_LOG.md` | AUDIT_REVIEW_LOG | ADVERSARIAL_CRITIQUE_AND_EVIDENCE | Adversarial Multi-Agent Review Cycles and Hostile Audit Findings |
+| Document Artifact Path | Category | Format | Required | Coverage Scope | Description |
+| :--- | :---: | :---: | :---: | :--- | :--- |
+| `README.md` | PRIMARY_SPECIFICATION | markdown | Required | FULL_NUMERICAL_AND_PROSE | Primary Project Specification, Benchmark Summary & Architectural Overview |
+| `paper/main.tex` | PAPER_MANUSCRIPT | latex | Required | FULL_NUMERICAL_AND_PROSE | LaTeX Academic Paper Manuscript |
+| `paper/main.typ` | PAPER_MANUSCRIPT | typst | Required | FULL_NUMERICAL_AND_PROSE | Typst Modern Typesetting Academic Manuscript |
+| `research/BENCHMARK_REPORT.md` | BENCHMARK_REPORT | markdown | Required | FULL_NUMERICAL_AND_PROSE | Comprehensive Empirical Benchmark Report (Tables A-F, Ablation, Analysis) |
+| `research/BENCHMARK_METHODOLOGY.md` | METHODOLOGY_SPECIFICATION | markdown | Required | FULL_METHODOLOGY_AND_COUNTS | Experimental Methodology, Protocol, Warmup Enforcements, Hardware |
+| `docs/BENCHMARK_METHODOLOGY.md` | METHODOLOGY_SPECIFICATION | markdown | Required | FULL_METHODOLOGY_AND_COUNTS | Detailed Suite Accounting, Graph Topologies & Instance Identifiers |
+| `docs/KNOWN_LIMITATIONS.md` | EMPIRICAL_LIMITATIONS | markdown | Required | QUANTITATIVE_ABLATION_AND_PROSE | Honest Empirical Boundaries, Overhead Analysis, and Tradeoffs |
+| `docs/COMPLEXITY_ANALYSIS.md` | THEORETICAL_COMPLEXITY | markdown | Required | ASYMPTOTIC_PROOFS_AND_LATENCY | Formal Asymptotic Time and Space Complexity Bounds |
+| `docs/RELATED_WORK.md` | LITERATURE_AND_BASELINES | markdown | Required | QUALITATIVE_ATTRIBUTION_AND_FORMULATIONS | Literature Context, Historical Baselines, and Theoretical Lineage |
+| `docs/RESEARCH_AUDIT.md` | HISTORICAL_AUDIT_LOG | markdown | Required | DEFECT_REMEDIATION_AND_LATENCY_AUDIT | Research Defect Log, Historical Remediations, and Empirical Audit |
+| `docs/REVIEW_REPORT.md` | REVIEW_REPORT | markdown | Required | AUDIT_REMEDIATION_ACCOUNTING | Multi-Perspective Peer Review Log and Defect Remediation Tracking |
+| `docs/PROBLEM_DEFINITION.md` | MATHEMATICAL_SPECIFICATION | markdown | Required | FORMULATION_AND_COMPLEXITY_BOUNDS | Formal Mathematical Formulation of the Constrained Shortest Path Problem |
+| `docs/PROJECT_SUMMARY.md` | EXECUTIVE_SUMMARY | markdown | Required | QUANTITATIVE_AND_QUALITATIVE_SUMMARY | Executive Research Summary, Novelty Claims, and Key Findings |
+| `docs/MATHEMATICAL_FOUNDATIONS.md` | MATHEMATICAL_THEORY | markdown | Required | FORMAL_THEOREMS_AND_PROOFS | Mathematical Proofs of Theorem 0, 1, 2, 3, and 4 (Duality, Admissibility, Error Bounds) |
+| `reviews/REVISION_LOG.md` | REVISION_LOG | markdown | Required | HISTORICAL_REVISION_ACCOUNTING | Comprehensive Peer Review Revision Log and Claim Reconciliation Matrix |
+| `docs/ADVERSARIAL_REVIEW_LOG.md` | AUDIT_REVIEW_LOG | markdown | Required | ADVERSARIAL_CRITIQUE_AND_EVIDENCE | Adversarial Multi-Agent Review Cycles and Hostile Audit Findings |
 
 ---
 
